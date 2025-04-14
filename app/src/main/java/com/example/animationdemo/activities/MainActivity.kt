@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +67,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
@@ -75,9 +80,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigator(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "splash") {
+    AnimatedNavHost(
+        navController = navController,
+        startDestination = "splash",
+        enterTransition = { fadeIn(animationSpec = tween(500)) },
+        exitTransition = { fadeOut(animationSpec = tween(300)) }
+    ) {
         composable("splash") {
             SplashScreen(
                 onFinished = {
@@ -94,7 +105,6 @@ fun AppNavigator(navController: NavHostController) {
             val index = backStackEntry.arguments?.getString("index")?.toIntOrNull() ?: 0
             DuaScreen(index = index, navController = navController)
         }
-
         composable("home") {
             PlaceholderScreen(title = "Home Screen")
         }
@@ -107,7 +117,6 @@ fun AppNavigator(navController: NavHostController) {
         composable("SettingsScreen") {
             SettingsScreen(navController)
         }
-
     }
 }
 
@@ -126,7 +135,7 @@ fun PlaceholderScreen(title: String) {
 @Composable
 fun SplashScreen(onFinished: () -> Unit) {
     val systemUiController = rememberSystemUiController()
-    val backgroundColor = colorResource(id = R.color.splash_bg)
+    val backgroundColor = colorResource(id = R.color.top_nav_new)
 
 
     SideEffect {
