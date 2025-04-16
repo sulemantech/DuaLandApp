@@ -1,5 +1,6 @@
 package com.example.animationdemo.activities
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -103,7 +105,7 @@ fun AppNavigator(navController: NavHostController) {
         }
         composable("dua/{index}") { backStackEntry ->
             val index = backStackEntry.arguments?.getString("index")?.toIntOrNull() ?: 0
-            DuaScreen(index = index, navController = navController)
+            DuaScreen(index = index, navController = navController, innerPadding =  PaddingValues())
         }
         composable("home") {
             PlaceholderScreen(title = "Home Screen")
@@ -174,11 +176,10 @@ fun MainScreen(navController: NavController) {
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            LearnWithEaseScreen(navController)
-        }
+        LearnWithEaseScreen(navController, innerPadding)
     }
 }
+
 
 data class DuaItem(
     val imageRes: Int,
@@ -186,7 +187,7 @@ data class DuaItem(
 )
 
 @Composable
-fun LearnWithEaseScreen(navController: NavController) {
+fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValues) {
     val systemUiController = rememberSystemUiController()
     val backgroundColor = colorResource(id = R.color.splash_bg)
 
@@ -207,10 +208,13 @@ fun LearnWithEaseScreen(navController: NavController) {
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
         Image(
-            painter = painterResource(id = R.drawable.dashboard_bg),
+            painter = painterResource(id = R.drawable.dashboard_2),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -226,24 +230,19 @@ fun LearnWithEaseScreen(navController: NavController) {
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                contentPadding = PaddingValues(8.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 30.dp),
+                contentPadding = PaddingValues(bottom = 50.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item(span = { GridItemSpan(2) }) {
-                    // Header()
-                }
-
-                item(span = { GridItemSpan(2) }) {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(26.dp))
                 }
 
                 items(duaList) { dua ->
                     DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
                 }
             }
-            Spacer(modifier = Modifier.height(44.dp))
 
         }
     }
@@ -258,7 +257,6 @@ fun DuaCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
             .clickable(
                 onClick = onClick,
                 indication = rememberRipple(bounded = true),
@@ -288,24 +286,31 @@ fun CustomBottomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(68.dp)
-            .background(colorResource(R.color.bottom_nav))
     ) {
+        // Background image
+        Image(
+            painter = painterResource(id = R.drawable.bottom_dash),
+            contentDescription = "Bottom Nav Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxSize(),
-            //.padding(horizontal = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(-1.dp, Alignment.CenterHorizontally)
+
         ) {
-            NavIcon(R.drawable.icon_home, onClick = onHomeClick)
-            NavIcon(R.drawable.ic_star, onClick = onStarClick)
-            NavIcon(R.drawable.ic_user, onClick = onUserClick)
-            NavIcon(R.drawable.ic_settings, onClick = onSettingsClick)
+            NavIcon(R.drawable.info_btn, onClick = onHomeClick)
+            NavIcon(R.drawable.share_btn, onClick = onStarClick)
+            NavIcon(R.drawable.btn_star, onClick = onUserClick)
         }
     }
 }
 
-//
+
 @Composable
 fun NavIcon(@DrawableRes iconRes: Int, onClick: () -> Unit) {
     Box(
@@ -331,18 +336,18 @@ fun CustomTopBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 25.dp, end = 16.dp)
+            .padding( end = 20.dp)
     ) {
         IconButton(
             onClick = onRightIconClick,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .size(40.dp)
+                .size(38.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_setting),
                 contentDescription = "Settings",
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(38.dp)
             )
         }
     }
@@ -497,6 +502,61 @@ fun DuaLandDashboardScreen(navController: NavController, onRightIconClick: () ->
 }
 
 
+@Composable
+fun bottomDuaTabs(
+    onWordByWordClick: () -> Unit = {},
+    onCompleteDuaClick: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.bottom_dash),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.matchParentSize()
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(-4.dp, Alignment.CenterHorizontally)
+        ) {
+
+            IconButton(onClick = {
+            }) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_pause),
+                    contentDescription = "Play Full Audio",
+                    modifier = Modifier.size(33.dp)
+                )
+            }
+
+            IconButton(onClick = {
+            }) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_pause),
+                    contentDescription = "Play Full Audio",
+                    modifier = Modifier.size(33.dp)
+                )
+            }
+
+            IconButton(onClick = {
+            }) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_stop_btn_pink),
+                    contentDescription = "Stop",
+                    modifier = Modifier.size(33.dp)
+                )
+            }
+        }
+    }
+}
+
+
 @Preview(showBackground = true)
 @Composable
 fun DuaLandDashboardScreenPreview() {
@@ -506,8 +566,12 @@ fun DuaLandDashboardScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun LearnWithEaseScreenPreview() {
-    LearnWithEaseScreen(navController = rememberNavController())
+    LearnWithEaseScreen(
+        navController = rememberNavController(),
+        innerPadding = PaddingValues()
+    )
 }
+
 
 @Preview(showBackground = true)
 @Composable
