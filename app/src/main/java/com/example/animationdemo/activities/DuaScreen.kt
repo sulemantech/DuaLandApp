@@ -218,12 +218,6 @@ fun DuaScreen(
                                 }
 
                                 IconButton(onClick = {
-                                    localMediaPlayer?.stop()
-                                    localMediaPlayer?.release()
-                                    localMediaPlayer = null
-                                    localWordIndex = -1
-                                    localIsPlaying = false
-                                    localIsPaused = false
                                 }) {
                                     Image(
                                         painter = painterResource(id = R.drawable.repeat_icon),

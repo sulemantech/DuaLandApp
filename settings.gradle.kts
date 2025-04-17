@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "KidsDuaApp"
+rootProject.name = "DuaLand"
 include(":app")
  
