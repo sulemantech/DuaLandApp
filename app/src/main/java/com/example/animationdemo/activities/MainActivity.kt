@@ -66,6 +66,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -191,6 +192,8 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
     val systemUiController = rememberSystemUiController()
     val backgroundColor = colorResource(id = R.color.splash_bg)
 
+    val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
+
     SideEffect {
         systemUiController.setStatusBarColor(color = backgroundColor)
         systemUiController.setNavigationBarColor(color = backgroundColor)
@@ -214,7 +217,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
             .padding(innerPadding)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.dashboard_2),
+            painter = painterResource(id = R.drawable.dashboard_new),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -226,6 +229,34 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 onRightIconClick = { }
             )
 
+            Spacer(modifier = Modifier.height(50.dp))
+
+            Box(
+                modifier = Modifier
+                    .width(320.dp)
+                    .height(70.dp)
+
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.top_bd),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.matchParentSize()
+                )
+
+                Text(
+                    text = "BELIEVER’S SUPERPOWER",
+                    fontSize = 15.sp,
+                    fontFamily = MyArabicFont,
+                    color = colorResource(R.color.doodlecolor),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
+            }
+
+
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
@@ -236,7 +267,6 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item(span = { GridItemSpan(2) }) {
-                    Spacer(modifier = Modifier.height(26.dp))
                 }
 
                 items(duaList) { dua ->
@@ -274,7 +304,6 @@ fun DuaCard(
 
     }
 }
-
 @Composable
 fun CustomBottomNavigationBar(
     onHomeClick: () -> Unit,
@@ -292,27 +321,25 @@ fun CustomBottomNavigationBar(
             painter = painterResource(id = R.drawable.bottom_dash),
             contentDescription = "Bottom Nav Background",
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(-1.dp, Alignment.CenterHorizontally)
-
+            horizontalArrangement = Arrangement.spacedBy(0.5.dp, Alignment.CenterHorizontally) // very tight
         ) {
-            NavIcon(R.drawable.info_btn, onClick = onHomeClick)
-            NavIcon(R.drawable.share_btn, onClick = onStarClick)
-            NavIcon(R.drawable.btn_star, onClick = onUserClick)
+            NavIcon(R.drawable.info_btn, onClick = onHomeClick, size = 30.dp)
+            NavIcon(R.drawable.share_btn, onClick = onStarClick, size = 30.dp)
+            NavIcon(R.drawable.btn_star, onClick = onUserClick, size = 30.dp)
         }
     }
 }
 
 
+
 @Composable
-fun NavIcon(@DrawableRes iconRes: Int, onClick: () -> Unit) {
+fun NavIcon(@DrawableRes iconRes: Int, onClick: () -> Unit, size: Dp = 30.dp) {
     Box(
         modifier = Modifier
             .size(68.dp)
@@ -345,9 +372,9 @@ fun CustomTopBar(
                 .size(38.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_setting),
+                painter = painterResource(id = R.drawable.setting_btn),
                 contentDescription = "Settings",
-                modifier = Modifier.size(38.dp)
+                modifier = Modifier.size(27.dp)
             )
         }
     }
