@@ -1,4 +1,4 @@
-package com.example.animationdemo.activities
+package com.dualand.app.activities
 
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
-import com.example.animationdemo.R
+import com.dualand.app.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -70,6 +70,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.dualand.app.activities.DuaScreen
+import com.dualand.app.activities.SettingsScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 

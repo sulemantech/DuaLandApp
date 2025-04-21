@@ -1,6 +1,6 @@
-package com.example.animationdemo.activities
+package com.dualand.app.activities
 
-import com.example.animationdemo.R
+import com.dualand.app.R
 
 data class Dua(
     val arabic: String,
