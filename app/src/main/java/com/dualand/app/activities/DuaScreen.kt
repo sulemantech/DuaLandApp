@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -40,7 +41,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.dualand.app.R
-import com.example.animationdemo.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -56,8 +56,8 @@ fun DuaScreen(
 
     var currentIndex by remember { mutableStateOf(index.coerceIn(0, duas.lastIndex)) }
 
-    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15, 16, 18, 21, 22, 27, 28, 30, 31)
-    val threeDuaIndices = setOf(18, 19, 20, 35, 36, 37)
+    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15, 16, 19, 21, 22, 23, 28, 29, 31, 32)
+    val threeDuaIndices = setOf(19, 20, 21, 36, 37, 38)
 
     val showCount = when {
         currentIndex in threeDuaIndices -> 3
@@ -113,14 +113,28 @@ fun DuaScreen(
                     )
                 }
 
-                Text(
-                    text = duas[currentIndex].textheading,
-                    fontSize = 14.sp,
-                    color = colorResource(R.color.heading_color),
-                    fontFamily = title,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 6.dp)
+                ) {
+                    Text(
+                        text = duas[currentIndex].duaNumber,
+                        fontSize = 14.sp,
+                        color = colorResource(R.color.heading_color),
+                        fontFamily = title,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+
+                    Text(
+                        text = duas[currentIndex].textheading,
+                        fontSize = 14.sp,
+                        color = colorResource(R.color.heading_color),
+                        fontFamily = title,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                }
+
 
                 IconButton(
                     onClick = { navController.navigate("SettingsScreen") },
@@ -170,7 +184,7 @@ fun DuaScreen(
                                     Alignment.CenterHorizontally
                                 )
                             ) {
-                                IconButton(onClick = {  }) {
+                                IconButton(onClick = { }) {
                                     Image(
                                         painter = painterResource(id = R.drawable.favourite_icon),
                                         contentDescription = "Favourite",
@@ -197,7 +211,8 @@ fun DuaScreen(
                                     globalMediaPlayer?.apply {
                                         val rawDuration = duration
                                         val silencePadding = 500
-                                        val effectiveDuration = (rawDuration - silencePadding).coerceAtLeast(100)
+                                        val effectiveDuration =
+                                            (rawDuration - silencePadding).coerceAtLeast(100)
 
                                         setOnCompletionListener {
                                             showListening = true
@@ -209,6 +224,7 @@ fun DuaScreen(
                                         start()
                                     }
                                 }
+
 
                                 PlayWordByWordButton(
                                     isPlaying = isPlaying && currentPlayingIndex == i,
@@ -227,20 +243,58 @@ fun DuaScreen(
                                     }
                                 )
 
-                                IconButton(onClick = {
-                                    globalMediaPlayer?.release()
-                                    globalMediaPlayer = null
-                                    isPlaying = false
-                                    globalWordIndex = -1
-                                }) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.repeat_icon),
-                                        contentDescription = "Stop",
-                                        modifier = Modifier.size(33.dp)
-                                    )
+                                var repeatCount by remember { mutableStateOf(0) }
+
+                                Box(
+                                    contentAlignment = Alignment.TopEnd,
+                                    modifier = Modifier.padding(4.dp)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            if (repeatCount < 5) {
+                                                repeatCount++
+                                                globalMediaPlayer?.release()
+                                                globalMediaPlayer = null
+                                                isPlaying = false
+                                                globalWordIndex = -1
+
+                                            }
+                                        }
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.repeat_off_btn),
+                                            contentDescription = "Repeat",
+                                            modifier = Modifier.size(33.dp)
+                                        )
+                                    }
+
+                                    if (repeatCount > 0) {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .offset(x = (-4).dp, y = 4.dp)
+                                                .size(18.dp)
+                                                .background(Color.Red, shape = CircleShape)
+                                        ) {
+                                            Text(
+                                                text = repeatCount.toString(),
+                                                color = Color.White,
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
                                 }
+
                             }
 
+                            val stopAudioPlayback = {
+                                globalMediaPlayer?.release()
+                                globalMediaPlayer = null
+                                isPlaying = false
+                                showListening = false
+                                globalWordIndex = -1
+                            }
                             Spacer(modifier = Modifier.height(9.dp))
 
                             dua.steps?.let {
@@ -316,6 +370,17 @@ fun DuaScreen(
                             ) {
                                 Text(
                                     text = dua.translation,
+                                    fontSize = 14.sp,
+                                    textAlign = TextAlign.Center,
+                                    fontFamily = translationtext,
+                                    lineHeight = 18.sp,
+                                    color = colorResource(R.color.translation_color),
+                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                                )
+
+                                Spacer(modifier = Modifier.height(7.dp))
+                                Text(
+                                    text = dua.hinditranslation,
                                     fontSize = 14.sp,
                                     textAlign = TextAlign.Center,
                                     fontFamily = translationtext,
@@ -593,7 +658,7 @@ fun DuaTabs(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .height(55.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.complete_dua_word_by_word_dua_button),
@@ -604,7 +669,7 @@ fun DuaTabs(
 
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth().padding(bottom = 5.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {

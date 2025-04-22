@@ -17,7 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
-import com.dualand.app.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -32,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,13 +68,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
-<<<<<<< HEAD:app/src/main/java/com/example/animationdemo/activities/MainActivity.kt
-=======
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import com.dualand.app.activities.DuaScreen
-import com.dualand.app.activities.SettingsScreen
->>>>>>> 256f35f89a3385a9f879b796b1bc4eabe78831ee:app/src/main/java/com/dualand/app/activities/MainActivity.kt
+import com.dualand.app.R
+
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -210,17 +205,53 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
 
     val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
 
-    val duaList = (0 until 21).map { index ->
-        val drawableName = if (index == 0) "card" else "card${index + 1}"
+    val duaCardMappings = listOf(
+        listOf(0, 1),
+        listOf(2, 3),           // card 2
+        listOf(4),              // card 3
+        listOf(5),              // card 4
+        listOf(6, 7),           // card 5
+        listOf(8),              // card 6
+        listOf(9),              // card 7
+        listOf(10),             // card 8
+        listOf(11),             // card 9
+        listOf(12),             // card 10
+        listOf(13),             // card 11
+        listOf(14),             // card 12
+        listOf(15, 16),         // card 13
+        listOf(17),
+        listOf(18),             // card 14
+        listOf(19, 20,21),     // card 15
+        listOf(22, 23),         // card 16
+        listOf(24),             // card 18
+        listOf(25),             // card 19
+        listOf(26),             // card 20
+        listOf(27),         // card 21
+        listOf(28,29),             // card 22
+        listOf(30),         // card 23
+        listOf(31, 32),         // card 23
+        listOf(33),             // card 24
+        listOf(34),             // card 25
+        listOf(35),             // card 26
+        listOf(36, 37, 38) ,     // card 27
+        listOf(39) ,     // card 27
+        listOf(40),      // card 27
+        listOf(41)  ,    // card 27
+        listOf(42)  ,    // card 27
+         listOf(43)  ,    // card 27
+    )
+
+    val duaList = duaCardMappings.mapIndexed { cardIndex, indexGroup ->
+        val drawableName = if (cardIndex == 0) "card" else "card${cardIndex + 1}"
         val resId = remember(drawableName) {
-            val res = R.drawable::class.java.getDeclaredField(drawableName).getInt(null)
-            res
+            R.drawable::class.java.getDeclaredField(drawableName).getInt(null)
         }
+
         DuaItem(
             imageRes = resId,
-            title = "Dua ${index + 1}",
+            title = "Dua ${cardIndex + 1}",
             onClick = {
-                navController.navigate("dua/$index")
+                navController.navigate("dua/${indexGroup.first()}")
             }
         )
     }
@@ -320,6 +351,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
 
                 items(filteredDuaList) { dua ->
                     DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
+
                 }
             }
         }
@@ -392,7 +424,7 @@ fun DuaCard(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .clickable(
                 onClick = onClick,
                 indication = rememberRipple(bounded = true),
@@ -404,12 +436,13 @@ fun DuaCard(
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = "Dua card image",
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Fit,
             modifier = Modifier.fillMaxSize()
         )
-
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
