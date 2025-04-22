@@ -18,8 +18,7 @@ data class Dua(
 val duaList = listOf(
     Dua(
         arabic = "سُبْحَانَ اللّٰہِ وَبِحَمْدِہِ سُبْحَانَ اللّٰہِ الْعَظِیْمِ",
-        translation = "Glory be to Allah and all praise be to Him; Glory\n" +
-                "be to Allah, the Most Great.",
+        translation = "Glory be to Allah and all praise be to Him; Glory be to Allah, the Most Great.",
         reference = "[Ṣaḥīḥ Muslim]",
         textheading = "Praise and Glory",
         backgroundResId = R.drawable.header_bg,
@@ -35,7 +34,7 @@ val duaList = listOf(
     ),
     Dua(
         arabic = "اَللّٰہُ اَکْبَرُکَبِیْرًاوَّالْحَمْدُ لِلّٰہِ کَثِیْرًاوَّسُبْحَانَ اللّٰہِ بُکْرَةً وَّاَصِیْلًا",
-        translation = "Allah is truly Great, praise be to Allah\n in abundance and glory be to Allah in the morning and the evening.",
+        translation = "Allah is truly Great, praise be to Allah in abundance and glory be to Allah in the morning and the evening.",
         reference = "[Sahih Muslim]",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -67,12 +66,7 @@ val duaList = listOf(
     ),
     Dua(
         arabic = "اَللّٰھُمَّ صَلِّ عَلٰی مُحَمَّدٍ عَبْدِکَ وَ رَسُوْلِکَ کَمَا صَلَّیْتَ عَلٰی اِبْرَاھِیْمَ وَ بَارِکْ عَلٰی مُحَمَّدٍ وَّعَلٰی آلِ مُحَمَّدٍ کَمَا بَارَکْتَ عَلٰی اِبْرَاھِیْمَ وَآلِ اِبْرَاھِیْمَِ",
-        translation = "O Allah! Bestow mercy upon your servant\n" +
-                "and messenger, Mohammad ﷺ, as You bestowed\n" +
-                "Your mercy upon Ibrahim AS and bless\n" +
-                "Mohammad ﷺ and the family of Mohammad ﷺ,\n" +
-                "as You blessed Ibrahim (AS) and the family of\n" +
-                "Ibrahim (AS). ",
+        translation = "O Allah! Bestow mercy upon your servant and messenger, Mohammad ﷺ, as You bestowed Your mercy upon Ibrahim AS and bless Mohammad ﷺ and the family of Mohammad ﷺ,as You blessed Ibrahim (AS) and the family Ibrahim (AS). ",
         reference = "[Ṣaḥīḥ al-Bukhārī]",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -93,10 +87,7 @@ val duaList = listOf(
 
     Dua(
         arabic = "اَللّٰھُمَّ بِکَ اَصْبَحْنَا وَ بِکَ اَمْسَیْنَا وَ بِکَ نَحْیَا وَ بِکَ نَمُوْتُ وَ إِلَـيْكَ اَلْمَصِیْرِ",
-        translation = "O Allah, by Your leave we have reached the\n" +
-                "morning and by Your leave we have reached the\n" +
-                "evening and by Your leave we live and die, and\n" +
-                "unto You is our return.",
+        translation = "O Allah, by Your leave we have reached the morning and by Your leave we have reached the evening and by Your leave we live and die, and unto You is our return.",
         reference = " [Sunan al-Tirmidhī]",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -127,11 +118,11 @@ val duaList = listOf(
                 "(Before Sunset)",
         image = R.drawable.dua_4,
         wordAudioPairs = listOf(
-            "اَللّٰھُمَّ بِکَ اَمْسَیْنَا" to R.raw.dua2_audio4,
-            "وَبِکَ اَصْبَحْنَا" to R.raw.dua2_audio4,
-            "وَبِکَ نَحْیَاُ" to R.raw.dua2_audio4,
-            "وَبِکَ نَمُوْتَُُ" to R.raw.dua2_audio4,
-            " وَاِلَیْکَ النُّشُوْرُ۔" to R.raw.dua2_audio4,
+            "اَللّٰھُمَّ بِکَ اَمْسَیْنَا" to R.raw.dua07_part01_audio01,
+            "وَبِکَ اَصْبَحْنَا" to R.raw.dua07_part01_audio02,
+            "وَبِکَ نَحْیَاُ" to R.raw.dua07_part01_audio03,
+            "وَبِکَ نَمُوْتَُُ" to R.raw.dua07_part01_audio04,
+            " وَاِلَیْکَ النُّشُوْرُ۔" to R.raw.dua07_part01_audio05,
         )
     ),
     Dua(
@@ -145,21 +136,15 @@ val duaList = listOf(
         textheading = "Du’a for Protection",
         image = R.drawable.dua_5,
         wordAudioPairs = listOf(
-            "اَعُوْذُ" to R.raw.dua2_audio4,
-            "بِکَلِمَاتِ" to R.raw.dua2_audio4,
-            "اللّٰہِ" to R.raw.dua2_audio4,
-            "التَّامَّاتِ" to R.raw.dua2_audio4,
-            "مِنْ" to R.raw.dua2_audio4,
-            "شَرِّ" to R.raw.dua2_audio4,
-            "مَا" to R.raw.dua2_audio4,
-            "خَلَقَ" to R.raw.dua2_audio4
+            "اَعُوْذُ" to R.raw.dua05_part01_audio01,
+            " بِکَلِمَاتِ اللّٰہِ التَّامَّاتِ " to R.raw.dua05_part01_audio02,
+            " مِنْ شَرِّ" to R.raw.dua05_part01_audio03,
+            "مَا خَلَق" to R.raw.dua05_part01_audio04,
         )
     ),
     Dua(
         arabic = "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
-        translation = "In the name of Allah, by Whose name nothing on the \n" +
-                "earth or in the heavens can cause harm, \n" +
-                "and He is the All Knowing, the All-Hearing. (3 times)",
+        translation = "In the name of Allah, by Whose name nothing on the earth or in the heavens can cause harm,and He is the All Knowing, the All-Hearing. (3 times)",
         reference = "[Sunan Abu Dawud]",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -167,12 +152,12 @@ val duaList = listOf(
         image = R.drawable.dua_5,
         textheading = "Du’a for Protection",
         wordAudioPairs = listOf(
-            "بِسْمِ اللَّهِ" to R.raw.dua2_audio4,
-            "الَّذِي لَا يَضُر" to R.raw.dua2_audio4,
-            " مَعَ اسْمِهِ شَيْء" to R.raw.dua2_audio4,
-            "فِي الْأَرْضِ" to R.raw.dua2_audio4,
-            "وَلَا فِي السَّمَاءِ" to R.raw.dua2_audio4,
-            "وَهُوَ السَّمِيعُ الْعَلِيم" to R.raw.dua2_audio4,
+            "بِسْمِ اللَّهِ الَّذِيِ" to R.raw.dua05_part02_audio01,
+            " لَا يَضُرُّ" to R.raw.dua05_part02_audio02,
+            " مَعَ اسْمِهِ" to R.raw.dua05_part02_audio03,
+            "شَيْءٌ فِي الْأَرْضِ ِ" to R.raw.dua05_part02_audio04,
+            "وَلَا فِي السَّمَاءِ " to R.raw.dua05_part02_audio05,
+            "وَهُوَ السَّمِيعُ الْعَلِيم" to R.raw.dua05_part02_audio06,
         )
     ),
     Dua(
@@ -188,10 +173,10 @@ val duaList = listOf(
                 "2. Sleep on the right side\n" +
                 "3. Put your hand under your right\ncheek and say",
         wordAudioPairs = listOf(
-            "اَللّٰھُمَّ" to R.raw.dua2_audio4,
-            "بِاسْمِكَ" to R.raw.dua2_audio4,
-            "اَمُوْتُ" to R.raw.dua2_audio4,
-            "وَاَحْیَا" to R.raw.dua2_audio4
+            "اَللّٰھُمَّ" to R.raw.dua03_part01_audio01,
+            "بِاسْمِكَ" to R.raw.dua03_part01_audio02,
+            "اَمُوْتُ" to R.raw.dua03_part01_audio03,
+            "وَاَحْیَا" to R.raw.dua03_part01_audio04
         )
     ),
     Dua(
@@ -225,13 +210,13 @@ val duaList = listOf(
         image = R.drawable.dua_8,
         steps = "Enter with your left foot and say:",
         wordAudioPairs = listOf(
-            "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ" to R.raw.dua2_audio4,
-            "مِنَ الْخُبُثِ" to R.raw.dua2_audio4,
-            "وَ الْخَبَائِثَ" to R.raw.dua2_audio4,
+            "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ" to R.raw.dua08_part01_audio01,
+            "مِنَ الْخُبُثِ" to R.raw.dua08_part01_audio02,
+            "وَ الْخَبَائِثَ" to R.raw.dua08_part01_audio03,
         )
     ),
     Dua(
-        arabic = "اَلْـحَمْدُ لِلّٰهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُُِ",
+        arabic = "غُفْرَانَكَ",
         translation = "I ask you (Allah) for forgiveness.",
         reference = "[Sunan Abu Dawud]",
         backgroundResId = R.drawable.header_bg,
@@ -242,10 +227,7 @@ val duaList = listOf(
                 "the Toilet",
         steps = "Leave with your right foot and say:",
         wordAudioPairs = listOf(
-            "اَلْـحَمْدُ لِلّٰهِ" to R.raw.dua2_audio4,
-            "الَّذِي أَحْيَانَا" to R.raw.dua2_audio4,
-            " بَعْدَ مَا أَمَاتَنَا" to R.raw.dua2_audio4,
-            " وَإِلَيْهِ النُّشُور" to R.raw.dua2_audio4,
+            "غُفْرَانَكَ " to R.raw.dua09_part01_audio01,
         )
     ),
     Dua(
@@ -379,7 +361,7 @@ val duaList = listOf(
     ),
     Dua(
         arabic = "سُبْحٰنَ الَّذِیْ سَخَّرَلَنَاھٰذَاوَمَاکُنَّا لَہ مُقْرِنِیْنَoوَاِنَّآاِلٰی رَبِّنَا لَمُنْقَلِبُوْنَ oِِ",
-        translation = "Glory to Him Who created this transportation for\n" + "us, though we were unable to create it on our own.\n"+ "And to our Lord we shall return.",
+        translation = "Glory to Him Who created this transportation for us, though we were unable to create it on our own.And to our Lord we shall return.",
         reference = " [al-Zukhruf: 13-14]",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -577,9 +559,7 @@ val duaList = listOf(
     ),
     Dua(
        arabic = "اِنَّا لِلّٰہِ وَاِنَّا اِلَیْہِ رَاجِعُوْنَ \u2028اَللّٰھُمَّ اَجِرْنِیْ فِیْ مُصِیْبَتِیْ وَاَخْلِفْ لِیْ خَیْرًا مِّنْھَا",
-        translation = "Indeed we belong to Allah, and indeed to Him we \n" +
-                "will return. O Allah, recompense me for my affliction and \n" +
-                "replace it for me with something better.",
+        translation = "Indeed we belong to Allah, and indeed to Him we will return. O Allah, recompense me for my affliction and replace it for me with something better.",
         reference = "[Sahih Muslim]  ",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
