@@ -1,4 +1,4 @@
-package com.example.animationdemo.activities
+package com.dualand.app.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
-import com.example.animationdemo.R
+import com.dualand.app.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -68,6 +68,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
+<<<<<<< HEAD:app/src/main/java/com/example/animationdemo/activities/MainActivity.kt
+=======
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.dualand.app.activities.DuaScreen
+import com.dualand.app.activities.SettingsScreen
+>>>>>>> 256f35f89a3385a9f879b796b1bc4eabe78831ee:app/src/main/java/com/dualand/app/activities/MainActivity.kt
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 

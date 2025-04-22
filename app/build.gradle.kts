@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.animationdemo"
+    namespace = "com.dualand.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.animationdemo"
+        applicationId = "com.dualand.app"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

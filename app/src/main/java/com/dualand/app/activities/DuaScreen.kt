@@ -1,4 +1,4 @@
-package com.example.animationdemo.activities
+package com.dualand.app.activities
 
 import android.media.MediaPlayer
 import android.os.Handler
@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.dualand.app.R
 import com.example.animationdemo.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 

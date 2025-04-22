@@ -1,4 +1,4 @@
-package com.example.animationdemo.activities
+package com.dualand.app.activities
 
 import com.example.animationdemo.R
 
