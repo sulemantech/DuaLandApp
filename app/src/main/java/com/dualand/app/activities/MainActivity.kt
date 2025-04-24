@@ -118,7 +118,7 @@ fun AppNavigator(navController: NavHostController) {
             PlaceholderScreen(title = "Profile Screen")
         }
         composable("SettingsScreen") {
-            SettingsScreen(navController)
+            SettingsScreen(navController=navController, innerPadding = PaddingValues())
         }
     }
 }
@@ -312,16 +312,16 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 onValueChange = { searchText = it },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(48.dp)
                     .padding(start = 16.dp, end = 16.dp),
-                placeholder = { Text("Search Duas...") },
+               // placeholder = { Text("Search Duas...", fontSize = 14.sp ) },
                 trailingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_search),
                         contentDescription = "Voice Search",
                         modifier = Modifier
-                            .size(34.dp)
+                            .size(42.dp)
                             .clickable {
-
                             }
                     )
                 },
@@ -341,7 +341,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, top = 10.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 45.dp),
                 contentPadding = PaddingValues(bottom = 50.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -351,6 +351,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
 
                 items(filteredDuaList) { dua ->
                     DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
+                    Spacer(modifier = Modifier.padding(bottom = 30.dp))
 
                 }
             }
@@ -378,7 +379,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                        .padding(start = 15.dp, end = 15.dp, top = 5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -388,7 +389,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                         Image(
                             painter = painterResource(id = R.drawable.favourite_icon),
                             contentDescription = "Previous",
-                            modifier = Modifier.size(29.dp, 40.dp)
+                            modifier = Modifier.size(33.dp, 40.dp)
                         )
                     }
 
@@ -398,7 +399,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                         Image(
                             painter = painterResource(id = R.drawable.share_icon),
                             contentDescription = "Previous",
-                            modifier = Modifier.size(29.dp, 40.dp)
+                            modifier = Modifier.size(33.dp, 40.dp)
                         )
                     }
 
@@ -407,7 +408,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                         Image(
                             painter = painterResource(id = R.drawable.info_icon),
                             contentDescription = "Next",
-                            modifier = Modifier.size(29.dp, 40.dp)
+                            modifier = Modifier.size(33.dp, 40.dp)
                         )
                     }
                 }
@@ -430,7 +431,6 @@ fun DuaCard(
                 indication = rememberRipple(bounded = true),
                 interactionSource = remember { MutableInteractionSource() }
             ),
-        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Image(

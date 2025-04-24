@@ -6,6 +6,7 @@ data class Dua(
     val arabic: String,
     val translation: String,
     val hinditranslation: String,
+    val urdu: String,
     val reference: String,
     val backgroundResId: Int,
     val statusBarColorResId: Int,
@@ -21,6 +22,7 @@ val duaList = listOf(
     Dua(
         arabic = "سُبْحَانَ اللّٰہِ وَبِحَمْدِہِ سُبْحَانَ اللّٰہِ الْعَظِیْمِ",
         translation = "Glory be to Allah and all praise be to Him; Glory be to Allah, the Most Great.",
+        urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         reference = "[Ṣaḥīḥ Muslim]",
         textheading = "Praise and Glory",
@@ -41,6 +43,7 @@ val duaList = listOf(
         translation = "Allah is truly Great, praise be to Allah in abundance and glory be to Allah in the morning and the evening.",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         reference = "[Sahih Muslim]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua01_part02_audio01,
@@ -63,13 +66,13 @@ val duaList = listOf(
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua03_part01_audio01,
         duaNumber = "2. ",
+        urdu = "",
         textheading = "Peace and Blessing upon\n" + "the Prophet Muhammad ﷺ",
         image = R.drawable.dua_2,
         wordAudioPairs = listOf(
-            "اَللّٰھُمَّ" to R.raw.dua03_part01_audio01,
-            "صَلِّ عَلٰی" to R.raw.dua03_part01_audio02,
-            "مُحَمَّدٍ وَّعَلٰیَ" to R.raw.dua03_part01_audio03,
-            "آلِ مُحَمَّدَ" to R.raw.dua03_part01_audio04,
+            "اَللّٰھُمَّ صَلِّ عَلٰی" to R.raw.dua02_part01_audio01,
+            "مُحَمَّدٍ وَّعَلٰی" to R.raw.dua02_part01_audio02,
+            "آلِ مُحَمَّدَ" to R.raw.dua02_part01_audio03,
         )
     ),
     Dua(
@@ -82,22 +85,27 @@ val duaList = listOf(
         fullAudioResId = R.raw.dua03_part01_audio01,
         textheading = "Peace and Blessing upon\n" + "the Prophet Muhammad ﷺ",
         image = R.drawable.dua_2,
+        urdu = "",
         duaNumber = "2. ",
         wordAudioPairs = listOf(
-            "اَللّٰھُمَّ" to R.raw.dua03_part01_audio01,
-            "صَلِّ عَلٰی مُحَمَّدٍ" to R.raw.dua03_part01_audio01,
-            "عَبْدِکَ وَ رَسُوْلِکَ" to R.raw.dua03_part01_audio01,
-            "کَمَا صَلَّیْتَ عَلٰی اِبْرَاھِیْمَ" to R.raw.dua03_part01_audio01,
-            "وَ بَارِکْ عَلٰی مُحَمَّدٍ" to R.raw.dua03_part01_audio01,
-            "وَّعَلٰی آلِ مُحَمَّدٍ" to R.raw.dua03_part01_audio01,
-            "کَمَا بَارَکْتَ عَلٰی اِبْرَاھِیْمَ" to R.raw.dua03_part01_audio01,
-            "وَآلِ اِبْرَاھِیْمَِ" to R.raw.dua03_part01_audio01
+            "اَللّٰھُمَّ صَلِّ عَلٰی" to R.raw.dua02_part02_audio01,
+            "مُحَمَّدٍ عَبْدِکَ" to R.raw.dua02_part02_audio02,
+            "وَ رَسُوْلِکَ" to R.raw.dua02_part02_audio03,
+            "کَمَا صَلَّیْتََ" to R.raw.dua02_part02_audio04,
+            "عَلٰی اِبْرَاھِیْم" to R.raw.dua02_part02_audio05,
+            "وَ بَارِکْ عَلٰی" to R.raw.dua02_part02_audio06,
+            "مُحَمَّدٍ وَّعَلٰیٍ" to R.raw.dua02_part02_audio07,
+            "آلِ مُحَمَّدٍ" to R.raw.dua02_part02_audio08,
+            "کَمَا بَارَکْتََ" to R.raw.dua02_part02_audio09,
+            "عَلٰی اِبْرَاھِیْمَ" to R.raw.dua02_part02_audio10,
+            "وَآلِ اِبْرَاھِیْمَِ" to R.raw.dua02_part02_audio11
         )
     ),
     Dua(
         arabic = "اَللّٰھُمَّ بِکَ اَصْبَحْنَا وَ بِکَ اَمْسَیْنَا وَ بِکَ نَحْیَا وَ بِکَ نَمُوْتُ وَ إِلَـيْكَ اَلْمَصِیْرِ",
         translation = "O Allah, by Your leave we have reached the morning and by Your leave we have reached the evening and by Your leave we live and die, and unto You is our return.",
         reference = " [Sunan al-Tirmidhī]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -108,10 +116,10 @@ val duaList = listOf(
         duaNumber = "3. ",
         wordAudioPairs = listOf(
             "اَللّٰھُمَّ بِکَ اَصْبَحْنَا" to R.raw.dua03_part01_audio01,
-            "وَبِکَ اَمْسَیْنَا" to R.raw.dua03_part01_audio02,
-            "وَبِکَ نَحْیَاَُ" to R.raw.dua03_part01_audio03,
-            "وَبِکَ نَمُوْتَُ" to R.raw.dua03_part01_audio04,
-            "وَإِلَـيْكَ اَلْمَصِیْر" to R.raw.dua03_part01_audio05,
+            "وَ بِکَ اَمْسَیْنَا" to R.raw.dua03_part01_audio02,
+            "وَ بِکَ نَحْیَا" to R.raw.dua03_part01_audio03,
+            " وَ بِکَ نَمُوْتُ" to R.raw.dua03_part01_audio04,
+            "إِلَـيْكَ اَلْمَصِیْر" to R.raw.dua03_part01_audio05,
 
             )
     ),
@@ -123,6 +131,7 @@ val duaList = listOf(
                 "will die and to You is our resurrection.",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         reference = "[Sunan al-Tirmidhī]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         duaNumber = "4. ",
         statusBarColorResId = R.color.top_nav_new,
@@ -133,17 +142,18 @@ val duaList = listOf(
         wordAudioPairs = listOf(
             "اَللّٰھُمَّ بِکَ اَمْسَیْنَا" to R.raw.dua04_part01_audio01,
             "وَبِکَ اَصْبَحْنَا" to R.raw.dua04_part01_audio02,
-            "وَبِکَ نَحْیَاُ" to R.raw.dua04_part01_audio03,
-            "وَبِکَ نَمُوْتَُُ" to R.raw.dua04_part01_audio04,
-            " وَاِلَیْکَ النُّشُوْرُ۔" to R.raw.dua04_part01_audio05,
+            "وَبِکَ نَحْیَا" to R.raw.dua04_part01_audio03,
+            "وَبِکَ نَمُوْتُ" to R.raw.dua04_part01_audio04,
+            "وَاِلَیْکَ النُّشُوْرُ" to R.raw.dua04_part01_audio05,
         )
     ),
     Dua(
         arabic = "اَعُوْذُ بِکَلِمَاتِ اللّٰہِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
-        translation = "I seek refuge in the complete, perfect words of\n" +
-                "Allah from the evil of what He has created.",
+        translation = "I seek refuge in the totality of the words of Allah \n" +
+                "from the evil of what He has created.",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         reference = "[Ṣaḥīḥ Muslim]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua05_part01_audio01,
@@ -152,9 +162,9 @@ val duaList = listOf(
         image = R.drawable.dua_5,
         wordAudioPairs = listOf(
             "اَعُوْذُ" to R.raw.dua05_part01_audio01,
-            " بِکَلِمَاتِ اللّٰہِ التَّامَّاتِ " to R.raw.dua05_part01_audio02,
-            " مِنْ شَرِّ" to R.raw.dua05_part01_audio03,
-            "مَا خَلَق" to R.raw.dua05_part01_audio04,
+            "بِکَلِمَاتِ اللّٰہِ التَّامَّاتِ" to R.raw.dua05_part01_audio02,
+            "مِنْ شَرِّ" to R.raw.dua05_part01_audio03,
+            " مَا خَلَقَ" to R.raw.dua05_part01_audio04,
         )
     ),
     Dua(
@@ -166,15 +176,16 @@ val duaList = listOf(
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua05_part02_audio01,
         image = R.drawable.dua_5,
+        urdu = "",
         duaNumber = "5. ",
         textheading = "Du’a for Protection",
         wordAudioPairs = listOf(
             "بِسْمِ اللَّهِ الَّذِيِ" to R.raw.dua05_part02_audio01,
-            " لَا يَضُرُّ" to R.raw.dua05_part02_audio02,
-            " مَعَ اسْمِهِ" to R.raw.dua05_part02_audio03,
-            "شَيْءٌ فِي الْأَرْضِ ِ" to R.raw.dua05_part02_audio04,
-            "وَلَا فِي السَّمَاءِ " to R.raw.dua05_part02_audio05,
-            "وَهُوَ السَّمِيعُ الْعَلِيم" to R.raw.dua05_part02_audio06,
+            "لَا يَضُرُّ" to R.raw.dua05_part02_audio02,
+            "مَعَ اسْمِهِ" to R.raw.dua05_part02_audio03,
+            "شَيْءٌ فِي الْأَرْضِ" to R.raw.dua05_part02_audio04,
+            "وَلَا فِي السَّمَاءِ" to R.raw.dua05_part02_audio05,
+            "وَهُوَ السَّمِيعُ الْعَلِيمُ" to R.raw.dua05_part02_audio06,
         )
     ),
     Dua(
@@ -182,6 +193,7 @@ val duaList = listOf(
         translation = "O Allah! In your name I die and I live.",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         reference = "[Ṣaḥīḥ al-Bukhārī]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua06_part01_audio01,
@@ -199,11 +211,12 @@ val duaList = listOf(
         )
     ),
     Dua(
-        arabic = "اَلْـحَمْدُ لِلّٰهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورَُِ",
+        arabic = "اَلْـحَمْدُ لِلّٰهِ الَّذِي  بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورَُِ",
         translation = "All praise is for Allah ho gave us life after death\n" +
                 "(sleep) and to Him is the resurrection.",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         reference = "[Ṣaḥīḥ al-Bukhārī]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua07_part01_audio01,
@@ -213,17 +226,18 @@ val duaList = listOf(
         steps = "Rub your face and your eyes with your hands to\n" +
                 "remove any remaining effects of sleep and say:",
         wordAudioPairs = listOf(
-            " اَلْـحَمْدُ لِلّٰه الَّذِي" to R.raw.dua07_part01_audio01,
-            " أَحْيَانَاِ" to R.raw.dua07_part01_audio02,
-            "بَعْدَ مَا أَمَاتَنَاِ" to R.raw.dua07_part01_audio03,
-            "وَإِلَيْهِ النُّشُور" to R.raw.dua07_part01_audio04,
+            "اَلْـحَمْدُ لِلّٰهِ الَّذِي" to R.raw.dua07_part01_audio01,
+            "أَحْيَانَا" to R.raw.dua07_part01_audio02,
+            "بَعْدَ مَا أَمَاتَنَا" to R.raw.dua07_part01_audio03,
+            "وَإِلَيْهِ النُّشُورَُِ" to R.raw.dua07_part01_audio04,
         )
     ),
     Dua(
-        arabic = "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ مِنَ الْخُبُثِ وَ الْخَبَائِثِِ",
-        translation = "O Allah, indeed I seek refuge in You from the\n" +
+        arabic = "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ مِنَ الْخُبُثِ وَالْخَبَائِثِِ",
+        translation = "O Allah, I seek refuge in You from the \n" +
                 "impure male jinns and impure female jinns.",
         reference = "[Ṣaḥīḥ al-Bukhārī]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -235,13 +249,14 @@ val duaList = listOf(
         wordAudioPairs = listOf(
             "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ" to R.raw.dua08_part01_audio01,
             "مِنَ الْخُبُثِ" to R.raw.dua08_part01_audio02,
-            "وَ الْخَبَائِثَ" to R.raw.dua08_part01_audio03,
+            "َوَالْخَبَائِثِِ" to R.raw.dua08_part01_audio03,
         )
     ),
     Dua(
         arabic = "غُفْرَانَكَ",
         translation = "I ask you (Allah) for forgiveness.",
         reference = "[Sunan Abu Dawud]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -252,15 +267,16 @@ val duaList = listOf(
                 "the Toilet",
         steps = "Leave with your right foot and say:",
         wordAudioPairs = listOf(
-            "غُفْرَانَكَ " to R.raw.dua09_part01_audio01,
+            "غُفْرَانَكَ" to R.raw.dua09_part01_audio01,
         )
     ),
     Dua(
         arabic = "الحَمْدُ لِلّٰهِ الَّذِي كَسَانِي هَذَا الثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍُِِ",
-        translation = "All praise is for Allah who has clothed me with\n" +
+        translation = "All praise is for Allah Who has clothed me with\n" +
                 "this garment and provided it for me, with no\n" +
                 "power or might from myself. ",
         reference = "[Sunan Abu Dawūd]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -268,24 +284,25 @@ val duaList = listOf(
         duaNumber = "10. ",
         textheading = "Du’a before Putting\n" +
                 "on Dress",
-        steps = "1. Shake and dust your dress before wearing it.\n" +
+        steps = "1. Shake and dust your dress before wearing.\n" +
                 "2. Start wearing the cloth from the right side (right\n" +
                 "sleeve, right side of the trouser, right socks, etc.).",
         image = R.drawable.dua_10,
         wordAudioPairs = listOf(
             "الحَمْدُ لِلّٰهِ الَّذِي" to R.raw.dua10_part01_audio01,
-            "كَسَانِي " to R.raw.dua10_part01_audio02,
-            " هَذَاالثَّوْبَ " to R.raw.dua10_part01_audio03,
-            " وَرَزَقَنِيهِ" to R.raw.dua10_part01_audio04,
+            "كَسَانِي" to R.raw.dua10_part01_audio02,
+            "هَذَاالثَّوْبَ" to R.raw.dua10_part01_audio03,
+            "وَرَزَقَنِيهِ" to R.raw.dua10_part01_audio04,
             "مِنْ غَيْرِ" to R.raw.dua10_part01_audio05,
-            " حَوْلٍ مِنِّي " to R.raw.dua10_part01_audio06,
-            "  وَلَا قُوَّة " to R.raw.dua10_part01_audio07,
+            "حَوْلٍ مِنِّي" to R.raw.dua10_part01_audio06,
+            "وَلَا قُوَّةٍُِِ" to R.raw.dua10_part01_audio07,
         )
     ),
     Dua(
         arabic = "بِسْمِ اللّٰہُِِِِ",
         translation = "In the Name of Allah.",
-        reference = "[Ṣaḥīḥ Jāmi’ al-Ṣaghīr]",
+        reference = "[Sahih al-Jami’ al-Saghir]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -304,6 +321,7 @@ val duaList = listOf(
         translation = "In the name of Allah, I place my trust in Allah, and\n" +
                 "there is no might nor power except with Allah.",
         reference = "[Sunan Abu Dawūd]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -314,9 +332,9 @@ val duaList = listOf(
                 "the Home",
         wordAudioPairs = listOf(
             "بِسْمِ اللّٰہِ" to R.raw.dua12_part01_audio01,
-            "تَوَکَّلْتُِ" to R.raw.dua12_part01_audio02,
+            "تَوَکَّلْتُ" to R.raw.dua12_part01_audio02,
             "عَلَی اللّٰہِ" to R.raw.dua12_part01_audio03,
-            "لَاحَوْلََ" to R.raw.dua12_part01_audio04,
+            "لَاحَوْلَ" to R.raw.dua12_part01_audio04,
             "وَلَا قُوَّةَ" to R.raw.dua12_part01_audio05,
             "اِلَّا بِاللّٰہِ" to R.raw.dua12_part01_audio06,
         )
@@ -325,6 +343,7 @@ val duaList = listOf(
         arabic = "بِسْمِ اللّٰہِ",
         translation = "In the Name of Allah ",
         reference = "[Ṣaḥīḥ Muslim] ",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -340,7 +359,8 @@ val duaList = listOf(
     Dua(
         arabic = "اَلسَّلَامُ عَلَیْکُمْ",
         translation = "May Peace (of Allah) be upon you.",
-        reference = "[al-Nūr: 27]",
+        reference = "[Surah An-Nur: 27]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -358,6 +378,7 @@ val duaList = listOf(
         translation = "O Allah! Verily, I seek refuge in You from bad \n" +
                 "manners, deeds and desires.",
         reference = "[Sunan al-Tirmidhī]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -368,9 +389,9 @@ val duaList = listOf(
                 "from Bad Akhlaq",
         wordAudioPairs = listOf(
             "اَللّٰهُمَّ إِنِّیْ أَعُوْذُبِکَ" to R.raw.dua14_part01_audio01,
-            "  مِنْ مُنْکَرَاتِ الْأخلاَ قِ، " to R.raw.dua14_part01_audio02,
-            "وَالْأعْمَالِ، " to R.raw.dua14_part01_audio03,
-            "وَالْأھْوَاءِِ " to R.raw.dua14_part01_audio04,
+            "مِنْ مُنْکَرَاتِ الْأخلاَ قِ،" to R.raw.dua14_part01_audio02,
+            "وَالْأعْمَالِ،" to R.raw.dua14_part01_audio03,
+            "وَالْأھْوَاءِ" to R.raw.dua14_part01_audio04,
         )
     ),
     Dua(
@@ -378,6 +399,7 @@ val duaList = listOf(
         translation = "(I make) Allah responsible for your deen, your trustsworthiness\n" +
                 "and for the results of your actions",
         reference = "[Sunan al-Tirmidhi]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua14_part01_audio01,
@@ -386,15 +408,18 @@ val duaList = listOf(
         duaNumber = "15. ",
         textheading = "Du’a for Traveller",
         wordAudioPairs = listOf(
-            "أَسْتَوْدِعُ اللَّهَ" to R.raw.dua14_part01_audio01,
-            "دِينَكَ وَأَمَانَتَكَ،" to R.raw.dua14_part01_audio02,
-            "وَخَوَاتِيمَ عَمَلِك" to R.raw.dua14_part01_audio03,
+            "أَسْتَوْدِعُ اللَّهَ" to R.raw.dua15_new_part01_audio01,
+            "دِينَكَ" to R.raw.dua15_new_part01_audio02,
+            "وَأَمَانَتَكَ،" to R.raw.dua15_new_part01_audio03,
+            "وَخَوَاتِيمَ" to R.raw.dua15_new_part01_audio04,
+            "عَمَلِكَِِ" to R.raw.dua15_new_part01_audio05,
         )
     ),
     Dua(
         arabic = "بِسْمِ اللّٰہِ",
-        translation = "In the Name of Allah ",
+        translation = "In the Name of Allah.",
         reference = " [Sunan Abu Dawūd]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua15_part01_audio01,
@@ -410,6 +435,7 @@ val duaList = listOf(
         arabic = "اَلْحَمْدُ لِلّٰہِ",
         translation = "All Praise is for Allah.",
         reference = " [Sunan Abu Dawūd]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua15_part02_audio01,
@@ -423,8 +449,9 @@ val duaList = listOf(
     ),
     Dua(
         arabic = "سُبْحٰنَ الَّذِیْ سَخَّرَلَنَاھٰذَاوَمَاکُنَّا لَہ مُقْرِنِیْنَoوَاِنَّآاِلٰی رَبِّنَا لَمُنْقَلِبُوْنَ oِِ",
-        translation = "Glory to Him Who created this transportation for us, though we were unable to create it on our own.And to our Lord we shall return.",
+        translation = "Glory to Him Who created this transportation for us, though we were unable to create it on our own. And to our Lord we shall return.",
         reference = " [al-Zukhruf: 13-14]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua15_part03_audio01,
@@ -447,6 +474,7 @@ val duaList = listOf(
         arabic = "اَلسَّلَامُ عَلَیْکُمْ وَرَحْمَةُ اللّٰہِ وَ بَرَکَاتُہُِِ",
         translation = "May peace, mercy and blessings\n"+ "(of Allah) be upon You.",
         reference = "[Sunan Abu Dawūd]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua16_part01_audio01,
@@ -462,14 +490,16 @@ val duaList = listOf(
     ),
     Dua(
         arabic = "وَعَلَیْکُمُ السَّلَامُ وَ رَ حْمَةُ اللّٰہِ وَ بَرَکَاتُہُُِِ",
-        translation = "May peace, mercy and blessings\n"+ "(of Allah) be upon You as Well.",
+        translation = "May peace, mercy and blessings\n"+ "of Allah be upon You as Well.",
         reference = "[Sunan Abu Dawūd]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua16_part02_audio01,
         image = R.drawable.dua_16,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         duaNumber = "17. ",
+        steps = "Reply to the Greeting:",
         textheading = "Du’a When Meeting\n" +
                 "a Muslim",
         wordAudioPairs = listOf(
@@ -482,6 +512,7 @@ val duaList = listOf(
         arabic = "سُبْحَانَکَ اللّٰھُمَّ وَبِحَمْدِکَ،اَشْھَدُاَنْ لَّااِلٰہَ اِلَّااَنْتَ، اَسْتَغْفِرُکَ وَاَتُوْبُ اِلَیْکَِ",
         translation = "Glory be to You O Allah, and all praise be to You! I\n" + "bear witness that there is no true deity except\n" +"You, I seek Your forgiveness and turn in\n" + "repentance to You.",
         reference = " [Sunan Abu Dawūd]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         statusBarColorResId = R.color.top_nav_new,
@@ -490,15 +521,16 @@ val duaList = listOf(
         duaNumber = "18. ",
         textheading = "Du’a at the End of a\n" +"Gathering",
         wordAudioPairs = listOf(
-            "سُبْحَانَکَ اللّٰھُمَّ وَبِحَمْدِکَ،َّ" to R.raw.dua17_part01_audio01,
-            "اَشْھَدُاَنْ لَّااِلٰہَ اِلَّااَنْتَ،َّْ" to R.raw.dua17_part01_audio02,
-            "اَسْتَغْفِرُکَ وَاَتُوْبُ اِلَیْک" to R.raw.dua17_part01_audio03,
+            "سُبْحَانَکَ اللّٰھُمَّ وَبِحَمْدِکََّ" to R.raw.dua17_part01_audio01,
+            "اَشْھَدُاَنْ لَّااِلٰہَ اِلَّااَنْتَ،" to R.raw.dua17_part01_audio02,
+            "اَسْتَغْفِرُکَ وَاَتُوْبُ اِلَیْکَِ" to R.raw.dua17_part01_audio03,
         )
     ),
     Dua(
         arabic = "لَا اِلٰہَ اِلَّا اللّٰہُ وَحْدَہُ لَا شَرِیْکَ لَہُ،لَہُ الْمُلْکُ وَلَہُ الْحَمْدُ  یُحْیی وَ یُمِیْتُ وَھُوَ حَی لَّا یَمُوْتُ بِیَدِہِ الْخَیْرُ وَھُوَ عَلٰی کُلِّ شَیْئٍ قَدِیْرَِ",
         translation = "There is no true deity except Allah, alone, He has\n" +  "no partners. To Him belongs the dominion and\n" + "for Him is all praise. He gives life and causes\n" + "death,  and He is living and does not die. In His\n" + "hand is all good and He is upon all things always\n" + "All-Powerful.",
         reference = "[Sunan al-Tirmidhi]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua18_part01_audio01,
@@ -509,12 +541,12 @@ val duaList = listOf(
         wordAudioPairs = listOf(
             "لَا اِلٰہَ اِلَّا اللّٰہُ" to R.raw.dua18_part01_audio01,
             "وَحْدَہُ لَا شَرِیْکَ لَہُ،" to R.raw.dua18_part01_audio02,
-            "لَہُ الْمُلْکُ " to R.raw.dua18_part01_audio03,
+            "لَہُ الْمُلْکُ" to R.raw.dua18_part01_audio03,
             "وَلَہُ الْحَمْد" to R.raw.dua18_part01_audio04,
-            " یُحْیی " to R.raw.dua18_part01_audio05,
-            " وَ یُمِیْتُ " to R.raw.dua18_part01_audio06,
+            "یُحْیی" to R.raw.dua18_part01_audio05,
+            "وَ یُمِیْتُ" to R.raw.dua18_part01_audio06,
             "وَھُوَ حَی لَّا یَمُوْتُ" to R.raw.dua18_part01_audio07,
-            "  بِیَدِہِ الْخَیْرُ" to R.raw.dua18_part01_audio08,
+            "بِیَدِہِ الْخَیْرُ" to R.raw.dua18_part01_audio08,
             "وَھُوَ عَلٰی کُلِّ شَیْئٍ قَدِیْرُ" to R.raw.dua18_part01_audio09,
 
         )
@@ -523,6 +555,7 @@ val duaList = listOf(
         arabic = "اَللّٰھُمَّ افْتَحْ لِیْ اَبْوَابَ رَحْمَتِکَُُِِ",
         translation = "O Allah, open for me the doors of your mercy.",
         reference = "[Sunan al-Nasa’i]",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -537,9 +570,10 @@ val duaList = listOf(
         )
     ),
     Dua(
-        arabic = "اَللّٰھُمَّ اِنِّی اَسْئَلُکَ مِنْ فَضْلِکَُُِِ",
+        arabic = "اَللّٰھُمَّ اِنِّی اَسْئَلُکَ مِنْ فَضْلِکََُُِِ",
         translation = "O Allah, I ask you of Your bounties.",
         reference = " [Sahih Muslim]",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua20_part01_audio01,
@@ -550,13 +584,14 @@ val duaList = listOf(
         textheading = "Du’a When Leaving\n" +
                 "the Masjid",
         wordAudioPairs = listOf(
-            " اَللّٰھُمَّ اِنِّی اَسْئَلُکَ" to R.raw.dua20_part01_audio01,
-            "مِنْ فَضْلِکَُُِِ" to R.raw.dua20_part01_audio02,
+            "اَللّٰھُمَّ اِنِّی اَسْئَلُکَ" to R.raw.dua20_part01_audio01,
+           "مِنْ فَضْلِکَ" to R.raw.dua20_part01_audio02,
         )
     ), Dua(
         arabic = "بِسْمِ اللّٰہَُُِِِ",
         translation = "In the Name of Allah.",
         reference = "  [Sunan Ibn Majah] ",
+        urdu = "",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
@@ -564,16 +599,16 @@ val duaList = listOf(
         image = R.drawable.dua_21,
         duaNumber = "22. ",
         steps = "1. Sit while eating and drinking\n" +"2. Eat with your right hand and eat from\n" + "what is in front of you and say:",
-        textheading = "Du’a Before\n" +
-                "Eating & Drinking",
+        textheading = "Du’a Before Eating\n& Drinking",
         wordAudioPairs = listOf(
-            "بِسْمِ اللّٰہ" to R.raw.dua21_part01_audio01,
+            "بِسْمِ اللّٰہِ" to R.raw.dua21_part01_audio01,
         )
     ),
     Dua(
         arabic = "بِسْمِ اللّٰہِ فِی اَوَّلِہِ وَ آخِرِہَُُِِِ",
         translation = "In the name of Allah, at the beginning and\n" + "at the end.",
         reference = "  [Sunan Ibn Majah] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua21_part02_audio01,
@@ -581,8 +616,7 @@ val duaList = listOf(
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         duaNumber = "22. ",
         steps = "3. If you forgot to read the Du'a at the beginning\n"+ "then upon remembering say:",
-        textheading = "Du’a When Leaving\n" +
-                "the Masjid",
+        textheading = "Du’a Before Eating\n& Drinking",
         wordAudioPairs = listOf(
             "بِسْمِ اللّٰہِ" to R.raw.dua21_part02_audio01,
             " فِی اَوَّلِہ" to R.raw.dua21_part02_audio02,
@@ -594,14 +628,14 @@ val duaList = listOf(
         translation = "O Allah, You grant us blessings in it and \n" +
                 "grant us better than it.",
         reference = "[Sunan al-Tirmidhi] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
         image = R.drawable.dua_22,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         duaNumber = "23. ",
-        textheading = "Du’a after\n" +
-                "Eating & Drinking",
+        textheading = "Du’a after Eating\n& Drinking",
         wordAudioPairs = listOf(
             "اَلّٰھُمَّ بَارِکْ لَناَ فِیْہِ  " to R.raw.dua22_part01_audio01,
             "وَاَطْعِمْنَا" to R.raw.dua22_part01_audio02,
@@ -612,6 +646,7 @@ val duaList = listOf(
         arabic = "لَا بَأْسَ طَهُورٌ إِنْ شَاءَ اللَّهَُُُُِِِ",
         translation = "No harm, (this illness will be) a purification (from\n" + "sins), if Allah wills.",
         reference = " [Sahih al-Bukhari]  ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -621,14 +656,16 @@ val duaList = listOf(
         textheading = "Du’a When Visiting\n" +
                 "the Sick",
         wordAudioPairs = listOf(
-            "لَا بَأْسَ طَهُور " to R.raw.dua22_part01_audio01,
-            "إِنْ شَاءَ اللَّه" to R.raw.dua22_part01_audio01,
+            "لَا بَأْسَ" to R.raw.dua24_part01_audio01,
+            "طَهُورٌ" to R.raw.dua24_part01_audio02,
+            " إِنْ شَاءَ اللَّهُ" to R.raw.dua24_part01_audio03,
         )
     ),
     Dua(
-        arabic = "اَسْاَلُ اللّٰہَ الْعَظِیْمَ رَبَّ الْعَرْشِ الْعَظِیْمِ اَنْ یَّشْفِیَکََُُُُِِِ",
+        arabic = "اَسْاَلُ اللّٰہَ الْعَظِیْمَ رَبَّ الْعَرْشِ الْعَظِیْمِ اَنْ یَّشْفِیَکَ",
         translation = "I ask Allah, the Great, Lord of the Magnificent\n" + "Throne, to cure you.",
         reference = "[Sunan al-Tirmidhi ] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         statusBarColorResId = R.color.top_nav_new,
@@ -638,15 +675,16 @@ val duaList = listOf(
         textheading = "Du’a When Visiting\n" +
                 "the Sick",
         wordAudioPairs = listOf(
-            "اَسْاَلُ اللّٰہَ " to R.raw.dua22_part01_audio01,
-            "الْعَظِیْمَ رَبَّ الْعَرْشِ" to R.raw.dua22_part01_audio01,
-            "لْعَظِیْمِ اَنْ یَّشْفِیَک" to R.raw.dua22_part01_audio01,
+            "اَسْاَلُ اللّٰہَ الْعَظِیْمَ" to R.raw.dua24_part02_audio01,
+            "رَبَّ الْعَرْشِ الْعَظِیْمِِ" to R.raw.dua24_part02_audio02,
+            "اَنْ یَّشْفِیَکَ" to R.raw.dua24_part02_audio03,
         )
     ),
     Dua(
        arabic = "اِنَّا لِلّٰہِ وَاِنَّا اِلَیْہِ رَاجِعُوْنَ \u2028اَللّٰھُمَّ اَجِرْنِیْ فِیْ مُصِیْبَتِیْ وَاَخْلِفْ لِیْ خَیْرًا مِّنْھَا",
         translation = "Indeed we belong to Allah, and indeed to Him we will return. O Allah, recompense me for my affliction and replace it for me with something better.",
         reference = "[Sahih Muslim]  ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -656,12 +694,13 @@ val duaList = listOf(
         textheading = "Du’a For one Afficted\n" +
                 "by a Calamity",
             wordAudioPairs = listOf(
-                "اِنَّا لِلّٰہِ" to R.raw.dua22_part01_audio01,
-                "وَاِنَّا اِلَیْہِ رَاجِعُوْنَ" to R.raw.dua22_part01_audio01,
-                "اَللّٰھُمَّ اَجِرْنِیْ" to R.raw.dua22_part01_audio01,
-                "فِیْ مُصِیْبَتِیْ" to R.raw.dua22_part01_audio01,
-                "وَأَخْلِفْ لِیْ" to R.raw.dua22_part01_audio01,
-                "خَیْرًا مِّنْهَا" to R.raw.dua22_part01_audio01
+                "اِنَّا لِلّٰہِ" to R.raw.dua25_part01_audio01,
+                "وَاِنَّا اِلَیْہِ" to R.raw.dua25_part01_audio02,
+                "رَاجِعُوْنَ" to R.raw.dua25_part01_audio03,
+                "اَللّٰھُمَّ اَجِرْنِیْ" to R.raw.dua25_part01_audio04,
+                "فِیْ مُصِیْبَتِیْ" to R.raw.dua25_part01_audio05,
+                "وَأَخْلِفْ لِیْ" to R.raw.dua25_part01_audio06,
+                "خَیْرًا مِّنْهَا" to R.raw.dua25_part01_audio07
         )
     ),
     Dua(
@@ -669,27 +708,30 @@ val duaList = listOf(
         translation = "All praise is for Allah, Who saved me from that\n" +
                 "which He tested you with and favoured me over\n" + "much of His creation.",
         reference = "[Sunan al-Tirmidhi] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         duaNumber = "26. ",
         image = R.drawable.dua_25,
-        textheading = "Du‘a upon Seeing \n" +
-                "Someone in Calamity ",
+        textheading = "Du‘a upon Seeing Someone\nin Calamity ",
             wordAudioPairs = listOf(
-                "اَلْحَمْدُ للهِ الَّذِیِْ" to R.raw.dua22_part01_audio01,
-                "عَافَانِیْ مِمَّا" to R.raw.dua22_part01_audio01,
-                "ابْتَلَاکَ بِهِْ" to R.raw.dua22_part01_audio01,
-                "وَ فَضَّلَنِیْْ" to R.raw.dua22_part01_audio01,
-                "عَلٰی کَثِیْر" to R.raw.dua22_part01_audio01,
-                "مِمَّنْ خَلَقَ تَفْضِیْل" to R.raw.dua22_part01_audio01
+                "اَلْحَمْدُ للهِ الَّذِیِْ" to R.raw.dua26_part01_audio01,
+                "عَافَانِیْ" to R.raw.dua26_part01_audio02,
+                "مِمَّاابْتَلَاکَ" to R.raw.dua26_part01_audio03,
+                "بِهِْ" to R.raw.dua26_part01_audio04,
+                "وَ فَضَّلَنِیْْ" to R.raw.dua26_part01_audio05,
+                "عَلٰی کَثِیْر" to R.raw.dua26_part01_audio06,
+                "مِمَّنْ خَلَقَ" to R.raw.dua26_part01_audio07,
+                "تَفْضِیْلً" to R.raw.dua26_part01_audio08
         )
     ),
     Dua(
        arabic = "اَعُوْذُ بِاللّٰہِ مِنَ الشَّیْطَانِ الرَّجِیْمًِ",
         translation = "I seek refuge in Allah from the Satan the rejected.",
         reference = " [Sahih al-Bukhari] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -699,15 +741,15 @@ val duaList = listOf(
         steps = "Seek refuge with Allah from the Satan: ",
         textheading = "Du‘a when Angry",
             wordAudioPairs = listOf(
-                "اَعُوْذُ بِاللّٰہِْ" to R.raw.dua22_part01_audio01,
-                "مِنَ الشَّیْطَانِ" to R.raw.dua22_part01_audio01,
-                "الرَّجِیْمًِِْ" to R.raw.dua22_part01_audio01,
+                "اَعُوْذُ بِاللّٰہِْ" to R.raw.dua27_part01_audio01,
+                "مِنَ الشَّیْطَانِ الرَّجِیْمًِِْ" to R.raw.dua27_part01_audio02,
         )
     ),
     Dua(
        arabic = "اَلْحَمْدُ لِلّٰہًِِ",
         translation = "All praises to Allah.",
         reference = " [Sahih al-Bukhari] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -717,13 +759,14 @@ val duaList = listOf(
         steps = "Say after sneezing: ",
         textheading = "Du‘a when Sneezing",
             wordAudioPairs = listOf(
-                "اَلْحَمْدُ لِلّٰہِْ" to R.raw.dua22_part01_audio01,
+                "اَلْحَمْدُ لِلّٰہِْ" to R.raw.dua28_part01_audio01,
         )
     ),
     Dua(
        arabic = "یَرْحَمُکَ اللّٰہًُِِ",
         translation = "May Allah have mercy on you.",
         reference = " [Sahih al-Bukhari] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -733,12 +776,13 @@ val duaList = listOf(
         steps = "Dua by one who hears someone saying اَلْحَمْدُ لِلّٰہِ",
         textheading = "Du‘a when Sneezing",
             wordAudioPairs = listOf(
-                "یَرْحَمُکَ اللّٰہِْ" to R.raw.dua22_part01_audio01,
+                "یَرْحَمُکَ اللّٰہِْ" to R.raw.dua28_part02_audio01,
         )
     ), Dua(
        arabic = "یَھْدِیْکُمُ اللّٰہُ وَیُصْلِحُ بَالَکُمًِِْ",
         translation = "May Allah guide you and improve your position.",
         reference = " [Sahih al-Bukhari] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -748,14 +792,15 @@ val duaList = listOf(
         steps = "Du’a in reply by the person who sneezes:",
         textheading = "Du‘a when Sneezing",
             wordAudioPairs = listOf(
-                "یَھْدِیْکُمُ اللّٰہُِْ" to R.raw.dua22_part01_audio01,
-                " وَیُصْلِحُ بَالَکُم" to R.raw.dua22_part01_audio01,
+                "یَھْدِیْکُمُ اللّٰہُِْ" to R.raw.dua28_part03_audio01,
+                " وَیُصْلِحُ بَالَکُم" to R.raw.dua28_part03_audio02,
         )
     ),
     Dua(
-       arabic = "اَلّٰھُمَّ اجْعَلْہُ  صَیِّباً  نَافِعاًًِِْ",
+       arabic = "اَلّٰھُمَّ اجْعَلْہُ  صَیِّباً  نَافِعاً",
         translation = "O Allah, may it be a beneficial rain cloud.",
         reference = "[Sunan al-Nasa’i]  ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -764,71 +809,87 @@ val duaList = listOf(
         duaNumber = "29. ",
         textheading = "Du‘a when it Rains",
             wordAudioPairs = listOf(
-                " اَلّٰھُمَّ اجْعَلْہُ" to R.raw.dua22_part01_audio01,
-                "  صَیِّباً  نَافِعا" to R.raw.dua22_part01_audio01,
+                " اَلّٰھُمَّ اجْعَلْہُ" to R.raw.dua29_part01_audio01,
+                "  صَیِّباً  نَافِعاً" to R.raw.dua29_part01_audio02,
         )
     ),
     Dua(
        arabic ="اَلّٰھُمَّ اَھْلِلْہُ عَلَیْنَا بِلْیُمْنِ وَالْاِیْمَانِ وَالسَّلَامَةِ وَالْاِسْلَامِ رَبِّیْ وَرَبُّکَ اللّٰہُ",
         translation = "O Allah! Let the moon appear over us with\n" + "security, faith, peace and Islam. [O moon!] My\n" + "Lord and your Lord is Allah. ",
         reference = "[Sunan al-Tirmidhi] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
         image = R.drawable.dua_29,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         duaNumber = "30. ",
-        textheading = "Du‘a upon\nSighting the Crescent Moon",
+        textheading = "Du‘a upon Sighting\nthe Crescent Moon",
             wordAudioPairs = listOf(
-                "  اَلّٰھُمَّ اَھْلِلْہُ" to R.raw.dua22_part01_audio01,
-                "عَلَیْنَا بِلْیُمْنِ" to R.raw.dua22_part01_audio01,
-                " وَالْاِیْمَانِ وَالسَّلَامَةِ" to R.raw.dua22_part01_audio01,
-                "وَالْاِسْلَامِ رَبِّیْ" to R.raw.dua22_part01_audio01,
-                " وَرَبُّکَ اللّٰہ" to R.raw.dua22_part01_audio01,
+                "اَلّٰھُمَّ اَھْلِلْہُ عَلَیْنَا" to R.raw.dua30_part01_audio01,
+                "بِلْیُمْنِ" to R.raw.dua30_part01_audio03,
+                "وَالْاِیْمَانِ" to R.raw.dua30_part01_audio04,
+                "وَالسَّلَامَةِ" to R.raw.dua30_part01_audio05,
+                "وَالْاِسْلَامِ" to R.raw.dua30_part01_audio06,
+                "رَبِّیْ وَرَبُّکَ اللّٰہُ" to R.raw.dua30_part01_audio07,
         )
     ),
     Dua(
-       arabic ="اللَّهُمَّ اِنِّىْ اَسْئَلُكَ حُبَّكَ وَ حُبَّ مَنْ يُّحِبُّكَ وحُبَّ عَمَلٍ يُّقَرِّبُ اِلى حُبِّكَُ",
-        translation = "O Allah! I ask You for Your love and for the love of\n"+"the one who loves You and I ask for the deeds\n"+"which lead me towards Your love.",
+       arabic ="اللَّهُمَّ إِنِّي أَسْأَلُكَ حُبَّكَ  وَحُبَّ مَنْ يُحِبُّكَ  وَعَمَلٍ يُقَرِّبُنِي إِلَى حُبِّكَ"   ,
+    translation = "O Allah! I ask You for Your love and for the love of\n"+"the one who loves You and I ask for the deeds\n"+"which lead me towards Your love.",
         reference = "[Sunan al-Tirmidhi] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
         image = R.drawable.dua_31,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         duaNumber = "31. ",
-        textheading = "Du‘a for\nSeeking Allah’s Love",
+        textheading = "Du‘a for Seeking\nAllah’s Love",
             wordAudioPairs = listOf(
-                "اللَّهُمَّ اِنِّىْ" to R.raw.dua22_part01_audio01,
-                " اَسْئَلُكَ حُبَّكَ" to R.raw.dua22_part01_audio01,
-                "  وَ حُبَّ مَنْ يُّحِبُّكَ" to R.raw.dua22_part01_audio01,
-                " وحُبَّ عَمَلٍ يُّقَرِّبُ " to R.raw.dua22_part01_audio01,
-                "   اِلى حُبِّك" to R.raw.dua22_part01_audio01,
+                "اللَّهُمَّ إِنِّي أَسْأَلُكَ" to R.raw.dua31_part01_audio01,
+                "حُبَّكَ" to R.raw.dua31_part01_audio02,
+                "وَحُبَّ" to R.raw.dua31_part01_audio03,
+                "مَنْ يُحِبُّكَ" to R.raw.dua31_part01_audio04,
+                "وَعَمَلٍ يُقَرِّبُنِي" to R.raw.dua31_part01_audio05,
+                "إِلَى حُبِّكَ" to R.raw.dua31_part01_audio06,
         )
     ),
     Dua(
-       arabic ="اَللّٰھُمَّ اَنْتَ رَبِّیْ،لَا اِلٰہَ اِلَّااَنْتَ خَلَقْتَنِیْ وَاَنَا عَبْدُکَ وَاَنَا عَلٰی عَھْدِکَ وَوَعْدِکَ مَااسْتَطَعْتُ اَعُوْذُبِکَ مِنْ شَرِّ مَاصَنَعْتُ اَبُوْئُ لَکَ بِنِعْمَتِکَ عَلَیَّ وَاَبُوْئُ بِذَنْبِیْ فَاغْفِرْ لِیْ اِنَّہُ لَا یَغْفِرُالذُّنُوْبَ اِلَّا اَنْتََُ",
+       arabic ="اَللّٰھُمَّ اَنْتَ رَبِّیْ،لَا اِلٰہَ اِلَّااَنْتَ خَلَقْتَنِیْ وَاَنَا عَبْدُکَ وَاَنَا عَلٰی عَھْدِکَ وَوَعْدِکَ مَااسْتَطَعْتُ اَعُوْذُبِکَ مِنْ شَرِّ مَاصَنَعْتُ اَبُوْئُ لَکَ بِنِعْمَتِکَ عَلَیَّ وَاَبُوْئُ بِذَنْبِیْ فَاغْفِرْ لِیْ اِنَّہُ لَا یَغْفِرُالذُّنُوْبَ اِلَّا اَنْتَ",
         translation = "O Allah, You are my Lord; there is no deity worthy\n"+"of worship except You. You created me and I am\n"+"your servant, I abide by Your covenant and\n"+"promise to the best of my ability. I seek refuge \n" +
                 "with You from the evil of which I have committed. \n" +
                 "I acknowledge Your blessings upon me and I\n"+"acknowledge my sin, so forgive me, for verily\n"+"none forgives sins except You. ",
         reference = "[Sahih al-Bukhari] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
         image = R.drawable.dua_32,
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         duaNumber = "32. ",
-        textheading = "Du‘a:\nSayyid-ul-Istighfar ",
+        textheading = "Du‘a:Sayyid-ul-Istighfar ",
         wordAudioPairs = listOf(
-            "اَللّٰھُمَّ اَنْتَ رَبِّیْ" to R.raw.dua22_part01_audio01,
-            "لَا اِلٰہَ اِلَّا اَنْتَ" to R.raw.dua22_part01_audio01,
-            "خَلَقْتَنِیْ وَ اَنَا عَبْدُکَ" to R.raw.dua22_part01_audio01,
-            "وَ اَنَا عَلٰی عَھْدِکَ وَ وَعْدِکَ مَا اسْتَطَعْتُ" to R.raw.dua22_part01_audio01,
-            "اَعُوْذُ بِکَ مِنْ شَرِّ مَا صَنَعْتُ" to R.raw.dua22_part01_audio01,
-            "اَبُوْءُ لَکَ بِنِعْمَتِکَ عَلَیَّ" to R.raw.dua22_part01_audio01,
-            "وَ اَبُوْءُ بِذَنْبِیْ" to R.raw.dua22_part01_audio01,
-            "فَاغْفِرْ لِیْ" to R.raw.dua22_part01_audio01,
-            "اِنَّہُ لَا یَغْفِرُ الذُّنُوْبَ اِلَّا اَنْتَ" to R.raw.dua22_part01_audio01
+            "اَللّٰھُمَّ اَنْتَ رَبِّیْ،" to R.raw.dua32_part01_audio01,
+            "لَا اِلٰہَ " to R.raw.dua32_part01_audio02,
+            "اِلَّااَنْتَ" to R.raw.dua32_part01_audio03,
+            "خَلَقْتَنِیْ" to R.raw.dua32_part01_audio04,
+            "وَاَنَا عَبْدُکَ" to R.raw.dua32_part01_audio05,
+            "وَاَنَا عَلٰی عَھْدِکَ" to R.raw.dua32_part01_audio06,
+            "وَوَعْدِکَ" to R.raw.dua32_part01_audio07,
+            "مَااسْتَطَعْتُ" to R.raw.dua32_part01_audio08,
+            "اَعُوْذُبِکَ" to R.raw.dua32_part01_audio09,
+            "مِنْ شَرِّ" to R.raw.dua32_part01_audio10,
+            "مَاصَنَعْتُ" to R.raw.dua32_part01_audio11,
+            "اَبُوْءُ لَکَ" to R.raw.dua32_part01_audio12,
+            "بِنِعْمَتِکَ" to R.raw.dua32_part01_audio13,
+            "عَلَیَّ" to R.raw.dua32_part01_audio14,
+            "وَ اَبُوْءُ" to R.raw.dua32_part01_audio15,
+            "بِذَنْبِیْ" to R.raw.dua32_part01_audio16,
+            "فَاغْفِرْ لِیْ" to R.raw.dua32_part01_audio17,
+            "اِنَّہُ" to R.raw.dua32_part01_audio18,
+            "لَا یَغْفِرُالذُّنُوْبَ" to R.raw.dua32_part01_audio19,
+            "اِلَّا اِلَّا اَنْتَ" to R.raw.dua32_part01_audio20
         )
 
     ),
@@ -837,6 +898,7 @@ val duaList = listOf(
         translation = "I seek refuge with the immense Face of Allah -\n" +
                 "there is nothing greater than it - and with the \n"+"complete words of Allah which neither the good\n"+"person nor the corrupt can exceed and with all\n"+"the most beautiful names of Allah, what I know of\n"+"them and what I do not know, from the evil of\n"+"what He has created and originated and multiplied.",
         reference = "[Mishkat ul-Masabih] ",
+        urdu = "",
         backgroundResId = R.drawable.header_bg,
         statusBarColorResId = R.color.top_nav_new,
         fullAudioResId = R.raw.dua22_part01_audio01,
@@ -845,13 +907,20 @@ val duaList = listOf(
         duaNumber = "33. ",
         textheading = "Seeking Refuge\nwith Allah",
         wordAudioPairs = listOf(
-            "اَعُوْذُ بِوَجْہِ اللّٰہِ الْعَظِیْمِ" to R.raw.dua22_part01_audio01,
-            "الَّذِیْ لَیْسَ شَیْئ اَعْظَمَ مِنْہُ" to R.raw.dua22_part01_audio01,
-            "وَبِکَلِمَاتِ اللّٰہِ التَّامَّاتِ" to R.raw.dua22_part01_audio01,
-            "الَّتِیْ لَا یُجَاوِزُھُنَّ بَرّ وَّ لَا فَاجِر" to R.raw.dua22_part01_audio01,
-            "وَبِاَسْمَائِ اللّٰہِ الْحُسْنٰی کُلِّھَا" to R.raw.dua22_part01_audio01,
-            "مَا عَلِمْتُ مِنْھَا وَمَا لَمْ اَعْلَمْ" to R.raw.dua22_part01_audio01,
-            "مِنْ شَرِّ مَا خَلَقَ وَ بَرَاَ وَذَرَاَ" to R.raw.dua22_part01_audio01
+            "اَعُوْذُِ" to R.raw.dua33_part01_audio01,
+            "بِوَجْہِ اللّٰہِ الْعَظِیْمِ الَّذِیْ" to R.raw.dua33_part01_audio02,
+            "لَیْسَ شَیْئُ" to R.raw.dua33_part01_audio03,
+            "اَعْظَمَ مِنْہُ" to R.raw.dua33_part01_audio04,
+            "وَبِکَلِمَاتِ اللّٰہِ التَّامَّاتِ الَّتِیْ" to R.raw.dua33_part01_audio05,
+            "لَا یُجَاوِزُھُنَّ" to R.raw.dua33_part01_audio06,
+            "بَرّ وَّ لَا فَاجِر" to R.raw.dua33_part01_audio08,
+            "وَبِاَسْمَائِ اللّٰہِ الْحُسْنٰی" to R.raw.dua33_part01_audio09,
+            "کُلِّھَا" to R.raw.dua33_part01_audio10,
+            "مَا عَلِمْتُ مِنْھَاْ" to R.raw.dua33_part01_audio11,
+            "وَمَا لَمْ اَعْلَمْ" to R.raw.dua33_part01_audio12,
+            "مِنْ شَرِّ مَا" to R.raw.dua33_part01_audio13,
+            "خَلَقَ" to R.raw.dua33_part01_audio14,
+            "وَ بَرَاَ وَذَرَاَ" to R.raw.dua33_part01_audio15,
         )
     ),
 )

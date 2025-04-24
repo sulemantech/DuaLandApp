@@ -21,6 +21,10 @@
     <color name="top_nav4">#9CCA16</color>
     <color name="top_nav5">#7CC128</color>
     <color name="top_nav6">#9EB2FF</color>
+    <color name="check_box">#FC6487</color>
+    <color name="uncheckedThumbColor">#A3A3A3</color>
+    <color name="uncheck_box">#949494</color>
+    <color name="background_screen">#C6EDF2</color>
     <color name="arabic_color">#1B8AAA</color>
     <color name="highlited_color">#FC6487</color>
     <color name="translation_color">#343A46</color>

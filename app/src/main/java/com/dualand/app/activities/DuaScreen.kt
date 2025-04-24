@@ -5,20 +5,19 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +41,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.dualand.app.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -73,6 +75,15 @@ fun DuaScreen(
     val reference = FontFamily(Font(R.font.poppins_semibold))
     val title = FontFamily(Font(R.font.mochypop_regular))
 
+    val selectedLanguagesFlow = remember { LanguagePreferences.getSelectedLanguages(context) }
+    val selectedLanguages by selectedLanguagesFlow.collectAsState(
+        initial = setOf(
+            "English",
+            "Hindi"
+        )
+    )
+
+
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
@@ -83,7 +94,25 @@ fun DuaScreen(
     var isPlaying by remember { mutableStateOf(false) }
     var showListening by remember { mutableStateOf(false) }
     var globalMediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
+    var repeatCount by remember { mutableStateOf(0) }
+    var currentRepeat by remember { mutableStateOf(0) }
+    var isRepeatingNow by remember { mutableStateOf(false) }
+    var isRepeatMode by remember { mutableStateOf(false) }
+    var currentlyRepeatingDuaIndex by remember { mutableStateOf(-1) }
 
+    val stopAudioPlayback = {
+        globalMediaPlayer?.release()
+        globalMediaPlayer = null
+        isPlaying = false
+        showListening = false
+        globalWordIndex = -1
+    }
+    LaunchedEffect(currentIndex) {
+        stopAudioPlayback()
+        repeatCount = 0
+        currentRepeat = 0
+        isRepeatMode = false
+    }
     Box(modifier = Modifier.fillMaxHeight()) {
         Image(
             painter = painterResource(id = duas[currentIndex].backgroundResId),
@@ -217,14 +246,32 @@ fun DuaScreen(
                                         setOnCompletionListener {
                                             showListening = true
                                             Handler(Looper.getMainLooper()).postDelayed({
-                                                playWord(index + 1)
+                                                if (index + 1 < dua.wordAudioPairs.size) {
+                                                    playWord(index + 1)
+                                                } else {
+                                                    if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
+                                                        currentRepeat++
+                                                        isRepeatingNow = true
+                                                        currentlyRepeatingDuaIndex =
+                                                            currentPlayingIndex
+                                                        playWord(0)
+                                                    } else {
+                                                        isPlaying = false
+                                                        showListening = false
+                                                        globalWordIndex = -1
+                                                        isRepeatMode = false
+                                                        repeatCount = 0
+                                                        currentRepeat = 0
+                                                        isRepeatingNow = false
+                                                        currentlyRepeatingDuaIndex = -1
+                                                    }
+                                                }
                                             }, effectiveDuration.toLong())
                                         }
 
                                         start()
                                     }
                                 }
-
 
                                 PlayWordByWordButton(
                                     isPlaying = isPlaying && currentPlayingIndex == i,
@@ -243,23 +290,21 @@ fun DuaScreen(
                                     }
                                 )
 
-                                var repeatCount by remember { mutableStateOf(0) }
-
                                 Box(
-                                    contentAlignment = Alignment.TopEnd,
                                     modifier = Modifier.padding(4.dp)
                                 ) {
                                     IconButton(
                                         onClick = {
                                             if (repeatCount < 5) {
                                                 repeatCount++
-                                                globalMediaPlayer?.release()
-                                                globalMediaPlayer = null
-                                                isPlaying = false
-                                                globalWordIndex = -1
-
+                                            } else {
+                                                repeatCount = Int.MAX_VALUE
                                             }
-                                        }
+                                            isRepeatMode = true
+                                            currentRepeat = 0
+                                        },
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
                                     ) {
                                         Image(
                                             painter = painterResource(id = R.drawable.repeat_off_btn),
@@ -268,33 +313,32 @@ fun DuaScreen(
                                         )
                                     }
 
-                                    if (repeatCount > 0) {
+                                    if (isRepeatingNow && currentPlayingIndex == i && repeatCount > 0) {
+                                        val badgeText =
+                                            if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
+
                                         Box(
                                             contentAlignment = Alignment.Center,
                                             modifier = Modifier
-                                                .offset(x = (-4).dp, y = 4.dp)
                                                 .size(18.dp)
                                                 .background(Color.Red, shape = CircleShape)
+                                                .align(Alignment.TopEnd)
+                                                .offset(x = (-2).dp, y = 2.dp)
                                         ) {
                                             Text(
-                                                text = repeatCount.toString(),
+                                                text = badgeText,
                                                 color = Color.White,
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
                                     }
+
                                 }
 
+
                             }
 
-                            val stopAudioPlayback = {
-                                globalMediaPlayer?.release()
-                                globalMediaPlayer = null
-                                isPlaying = false
-                                showListening = false
-                                globalWordIndex = -1
-                            }
                             Spacer(modifier = Modifier.height(9.dp))
 
                             dua.steps?.let {
@@ -327,8 +371,6 @@ fun DuaScreen(
                                     pop()
                                 }
                             }
-
-                            Spacer(modifier = Modifier.height(5.dp))
 
                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                                 ClickableText(
@@ -368,35 +410,50 @@ fun DuaScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(
-                                    text = dua.translation,
-                                    fontSize = 14.sp,
-                                    textAlign = TextAlign.Center,
-                                    fontFamily = translationtext,
-                                    lineHeight = 18.sp,
-                                    color = colorResource(R.color.translation_color),
-                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                                )
+                                if ("English" in selectedLanguages) {
+                                    Text(
+                                        text = dua.translation,
+                                        fontSize = 14.sp,
+                                        textAlign = TextAlign.Center,
+                                        fontFamily = translationtext,
+                                        lineHeight = 18.sp,
+                                        color = colorResource(R.color.translation_color),
+                                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(7.dp))
+                                }
 
-                                Spacer(modifier = Modifier.height(7.dp))
-                                Text(
-                                    text = dua.hinditranslation,
-                                    fontSize = 14.sp,
-                                    textAlign = TextAlign.Center,
-                                    fontFamily = translationtext,
-                                    lineHeight = 18.sp,
-                                    color = colorResource(R.color.translation_color),
-                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                                )
+                                if ("Urdu" in selectedLanguages) {
+                                    Text(
+                                        text = dua.urdu,
+                                        fontSize = 14.sp,
+                                        textAlign = TextAlign.Center,
+                                        lineHeight = 18.sp,
+                                        color = colorResource(R.color.translation_color),
+                                        modifier = Modifier.padding(horizontal = 20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(7.dp))
+                                }
 
-                                Spacer(modifier = Modifier.height(7.dp))
+                                if ("Hindi" in selectedLanguages) {
+                                    Text(
+                                        text = dua.hinditranslation,
+                                        fontSize = 14.sp,
+                                        textAlign = TextAlign.Center,
+                                        lineHeight = 18.sp,
+                                        color = colorResource(R.color.translation_color),
+                                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(7.dp))
+                                }
 
                                 Text(
                                     text = dua.reference,
                                     fontSize = 10.sp,
                                     fontFamily = reference,
                                     color = colorResource(R.color.reference_color),
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(bottom = 20.dp)
                                 )
                             }
                         }
@@ -425,6 +482,7 @@ fun DuaScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = {
+                            stopAudioPlayback()
                             val step = when {
                                 (currentIndex - 1) in threeDuaIndices -> 3
                                 (currentIndex - 1) in twoDuaIndices -> 2
@@ -440,6 +498,7 @@ fun DuaScreen(
                         }
 
                         IconButton(onClick = {
+                            stopAudioPlayback()
                             val step = when {
                                 currentIndex in threeDuaIndices -> 3
                                 currentIndex in twoDuaIndices -> 2
@@ -462,6 +521,7 @@ fun DuaScreen(
         }
     }
 }
+
 
 @Composable
 fun PlayWordByWordButton(
@@ -494,156 +554,312 @@ fun PlayWordByWordButton(
 }
 
 @Composable
-fun SettingsScreen(navController: NavController) {
-    var selectedLanguage by remember { mutableStateOf("English") }
-    var fontSize by remember { mutableStateOf(32f) }
-    var isAutoPlayEnabled by remember { mutableStateOf(true) }
+fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
+    val selectedLanguages = remember { mutableStateListOf("English", "Urdu") }
+    val fontSize = remember { mutableStateOf(16) }
+    val pauseSeconds = remember { mutableStateOf(2) }
+    val selectedVoice = remember { mutableStateOf("Male") }
+    val MyArabicFont = FontFamily(Font(R.font.al_quran))
+    var wordByWordPause by remember { mutableStateOf(2) }
+    val MyArabicFont1 = FontFamily(Font(R.font.doodlestrickers))
+    val systemUiController = rememberSystemUiController()
+    val translationtext = FontFamily(Font(R.font.poppins_regular))
 
-    val languages = listOf("English", "Urdu")
 
+    val toggleOptions =
+        listOf("Reading Out Dua Title", "Rewards", "Auto Next Dua's", "Word-by-Word Pause")
+    val scrollState = rememberScrollState()
+
+    val NavigationBarColor = colorResource(id = R.color.background_screen)
+    val statusBarColor = colorResource(id = R.color.top_nav_new)
+
+    SideEffect {
+        systemUiController.setStatusBarColor(color = statusBarColor)
+        systemUiController.setNavigationBarColor(color = NavigationBarColor)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
+            .padding(innerPadding)
+            .background(colorResource(R.color.background_screen))
     ) {
-        // Header
         Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFF4CAF50))
-            }
-            Text(
-                text = if (selectedLanguage == "Urdu") "ترتیبات" else "Settings",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = { /* Info logic */ }) {
-                Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFF4CAF50))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Language selection
-        Text(
-            text = if (selectedLanguage == "Urdu") "پہلی زبان" else "Default Language",
-            color = Color(0xFF00BCD4),
-            fontWeight = FontWeight.Medium
-        )
-
-        Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFF88)),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .background(colorResource(R.color.top_nav_new))
+                .padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                languages.forEach { lang ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = selectedLanguage == lang,
-                                onClick = { selectedLanguage = lang }
+            IconButton(
+                onClick = { navController.popBackStack() },
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_backarrow),
+                    contentDescription = "Back",
+                    modifier = Modifier.size(29.dp, 30.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Setting",
+                    fontSize = 16.sp,
+                    fontFamily = translationtext,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(R.color.heading_color),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(17.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Dua Translation", fontWeight = FontWeight.Bold)
+
+                    listOf("English", "Urdu", "Hindi").forEach { lang ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(
+                                    id = when (lang) {
+                                        "English" -> R.drawable.eng_flag
+                                        "Urdu" -> R.drawable.urdu_flag
+                                        else -> R.drawable.hindi_flag
+                                    }
+                                ),
+                                contentDescription = lang,
+                                modifier = Modifier.size(24.dp)
                             )
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(lang, fontSize = 16.sp)
+                            Spacer(modifier = Modifier.weight(1f))
+                            Checkbox(
+                                checked = selectedLanguages.contains(lang),
+                                onCheckedChange = {
+                                    if (it) selectedLanguages.add(lang) else selectedLanguages.remove(
+                                        lang
+                                    )
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = (colorResource(R.color.check_box)),
+                                    uncheckedColor = Color.Gray,
+                                    checkmarkColor = Color.White
+                                )
+                            )
+
+                        }
+                    }
+
+                    Divider(Modifier.padding(vertical = 4.dp))
+
+                    val fontSize = remember { mutableStateOf(32f) }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        RadioButton(
-                            selected = selectedLanguage == lang,
-                            onClick = { selectedLanguage = lang }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (lang == "Urdu") "اردو" else "English"
-                        )
+                        Text("Font Size", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { if (fontSize.value > 10) fontSize.value -= 2f }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.minus_icon),
+                                    contentDescription = "Minus"
+                                )
+                            }
+                            Text(text = "${fontSize.value.toInt()}", fontSize = 20.sp)
+                            IconButton(onClick = { fontSize.value += 2f }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.plus_icon),
+                                    contentDescription = "Plus"
+                                )
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = "سُبْحَانَ اللّٰہِ",
+                        fontSize = fontSize.value.sp,
+                        fontFamily = MyArabicFont,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Divider(Modifier.padding(vertical = 4.dp))
+
+                    toggleOptions.forEach { title ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                Text(
+                                    when (title) {
+                                        "Reading Out Dua Title" -> "Reads out the dua title automatically"
+                                        "Rewards" -> "Gives a reward when a dua is completed"
+                                        "Auto Next Dua's" -> "Automatically move to the next dua"
+                                        "Word-by-Word Pause" -> ""
+                                        else -> ""
+                                    },
+                                    fontSize = 10.sp,
+                                    color = Color.DarkGray
+                                )
+                            }
+                            var isSwitchOn by remember { mutableStateOf(false) }
+                            Switch(
+                                checked = isSwitchOn,
+                                onCheckedChange = { isSwitchOn = it },
+                                modifier = Modifier.scale(1.0f),
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = colorResource(R.color.check_box),
+                                    uncheckedThumbColor = colorResource(R.color.uncheckedThumbColor),
+                                    uncheckedTrackColor = colorResource(R.color.white)
+                                )
+                            )
+
+                        }
+                        if (title != "Word-by-Word Pause") {
+                            Divider(Modifier.padding(vertical = 6.dp))
+                        }
+
+                        if (title == "Word-by-Word Pause") {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.align(Alignment.Center)
+                                ) {
+                                    IconButton(onClick = { if (wordByWordPause > 1) wordByWordPause-- }) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.minus_icon),
+                                            contentDescription = "Minus"
+                                        )
+                                    }
+                                    Text("$wordByWordPause sec")
+                                    IconButton(onClick = { wordByWordPause++ }) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.plus_icon),
+                                            contentDescription = "Plus"
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Divider(Modifier.padding(vertical = 6.dp))
+                    Text("Choose Voice", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        listOf("Male", "Female").forEach { gender ->
+                            Box(
+                                modifier = Modifier
+                                    .border(
+                                        1.dp,
+                                        if (selectedVoice.value == gender) colorResource(R.color.check_box) else Color.Transparent,
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .padding(
+                                        top = 15.dp,
+                                        start = 25.dp,
+                                        end = 25.dp,
+                                        bottom = 10.dp
+                                    )
+                                    .clickable { selectedVoice.value = gender }
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.align(Alignment.Center)
+                                ) {
+                                    Image(
+                                        painter = painterResource(
+                                            id = if (gender == "Male") R.drawable.male_icon else R.drawable.female_icon
+                                        ),
+                                        contentDescription = gender,
+                                        modifier = Modifier.size(60.dp)
+                                    )
+                                    Text(gender)
+                                }
+                                if (selectedVoice.value == gender) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_check_circle),
+                                        contentDescription = "Selected",
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .align(Alignment.TopEnd)
+                                            .offset(
+                                                x = 17.dp,
+                                                y = (-6).dp
+                                            )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
 
+            val context = LocalContext.current
 
-        Text(
-            text = if (selectedLanguage == "Urdu") "فونٹ سیٹنگز" else "Font Settings",
-            color = Color(0xFF00BCD4),
-            fontWeight = FontWeight.Medium
-        )
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(0.9f)
+                    .height(46.dp)
+                    .clickable {
 
-        Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFF88)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Column(Modifier.padding(12.dp)) {
-                Text(text = if (selectedLanguage == "Urdu") "فونٹ سائز" else "Font Size")
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "اللّهُـمَّ باعِـدْ بَيْني وَبَيْنَ خَطاياي",
-                    fontSize = fontSize.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Slider(
-                    value = fontSize,
-                    onValueChange = { fontSize = it },
-                    valueRange = 16f..48f
-                )
-                Text(
-                    text = fontSize.toInt().toString(),
-                    modifier = Modifier.align(Alignment.End)
-                )
-            }
-        }
-
-        // Playback Settings
-        Text(
-            text = if (selectedLanguage == "Urdu") "پلے بیک سیٹنگز" else "Playback Settings",
-            color = Color(0xFF00BCD4),
-            fontWeight = FontWeight.Medium
-        )
-
-        Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFF88)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                        CoroutineScope(Dispatchers.IO).launch {
+                            LanguagePreferences.saveLanguages(context, selectedLanguages.toSet())
+                        }
+                    }
             ) {
-                Text(
-                    text = if (selectedLanguage == "Urdu") "آٹو پلے" else "AutoPlay",
-                    modifier = Modifier.weight(1f)
+                Image(
+                    painter = painterResource(id = R.drawable.save_changes_btn),
+                    contentDescription = "Background",
+                    modifier = Modifier.fillMaxSize()
                 )
-                RadioButton(
-                    selected = isAutoPlayEnabled,
-                    onClick = { isAutoPlayEnabled = !isAutoPlayEnabled }
+
+                Text(
+                    text = "SAVE CHANGES",
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    fontFamily = MyArabicFont1,
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Save button
-        Button(
-            onClick = { /* Save logic here */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0097A7))
-        ) {
-            Text(
-                text = if (selectedLanguage == "Urdu") "تبدیلیاں محفوظ کریں" else "Save changes",
-                color = Color.White
-            )
         }
     }
 }
@@ -669,7 +885,8 @@ fun DuaTabs(
 
         Row(
             modifier = Modifier
-                .fillMaxWidth().padding(bottom = 5.dp),
+                .fillMaxWidth()
+                .padding(bottom = 5.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -709,7 +926,7 @@ fun DuaTabs(
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen(navController = rememberNavController())
+    SettingsScreen(navController = rememberNavController(), innerPadding = PaddingValues())
 }
 
 @Preview(showBackground = true)

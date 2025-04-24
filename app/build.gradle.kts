@@ -95,6 +95,9 @@ dependencies {
     implementation( "com.google.accompanist:accompanist-flowlayout:0.30.1")
     implementation ("com.google.accompanist:accompanist-flowlayout:0.34.0")
 
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+
+
 }
 
 fun kapt(s: String) {
