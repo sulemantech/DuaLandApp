@@ -1,13 +1,21 @@
 package com.dualand.app.activities
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +69,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -89,8 +99,9 @@ fun AppNavigator(navController: NavHostController) {
     AnimatedNavHost(
         navController = navController,
         startDestination = "splash",
-        enterTransition = { fadeIn(animationSpec = tween(500)) },
-        exitTransition = { fadeOut(animationSpec = tween(300)) }
+        enterTransition = { fadeIn(animationSpec = tween(700)) },
+        exitTransition = { fadeOut(animationSpec = tween(500)) }
+
     ) {
         composable("splash") {
             SplashScreen(
@@ -117,8 +128,22 @@ fun AppNavigator(navController: NavHostController) {
         composable("profile") {
             PlaceholderScreen(title = "Profile Screen")
         }
-        composable("SettingsScreen") {
-            SettingsScreen(navController=navController, innerPadding = PaddingValues())
+        composable(
+            route = "SettingsScreen",
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(durationMillis = 1000))
+            },
+//            exitTransition = {
+//                slideOutHorizontally(
+//                    targetOffsetX = { fullWidth -> -fullWidth },
+//                    animationSpec = tween(durationMillis = 1000, easing = FastOutLinearInEasing)
+//                ) + fadeOut(animationSpec = tween(durationMillis = 1000))
+//            }
+        ) {
+            SettingsScreen(navController = navController, innerPadding = PaddingValues())
         }
     }
 }
@@ -197,6 +222,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
     val NavigationBarColor = colorResource(id = R.color.top_nav_new)
     val statusBarColor = colorResource(id = R.color.top_nav_new)
     var searchText by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -333,8 +359,10 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                     containerColor = colorResource(R.color.top_nav_new)
                 )
             )
-            val filteredDuaList = duaList.filter {
-                it.title.contains(searchText, ignoreCase = true)
+            val filteredDuaList = remember(searchText) {
+                duaList.filter {
+                    it.title.contains(searchText, ignoreCase = true)
+                }
             }
 
             LazyVerticalGrid(
@@ -346,13 +374,10 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                item(span = { GridItemSpan(2) }) {
-                }
-
-                items(filteredDuaList) { dua ->
-                    DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
-                    Spacer(modifier = Modifier.padding(bottom = 30.dp))
-
+                itemsIndexed(filteredDuaList) { index, dua ->
+                    BouncyGridCard(index = index) {
+                        DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
+                    }
                 }
             }
         }
@@ -394,14 +419,22 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                     }
 
                     IconButton(onClick = {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}")
+                            type = "text/plain"
+                        }
 
+                        val shareIntent = Intent.createChooser(sendIntent, "Share App")
+                        context.startActivity(shareIntent)
                     }) {
                         Image(
                             painter = painterResource(id = R.drawable.share_icon),
-                            contentDescription = "Previous",
+                            contentDescription = "Share",
                             modifier = Modifier.size(33.dp, 40.dp)
                         )
                     }
+
 
                     IconButton(onClick = {
                     }) {
@@ -419,6 +452,35 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
 }
 
 @Composable
+fun BouncyGridCard(index: Int, content: @Composable () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "gridBounce"
+    )
+
+    LaunchedEffect(Unit) {
+        delay(index * 5L)
+        visible = true
+    }
+
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+    ) {
+        content()
+    }
+}
+
+@Composable
 fun DuaCard(
     imageRes: Int,
     onClick: () -> Unit
@@ -431,6 +493,7 @@ fun DuaCard(
                 indication = rememberRipple(bounded = true),
                 interactionSource = remember { MutableInteractionSource() }
             ),
+        shape = RoundedCornerShape(6.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Image(
@@ -441,7 +504,6 @@ fun DuaCard(
         )
     }
 }
-
 
 
 @Preview(showBackground = true)

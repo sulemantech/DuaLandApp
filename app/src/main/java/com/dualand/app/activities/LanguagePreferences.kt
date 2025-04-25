@@ -1,26 +1,27 @@
 package com.dualand.app.activities
 
 import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringSetPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.Flow
+import android.content.SharedPreferences
 
 object LanguagePreferences {
-    private val Context.dataStore by preferencesDataStore("settings")
 
-    val SELECTED_LANGUAGES = stringSetPreferencesKey("selected_languages")
+    private const val PREF_NAME = "language_preferences"
+    private const val KEY_LANGUAGES = "selected_languages"
 
-    suspend fun saveLanguages(context: Context, languages: Set<String>) {
-        context.dataStore.edit { prefs ->
-            prefs[SELECTED_LANGUAGES] = languages
+    private fun getSharedPreferences(context: Context): SharedPreferences {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    }
+
+    fun saveLanguages(context: Context, languages: Set<String>) {
+        val sharedPreferences = getSharedPreferences(context)
+        with(sharedPreferences.edit()) {
+            putStringSet(KEY_LANGUAGES, languages)
+            apply()
         }
     }
 
-    fun getSelectedLanguages(context: Context): Flow<Set<String>> {
-        return context.dataStore.data.map { prefs ->
-            prefs[SELECTED_LANGUAGES] ?: setOf("English", "Hindi") // default
-        }
+    fun getLanguages(context: Context): Set<String> {
+        val sharedPreferences = getSharedPreferences(context)
+        return sharedPreferences.getStringSet(KEY_LANGUAGES, setOf()) ?: setOf()
     }
 }
