@@ -4,24 +4,16 @@ import android.content.Context
 import android.content.SharedPreferences
 
 object LanguagePreferences {
-
-    private const val PREF_NAME = "language_preferences"
-    private const val KEY_LANGUAGES = "selected_languages"
-
-    private fun getSharedPreferences(context: Context): SharedPreferences {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    }
+    private const val PREF_NAME = "language_prefs"
+    private const val SELECTED_LANGUAGES_KEY = "selected_languages"
 
     fun saveLanguages(context: Context, languages: Set<String>) {
-        val sharedPreferences = getSharedPreferences(context)
-        with(sharedPreferences.edit()) {
-            putStringSet(KEY_LANGUAGES, languages)
-            apply()
-        }
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putStringSet(SELECTED_LANGUAGES_KEY, languages).apply()
     }
 
-    fun getLanguages(context: Context): Set<String> {
-        val sharedPreferences = getSharedPreferences(context)
-        return sharedPreferences.getStringSet(KEY_LANGUAGES, setOf()) ?: setOf()
+    fun getSelectedLanguages(context: Context): Set<String> {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getStringSet(SELECTED_LANGUAGES_KEY, setOf("English", "Hindi")) ?: setOf("English", "Hindi")
     }
 }

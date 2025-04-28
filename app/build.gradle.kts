@@ -97,6 +97,9 @@ dependencies {
 
     implementation ("androidx.datastore:datastore-preferences:1.0.0")
 
+    // Compose Pager
+    implementation ("androidx.compose.foundation:foundation:1.5.0")
+
 
 }
 

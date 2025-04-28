@@ -3,22 +3,27 @@ package com.dualand.app.activities
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -30,10 +35,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.Bold
-import androidx.compose.ui.text.font.FontWeight.Companion.W500
-import androidx.compose.ui.text.font.FontWeight.Companion.W600
-import androidx.compose.ui.text.font.FontWeight.Companion.W700
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withStyle
@@ -47,10 +48,11 @@ import com.dualand.app.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun DuaScreen(
     innerPadding: PaddingValues,
@@ -61,14 +63,24 @@ fun DuaScreen(
     val duas = duaList
     val context = LocalContext.current
     var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
-
-
     var currentIndex by remember { mutableStateOf(index.coerceIn(0, duas.lastIndex)) }
 
-    val selectedLanguages = remember { mutableStateOf(LanguagePreferences.getLanguages(context)) }
+//    val selectedLanguages = remember { mutableStateOf(LanguagePreferences.getLanguages(context)) }
+//
+//    LaunchedEffect(selectedLanguages.value) {
+//        selectedLanguages.value = LanguagePreferences.getLanguages(context)
+//    }
 
-    LaunchedEffect(selectedLanguages.value) {
-        selectedLanguages.value = LanguagePreferences.getLanguages(context)
+    val selectedLanguages = remember {
+        mutableStateListOf<String>().apply {
+            CoroutineScope(Dispatchers.IO).launch {
+                val languages = LanguagePreferences.getSelectedLanguages(context)
+                withContext(Dispatchers.Main) {
+                    clear()
+                    addAll(languages)
+                }
+            }
+        }
     }
 
     val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15, 16, 19, 21, 22, 23, 28, 29, 31, 32)
@@ -214,328 +226,370 @@ fun DuaScreen(
                 }
             )
 
+            val scope = rememberCoroutineScope()
             Box(modifier = Modifier.fillMaxSize()) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = 50.dp)
+                        .pointerInput(Unit) {
+                            detectHorizontalDragGestures { _, dragAmount ->
+                                scope.launch {
+                                    if (dragAmount > 50 && currentIndex > 0) {
+                                        currentIndex--
+                                        delay(150)
+                                    } else if (dragAmount < -50 && currentIndex < duas.size - 1) { // Swipe right (previous page)
+                                        currentIndex++
+                                        delay(150) 
+                                    }
+                                }
+                            }
+                        }
                 ) {
                     Column(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(innerPadding)
-                            .verticalScroll(rememberScrollState())
+                            .fillMaxSize()
+                            .padding(bottom = 50.dp)
                     ) {
-                        for (i in currentIndex until (currentIndex + showCount).coerceAtMost(duas.size)) {
-                            val dua = duas[i]
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(innerPadding)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            for (i in currentIndex until (currentIndex + showCount).coerceAtMost(duas.size)) {
+                                val dua = duas[i]
 
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(
-                                    -10.dp,
-                                    Alignment.CenterHorizontally
-                                )
-                            ) {
-                                IconButton(onClick = { }) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.favourite_icon),
-                                        contentDescription = "Favourite",
-                                        modifier = Modifier.size(33.dp)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(
+                                        -10.dp,
+                                        Alignment.CenterHorizontally
                                     )
-                                }
-
-                                fun playWord(index: Int) {
-                                    if (index >= dua.wordAudioPairs.size) {
-                                        isPlaying = false
-                                        showListening = false
-                                        globalWordIndex = -1
-                                        return
-                                    }
-
-                                    val (_, audioResId) = dua.wordAudioPairs[index]
-
-                                    globalMediaPlayer?.release()
-                                    globalMediaPlayer = MediaPlayer.create(context, audioResId)
-
-                                    globalWordIndex = index
-                                    showListening = false
-
-                                    globalMediaPlayer?.apply {
-                                        val rawDuration = duration
-                                        val silencePadding = 500
-                                        val effectiveDuration =
-                                            (rawDuration - silencePadding).coerceAtLeast(100)
-
-                                        setOnCompletionListener {
-                                            showListening = true
-                                            Handler(Looper.getMainLooper()).postDelayed({
-                                                if (index + 1 < dua.wordAudioPairs.size) {
-                                                    playWord(index + 1)
-                                                } else {
-                                                    if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
-                                                        currentRepeat++
-                                                        isRepeatingNow = true
-                                                        currentlyRepeatingDuaIndex =
-                                                            currentPlayingIndex
-                                                        playWord(0)
-                                                    } else {
-                                                        isPlaying = false
-                                                        showListening = false
-                                                        globalWordIndex = -1
-                                                        isRepeatMode = false
-                                                        repeatCount = 0
-                                                        currentRepeat = 0
-                                                        isRepeatingNow = false
-                                                        currentlyRepeatingDuaIndex = -1
-                                                    }
-                                                }
-                                            }, effectiveDuration.toLong())
-                                        }
-
-                                        start()
-                                    }
-                                }
-
-                                PlayWordByWordButton(
-                                    isPlaying = isPlaying && currentPlayingIndex == i,
-                                    showListening = showListening && currentPlayingIndex == i,
-                                    onClick = {
-                                        if (isPlaying && currentPlayingIndex == i) {
-                                            globalMediaPlayer?.pause()
-                                            isPlaying = false
-                                        } else {
-                                            globalMediaPlayer?.release()
-                                            currentPlayingIndex = i
-                                            globalWordIndex = -1
-                                            isPlaying = true
-                                            playWord(0)
-                                        }
-                                    }
-                                )
-
-                                Box(
-                                    modifier = Modifier.padding(4.dp)
                                 ) {
-                                    IconButton(
-                                        onClick = {
-                                            if (repeatCount < 5) {
-                                                repeatCount++
-                                            } else {
-                                                repeatCount = Int.MAX_VALUE
-                                            }
-                                            isRepeatMode = true
-                                            currentRepeat = 0
-                                        },
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                    ) {
+                                    IconButton(onClick = { }) {
                                         Image(
-                                            painter = painterResource(id = R.drawable.repeat_off_btn),
-                                            contentDescription = "Repeat",
+                                            painter = painterResource(id = R.drawable.favourite_icon),
+                                            contentDescription = "Favourite",
                                             modifier = Modifier.size(33.dp)
                                         )
                                     }
 
-                                    if (isRepeatingNow && currentPlayingIndex == i && repeatCount > 0) {
-                                        val badgeText =
-                                            if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
+                                    fun playWord(index: Int) {
+                                        if (index >= dua.wordAudioPairs.size) {
+                                            isPlaying = false
+                                            showListening = false
+                                            globalWordIndex = -1
+                                            return
+                                        }
 
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier
-                                                .size(18.dp)
-                                                .background(Color.Red, shape = CircleShape)
-                                                .align(Alignment.TopEnd)
-                                                .offset(x = (-2).dp, y = 2.dp)
-                                        ) {
-                                            Text(
-                                                text = badgeText,
-                                                color = Color.White,
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
+                                        val (_, audioResId) = dua.wordAudioPairs[index]
+
+                                        globalMediaPlayer?.release()
+                                        globalMediaPlayer = MediaPlayer.create(context, audioResId)
+
+                                        globalWordIndex = index
+                                        showListening = false
+
+                                        globalMediaPlayer?.apply {
+                                            val rawDuration = duration
+                                            val silencePadding = 500
+                                            val effectiveDuration =
+                                                (rawDuration - silencePadding).coerceAtLeast(100)
+
+                                            setOnCompletionListener {
+                                                showListening = true
+                                                Handler(Looper.getMainLooper()).postDelayed({
+                                                    if (index + 1 < dua.wordAudioPairs.size) {
+                                                        playWord(index + 1)
+                                                    } else {
+                                                        if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
+                                                            currentRepeat++
+                                                            isRepeatingNow = true
+                                                            currentlyRepeatingDuaIndex =
+                                                                currentPlayingIndex
+                                                            playWord(0)
+                                                        } else {
+                                                            isPlaying = false
+                                                            showListening = false
+                                                            globalWordIndex = -1
+                                                            isRepeatMode = false
+                                                            repeatCount = 0
+                                                            currentRepeat = 0
+                                                            isRepeatingNow = false
+                                                            currentlyRepeatingDuaIndex = -1
+                                                        }
+                                                    }
+                                                }, effectiveDuration.toLong())
+                                            }
+
+                                            start()
                                         }
                                     }
 
-                                }
-
-
-                            }
-
-                            Spacer(modifier = Modifier.height(9.dp))
-
-                            dua.steps?.let {
-                                Text(
-                                    text = it,
-                                    fontSize = 12.sp,
-                                    fontFamily = translationtext,
-                                    fontWeight = FontWeight.SemiBold,
-                                    textAlign = TextAlign.Center,
-                                    color = colorResource(R.color.heading_color),
-                                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                                )
-                            }
-
-                            val annotatedText = buildAnnotatedString {
-                                dua.wordAudioPairs.forEachIndexed { index, pair ->
-                                    pushStringAnnotation("WORD", index.toString())
-                                    withStyle(
-                                        style = SpanStyle(
-                                            color = if (globalWordIndex == index && currentPlayingIndex == i)
-                                                colorResource(R.color.highlited_color)
-                                            else colorResource(R.color.arabic_color),
-                                            fontWeight = if (globalWordIndex == index && currentPlayingIndex == i)
-                                                FontWeight.Bold
-                                            else FontWeight.Normal
-                                        )
-                                    ) {
-                                        append(pair.first + " ")
-                                    }
-                                    pop()
-                                }
-                            }
-
-                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                ClickableText(
-                                    text = annotatedText,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 25.dp, end = 25.dp),
-                                    style = TextStyle(
-                                        fontSize = 24.sp,
-                                        fontFamily = MyArabicFont,
-                                        textDirection = TextDirection.Rtl,
-                                        textAlign = TextAlign.Center
-                                    ),
-                                    onClick = { offset ->
-                                        annotatedText.getStringAnnotations("WORD", offset, offset)
-                                            .firstOrNull()?.let { annotation ->
-                                                val clickedIndex = annotation.item.toInt()
+                                    PlayWordByWordButton(
+                                        isPlaying = isPlaying && currentPlayingIndex == i,
+                                        showListening = showListening && currentPlayingIndex == i,
+                                        onClick = {
+                                            if (isPlaying && currentPlayingIndex == i) {
+                                                globalMediaPlayer?.pause()
+                                                isPlaying = false
+                                            } else {
                                                 globalMediaPlayer?.release()
-                                                globalMediaPlayer = MediaPlayer.create(
-                                                    context,
-                                                    dua.wordAudioPairs[clickedIndex].second
-                                                )
                                                 currentPlayingIndex = i
-                                                globalWordIndex = clickedIndex
-                                                globalMediaPlayer?.setOnCompletionListener {
-                                                    globalWordIndex = -1
-                                                }
-                                                globalMediaPlayer?.start()
+                                                globalWordIndex = -1
+                                                isPlaying = true
+                                                playWord(0)
                                             }
+                                        }
+                                    )
+
+                                    Box(
+                                        modifier = Modifier.padding(4.dp)
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                if (repeatCount < 5) {
+                                                    repeatCount++
+                                                } else {
+                                                    repeatCount = Int.MAX_VALUE
+                                                }
+                                                isRepeatMode = true
+                                                currentRepeat = 0
+                                            },
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                        ) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.repeat_off_btn),
+                                                contentDescription = "Repeat",
+                                                modifier = Modifier.size(33.dp)
+                                            )
+                                        }
+
+                                        if (isRepeatingNow && currentPlayingIndex == i && repeatCount > 0) {
+                                            val badgeText =
+                                                if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
+
+                                            Box(
+                                                contentAlignment = Alignment.Center,
+                                                modifier = Modifier
+                                                    .size(18.dp)
+                                                    .background(Color.Red, shape = CircleShape)
+                                                    .align(Alignment.TopEnd)
+                                                    .offset(x = (-2).dp, y = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = badgeText,
+                                                    color = Color.White,
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
                                     }
-                                )
-                            }
 
-                            Spacer(modifier = Modifier.height(7.dp))
 
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
+                                }
+
+                                Spacer(modifier = Modifier.height(9.dp))
+
+                                dua.steps?.let {
                                     Text(
-                                        text = dua.translation,
-                                        fontSize = 14.sp,
-                                        textAlign = TextAlign.Center,
+                                        text = it,
+                                        fontSize = 12.sp,
                                         fontFamily = translationtext,
-                                        lineHeight = 18.sp,
-                                        color = colorResource(R.color.translation_color),
-                                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(7.dp))
-
-//                                if ("Urdu" in selectedLanguages.value) {
-//                                    Text(
-//                                        text = dua.urdu,
-//                                        fontSize = 14.sp,
-//                                        textAlign = TextAlign.Center,
-//                                        lineHeight = 18.sp,
-//                                        color = colorResource(R.color.translation_color),
-//                                        modifier = Modifier.padding(horizontal = 20.dp)
-//                                    )
-//                                    Spacer(modifier = Modifier.height(7.dp))
-//                                }
-
-                                    Text(
-                                        text = dua.hinditranslation,
-                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
                                         textAlign = TextAlign.Center,
-                                        lineHeight = 18.sp,
-                                        color = colorResource(R.color.translation_color),
-                                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                                        color = colorResource(R.color.heading_color),
+                                        modifier = Modifier.align(Alignment.CenterHorizontally)
                                     )
-                                    Spacer(modifier = Modifier.height(7.dp))
+                                }
 
+                                val annotatedText = buildAnnotatedString {
+                                    dua.wordAudioPairs.forEachIndexed { index, pair ->
+                                        pushStringAnnotation("WORD", index.toString())
+                                        withStyle(
+                                            style = SpanStyle(
+                                                color = if (globalWordIndex == index && currentPlayingIndex == i)
+                                                    colorResource(R.color.highlited_color)
+                                                else colorResource(R.color.arabic_color),
+                                                fontWeight = if (globalWordIndex == index && currentPlayingIndex == i)
+                                                    FontWeight.Bold
+                                                else FontWeight.Normal
+                                            )
+                                        ) {
+                                            append(pair.first + " ")
+                                        }
+                                        pop()
+                                    }
+                                }
 
-                                Text(
-                                    text = dua.reference,
-                                    fontSize = 10.sp,
-                                    fontFamily = reference,
-                                    color = colorResource(R.color.reference_color),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(bottom = 20.dp)
-                                )
+                                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                    ClickableText(
+                                        text = annotatedText,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 25.dp, end = 25.dp),
+                                        style = TextStyle(
+                                            fontSize = 24.sp,
+                                            fontFamily = MyArabicFont,
+                                            textDirection = TextDirection.Rtl,
+                                            textAlign = TextAlign.Center
+                                        ),
+                                        onClick = { offset ->
+                                            annotatedText.getStringAnnotations("WORD", offset, offset)
+                                                .firstOrNull()?.let { annotation ->
+                                                    val clickedIndex = annotation.item.toInt()
+                                                    globalMediaPlayer?.release()
+                                                    globalMediaPlayer = MediaPlayer.create(
+                                                        context,
+                                                        dua.wordAudioPairs[clickedIndex].second
+                                                    )
+                                                    currentPlayingIndex = i
+                                                    globalWordIndex = clickedIndex
+                                                    globalMediaPlayer?.setOnCompletionListener {
+                                                        globalWordIndex = -1
+                                                    }
+                                                    globalMediaPlayer?.start()
+                                                }
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(5.dp))
+                                Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp)) {
+                                    if (selectedLanguages.isEmpty()) {
+                                        Box(modifier = Modifier.fillMaxWidth()) {
+                                            Text(
+                                                text = "No translation language selected.",
+                                                fontFamily = translationtext,
+                                                color = Color.Gray,
+                                                textAlign = TextAlign.Center,
+                                                fontSize = 14.sp,
+                                                modifier = Modifier
+                                                    .align(Alignment.Center)
+                                            )
+                                        }
+                                    } else {
+                                        selectedLanguages.forEach { lang ->
+                                            when {
+                                                lang.equals("English", ignoreCase = true) -> {
+                                                    dua.translation?.let {
+                                                        Box(modifier = Modifier.fillMaxWidth()) {
+                                                            Text(
+                                                                text = it,
+                                                                fontFamily = translationtext,
+                                                                fontSize = 13.sp,
+                                                                textAlign = TextAlign.Center,
+                                                                modifier = Modifier
+                                                                    .align(Alignment.Center)
+
+                                                                )
+
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.height(10.dp))
+                                                }
+
+                                                lang.equals("Urdu", ignoreCase = true) -> {
+                                                    dua.urdu?.let {
+                                                        Text(
+                                                            text = it,
+                                                            fontFamily = translationtext,
+                                                            fontSize = 13.sp,
+                                                            textAlign = TextAlign.Center,
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.height(15.dp))
+
+                                                }
+                                                lang.equals("Hindi", ignoreCase = true) -> {
+                                                    dua.hinditranslation?.let {
+                                                        Text(
+                                                            text = it,
+                                                            fontFamily = translationtext,
+                                                            fontSize = 13.sp,
+                                                            textAlign = TextAlign.Center,
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.height(15.dp))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(5.dp))
+
+                                }
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = dua.reference,
+                                        fontSize = 10.sp,
+                                        fontFamily = reference,
+                                        color = colorResource(R.color.reference_color),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(bottom = 20.dp)
+                                    )
+                                }
                             }
                         }
                     }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .height(50.dp)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.dua_bottom_bg),
-                        contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.matchParentSize()
-                    )
-
-                    Row(
+                    Box(
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .align(Alignment.BottomCenter)
+                            .height(50.dp)
                     ) {
-                        IconButton(onClick = {
-                            stopAudioPlayback()
-                            val step = when {
-                                (currentIndex - 1) in threeDuaIndices -> 3
-                                (currentIndex - 1) in twoDuaIndices -> 2
-                                else -> 1
+                        Image(
+                            painter = painterResource(id = R.drawable.dua_bottom_bg),
+                            contentDescription = null,
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.matchParentSize()
+                        )
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = {
+                                stopAudioPlayback()
+                                val step = when {
+                                    (currentIndex - 1) in threeDuaIndices -> 3
+                                    (currentIndex - 1) in twoDuaIndices -> 2
+                                    else -> 1
+                                }
+                                currentIndex = (currentIndex - step).coerceAtLeast(0)
+                            }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_backarrow),
+                                    contentDescription = "Previous",
+                                    modifier = Modifier.size(29.dp, 30.dp)
+                                )
                             }
-                            currentIndex = (currentIndex - step).coerceAtLeast(0)
-                        }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_backarrow),
-                                contentDescription = "Previous",
-                                modifier = Modifier.size(29.dp, 30.dp)
-                            )
-                        }
-
-                        IconButton(onClick = {
-                            stopAudioPlayback()
-                            val step = when {
-                                currentIndex in threeDuaIndices -> 3
-                                currentIndex in twoDuaIndices -> 2
-                                else -> 1
+                            IconButton(onClick = {
+                                stopAudioPlayback()
+                                val step = when {
+                                    currentIndex in threeDuaIndices -> 3
+                                    currentIndex in twoDuaIndices -> 2
+                                    else -> 1
+                                }
+                                val newIndex = currentIndex + step
+                                if (newIndex < duas.size) {
+                                    currentIndex = newIndex
+                                }
+                            }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_nextarrow),
+                                    contentDescription = "Next",
+                                    modifier = Modifier.size(29.dp, 30.dp)
+                                )
                             }
-                            val newIndex = currentIndex + step
-                            if (newIndex < duas.size) {
-                                currentIndex = newIndex
-                            }
-                        }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_nextarrow),
-                                contentDescription = "Next",
-                                modifier = Modifier.size(29.dp, 30.dp)
-                            )
                         }
                     }
                 }
@@ -543,8 +597,6 @@ fun DuaScreen(
         }
     }
 }
-
-
 @Composable
 fun PlayWordByWordButton(
     isPlaying: Boolean,
@@ -577,24 +629,29 @@ fun PlayWordByWordButton(
 
 @Composable
 fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
-    val selectedLanguages = remember { mutableStateListOf("English", "Urdu") }
-    val fontSize = remember { mutableStateOf(32f) }
-    val pauseSeconds = remember { mutableStateOf(2) }
-    val selectedVoice = remember { mutableStateOf("Male") }
-    val MyArabicFont = FontFamily(Font(R.font.lateef_regular))
-    var wordByWordPause by remember { mutableStateOf(2) }
-    val MyArabicFont1 = FontFamily(Font(R.font.doodlestrickers))
+    val context = LocalContext.current
     val systemUiController = rememberSystemUiController()
-    val translationtext = FontFamily(Font(R.font.poppins_regular))
+
+    //  val selectedLanguages = remember { mutableStateListOf<String>() }
+    val fontSize = remember { mutableStateOf(32f) }
+    var wordByWordPause by remember { mutableStateOf(2) }
+    val selectedVoice = remember { mutableStateOf("Male") }
+
+    val MyArabicFont = FontFamily(Font(R.font.lateef_regular))
     val text_font = FontFamily(Font(R.font.montserrat_regular))
     val settings = FontFamily(Font(R.font.mochypop_regular))
-
-    val toggleOptions =
-        listOf("Reading Out Dua Title", "Rewards", "Auto Next Dua's", "Word-by-Word Pause")
-    val scrollState = rememberScrollState()
-
+    
     val NavigationBarColor = colorResource(id = R.color.background_screen)
     val statusBarColor = colorResource(id = R.color.top_nav_new)
+
+    val scrollState = rememberScrollState()
+    val toggleOptions =
+        listOf("Reading Out Dua Title", "Rewards", "Auto Next Dua's", "Word-by-Word Pause")
+
+    val savedLanguages =
+        remember { mutableStateOf(LanguagePreferences.getSelectedLanguages(context)) }
+
+    val selectedLanguages = remember { mutableStateListOf(*savedLanguages.value.toTypedArray()) }
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -608,7 +665,8 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
             .background(colorResource(R.color.background_screen))
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .background(colorResource(R.color.top_nav_new)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -623,24 +681,18 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                     modifier = Modifier.size(29.dp, 30.dp)
                 )
             }
-            Row(
+            Text(
+                text = "Settings",
+                fontSize = 16.sp,
+                fontFamily = settings,
+                fontWeight = FontWeight.Bold,
+                color = colorResource(R.color.heading_color),
+                textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 6.dp)
-            ) {
-                Text(
-                    text = "Settings",
-                    fontSize = 16.sp,
-                    fontFamily = settings,
-                    fontWeight = FontWeight.Bold,
-                    color = colorResource(R.color.heading_color),
-                    textAlign = TextAlign.Center,
-                )
-            }
-            IconButton(
-                onClick = { navController.navigate("SettingsScreen") },
-                modifier = Modifier.padding(end = 4.dp, top = 4.dp)
-            ) {
-            }
+            )
+            Spacer(modifier = Modifier.width(48.dp))
         }
+
         Spacer(modifier = Modifier.height(17.dp))
 
         Column(
@@ -659,9 +711,13 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Dua Translation", fontFamily = text_font, fontWeight = W600, color = colorResource(R.color.heading_color))
-
-                    val selectedLanguages = remember { mutableStateListOf<String>() }
+                    Text(
+                        "Dua Translation",
+                        fontFamily = text_font,
+                        fontWeight = FontWeight.W600,
+                        color = colorResource(R.color.heading_color)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     listOf("English", "Urdu", "Hindi").forEach { lang ->
                         Row(
@@ -682,12 +738,19 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(lang, fontSize = 16.sp)
+                            Text(
+                                lang,
+                                fontSize = 16.sp,
+                                fontFamily = text_font,
+                                fontWeight = FontWeight.W500
+                            )
                             Spacer(modifier = Modifier.weight(1f))
                             Checkbox(
                                 checked = selectedLanguages.contains(lang),
                                 onCheckedChange = {
-                                    if (it) selectedLanguages.add(lang) else selectedLanguages.remove(lang)
+                                    if (it) selectedLanguages.add(lang) else selectedLanguages.remove(
+                                        lang
+                                    )
                                 },
                                 colors = CheckboxDefaults.colors(
                                     checkedColor = colorResource(R.color.check_box),
@@ -705,7 +768,13 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Font Size",  fontFamily = text_font, fontWeight = W600, color = colorResource(R.color.heading_color), fontSize = 14.sp)
+                        Text(
+                            "Font Size",
+                            fontFamily = text_font,
+                            fontWeight = FontWeight.W600,
+                            color = colorResource(R.color.heading_color),
+                            fontSize = 14.sp
+                        )
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = { if (fontSize.value > 10) fontSize.value -= 2f }) {
@@ -714,11 +783,13 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                     contentDescription = "Minus"
                                 )
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Text(text = "${fontSize.value.toInt()}", fontSize = 20.sp, fontFamily = text_font,color = colorResource(R.color.heading_color), fontWeight = W700)
-
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${fontSize.value.toInt()}",
+                                fontSize = 20.sp,
+                                fontFamily = text_font,
+                                color = colorResource(R.color.heading_color),
+                                fontWeight = FontWeight.W700
+                            )
                             IconButton(onClick = { fontSize.value += 2f }) {
                                 Image(
                                     painter = painterResource(id = R.drawable.plus_icon),
@@ -740,6 +811,8 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                     Divider(Modifier.padding(vertical = 4.dp))
 
                     toggleOptions.forEach { title ->
+                        var isSwitchOn by remember { mutableStateOf(false) }
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -747,22 +820,27 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(Modifier.weight(1f)) {
-                                Text(title,  fontFamily = text_font, fontWeight = W600, color = colorResource(R.color.heading_color), fontSize = 15.sp)
-                                Spacer(modifier = Modifier.height(4.dp))
-
                                 Text(
-                                    when (title) {
-                                        "Reading Out Dua Title" -> "Reads out the dua title automatically"
-                                        "Rewards" -> "Gives a reward when a dua is completed"
-                                        "Auto Next Dua's" -> "Automatically move to the next dua"
-                                        "Word-by-Word Pause" -> ""
-                                        else -> ""
-                                    },
-                                    fontSize = 10.sp,
-                                    color = colorResource(R.color.heading_color)
+                                    title,
+                                    fontFamily = text_font,
+                                    fontWeight = FontWeight.W600,
+                                    color = colorResource(R.color.heading_color),
+                                    fontSize = 15.sp
                                 )
+                                if (title != "Word-by-Word Pause") {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        when (title) {
+                                            "Reading Out Dua Title" -> "Reads out the dua title automatically"
+                                            "Rewards" -> "Gives a reward when a dua is completed"
+                                            "Auto Next Dua's" -> "Automatically move to the next dua"
+                                            else -> ""
+                                        },
+                                        fontSize = 10.sp,
+                                        color = colorResource(R.color.heading_color)
+                                    )
+                                }
                             }
-                            var isSwitchOn by remember { mutableStateOf(false) }
                             Switch(
                                 checked = isSwitchOn,
                                 onCheckedChange = { isSwitchOn = it },
@@ -775,41 +853,49 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 )
                             )
                         }
-                        if (title != "Word-by-Word Pause") {
-                            Divider(Modifier.padding(vertical = 6.dp))
-                        }
 
                         if (title == "Word-by-Word Pause") {
-                            Box(modifier = Modifier.fillMaxWidth()) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.align(Alignment.Center)
-                                ) {
-                                    IconButton(onClick = { if (wordByWordPause > 1) wordByWordPause-- }) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.minus_icon),
-                                            contentDescription = "Minus"
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("$wordByWordPause sec", fontFamily = text_font, fontWeight = W700,color = colorResource(R.color.heading_color),fontSize=15.sp)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    IconButton(onClick = { wordByWordPause++ }) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.plus_icon),
-                                            contentDescription = "Plus"
-                                        )
-                                    }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                IconButton(onClick = { if (wordByWordPause > 1) wordByWordPause-- }) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.minus_icon),
+                                        contentDescription = "Minus"
+                                    )
+                                }
+                                Text(
+                                    "$wordByWordPause sec",
+                                    fontFamily = text_font,
+                                    fontWeight = FontWeight.W700,
+                                    color = colorResource(R.color.heading_color),
+                                    fontSize = 15.sp
+                                )
+                                IconButton(onClick = { wordByWordPause++ }) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.plus_icon),
+                                        contentDescription = "Plus"
+                                    )
                                 }
                             }
+                        } else {
+                            Divider(Modifier.padding(vertical = 6.dp))
                         }
                     }
-                    Divider(Modifier.padding(vertical = 6.dp))
+
                     Spacer(modifier = Modifier.height(17.dp))
 
-                    Text("Choose Voice",  fontFamily = text_font, fontWeight = W600, color = colorResource(R.color.heading_color))
+                    Text(
+                        "Choose Voice",
+                        fontFamily = text_font,
+                        fontWeight = FontWeight.W600,
+                        color = colorResource(R.color.heading_color)
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
+
                     Row(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
@@ -822,18 +908,10 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                         if (selectedVoice.value == gender) colorResource(R.color.check_box) else Color.Transparent,
                                         shape = RoundedCornerShape(10.dp)
                                     )
-                                    .padding(
-                                        top = 15.dp,
-                                        start = 25.dp,
-                                        end = 25.dp,
-                                        bottom = 10.dp
-                                    )
+                                    .padding(15.dp)
                                     .clickable { selectedVoice.value = gender }
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.align(Alignment.Center)
-                                ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Image(
                                         painter = painterResource(
                                             id = if (gender == "Male") R.drawable.male_icon else R.drawable.female_icon
@@ -842,7 +920,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                         modifier = Modifier.size(60.dp)
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
-                                    Text(gender)
+                                    Text(gender, fontFamily = text_font)
                                 }
                                 if (selectedVoice.value == gender) {
                                     Image(
@@ -851,21 +929,16 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                         modifier = Modifier
                                             .size(16.dp)
                                             .align(Alignment.TopEnd)
-                                            .offset(
-                                                x = 17.dp,
-                                                y = (-6).dp
-                                            )
+                                            .offset(x = 17.dp, y = (-6).dp)
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(17.dp))
-
                         }
                     }
                 }
             }
 
-            val context = LocalContext.current
+            Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier
@@ -876,6 +949,13 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                         CoroutineScope(Dispatchers.IO).launch {
                             LanguagePreferences.saveLanguages(context, selectedLanguages.toSet())
                             withContext(Dispatchers.Main) {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Changes saved successfully!",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                    .show()
                                 navController.popBackStack()
                             }
                         }
@@ -883,19 +963,19 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.save_changes_btn),
-                    contentDescription = "Background",
+                    contentDescription = "Save",
                     modifier = Modifier.fillMaxSize()
                 )
                 Text(
                     text = "SAVE CHANGES",
                     color = Color.White,
-                    textAlign = TextAlign.Center,
                     fontSize = 14.sp,
-                    fontFamily = MyArabicFont1,
+                    fontFamily = text_font,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
         }
     }
 }
