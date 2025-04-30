@@ -117,7 +117,7 @@ fun AppNavigator(navController: NavHostController) {
         }
         composable("dua/{index}") { backStackEntry ->
             val index = backStackEntry.arguments?.getString("index")?.toIntOrNull() ?: 0
-            DuaScreen(index = index, navController = navController, innerPadding = PaddingValues())
+            DuaScreen(index = index, navController = navController, innerPadding = PaddingValues(), stopAudioPlayback = {})
         }
         composable("home") {
             PlaceholderScreen(title = "Home Screen")
