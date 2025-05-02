@@ -2,6 +2,7 @@ package com.dualand.app.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
@@ -63,6 +64,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,14 +77,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.dualand.app.R
-
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,16 +93,31 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigator(navController: NavHostController) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                Log.d("AppNavigator", "App is in background, stopping audio...")
+                MediaPlayerManager.stopAudio()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     AnimatedNavHost(
         navController = navController,
         startDestination = "splash",
         enterTransition = { fadeIn(animationSpec = tween(700)) },
         exitTransition = { fadeOut(animationSpec = tween(500)) }
-
     ) {
         composable("splash") {
             SplashScreen(
@@ -128,25 +144,12 @@ fun AppNavigator(navController: NavHostController) {
         composable("profile") {
             PlaceholderScreen(title = "Profile Screen")
         }
-        composable(
-            route = "SettingsScreen",
-            enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { fullWidth -> fullWidth },
-                    animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
-                ) + fadeIn(animationSpec = tween(durationMillis = 1000))
-            },
-//            exitTransition = {
-//                slideOutHorizontally(
-//                    targetOffsetX = { fullWidth -> -fullWidth },
-//                    animationSpec = tween(durationMillis = 1000, easing = FastOutLinearInEasing)
-//                ) + fadeOut(animationSpec = tween(durationMillis = 1000))
-//            }
-        ) {
+        composable("SettingsScreen") {
             SettingsScreen(navController = navController, innerPadding = PaddingValues())
         }
     }
 }
+
 
 @Composable
 fun PlaceholderScreen(title: String) {

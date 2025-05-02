@@ -1,23 +1,25 @@
 package com.dualand.app.activities
 
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,23 +118,22 @@ fun DuaScreen(
     var currentlyRepeatingDuaIndex by remember { mutableStateOf(-1) }
     var isReadTitleEnabled by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("") }
-    val lifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE,
-                Lifecycle.Event.ON_STOP -> {
-                    stopAudioPlayback()
-                }
-                else -> {}
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
+//    val lifecycleOwner = LocalLifecycleOwner.current
+//
+//    DisposableEffect(lifecycleOwner) {
+//        val observer = LifecycleEventObserver { _, event ->
+//            if (event == Lifecycle.Event.ON_PAUSE) {
+//                MediaPlayerManager.stopAudio()  // stop audio when app goes to background
+//            }
+//        }
+//
+//        lifecycleOwner.lifecycle.addObserver(observer)
+//
+//        onDispose {
+//            lifecycleOwner.lifecycle.removeObserver(observer)
+//        }
+//    }
 
     fun stopAudioPlayback() {
         globalMediaPlayer?.apply {
@@ -154,13 +155,11 @@ fun DuaScreen(
         wordRunnable = null
     }
 
-
     DisposableEffect(Unit) {
         onDispose {
             stopAudioPlayback()
         }
     }
-
     LaunchedEffect(currentIndex) {
         stopAudioPlayback()
         repeatCount = 0
@@ -221,7 +220,7 @@ fun DuaScreen(
 
                 IconButton(
                     onClick = { navController.navigate("SettingsScreen") },
-                    modifier = Modifier.padding(end = 4.dp, top = 4.dp)
+                    modifier = Modifier.padding(end = 4.dp, top = 5.dp)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.setting_btn),
@@ -280,10 +279,10 @@ fun DuaScreen(
                     val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                     val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
 
-                    fun resetTabAfterComplete() {
-                        selectedTab = ""
-                        isPlaying = false
-                    }
+//                    fun resetTabAfterComplete() {
+//                        selectedTab = ""
+//                        isPlaying = false
+//                    }
 
                     val playQueue = mutableListOf<Int>()
 
@@ -525,6 +524,9 @@ fun DuaScreen(
                                     )
                                 }
 
+                                val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                                val savedFontSize = sharedPref.getFloat("font_size", 24f)
+
                                 val annotatedText = buildAnnotatedString {
                                     dua.wordAudioPairs.forEachIndexed { index, pair ->
                                         pushStringAnnotation("WORD", index.toString())
@@ -551,7 +553,7 @@ fun DuaScreen(
                                             .fillMaxWidth()
                                             .padding(start = 25.dp, end = 25.dp),
                                         style = TextStyle(
-                                            fontSize = 24.sp,
+                                            fontSize = savedFontSize.sp,
                                             fontFamily = MyArabicFont,
                                             textDirection = TextDirection.Rtl,
                                             textAlign = TextAlign.Center
@@ -574,7 +576,6 @@ fun DuaScreen(
                                                 }
                                         }
                                     )
-                                   
                                 }
                                 Spacer(modifier = Modifier.height(5.dp))
                                 Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp)) {
@@ -677,7 +678,7 @@ fun DuaScreen(
                         ) {
                             IconButton(onClick = {
                                 stopAudioPlayback()
-                                selectedTab = ""
+//                                selectedTab = ""
                                 val step = when {
                                     (currentIndex - 1) in threeDuaIndices -> 3
                                     (currentIndex - 1) in twoDuaIndices -> 2
@@ -693,7 +694,7 @@ fun DuaScreen(
                             }
                             IconButton(onClick = {
                                 stopAudioPlayback()
-                                selectedTab = ""
+//                                selectedTab = ""
                                 val step = when {
                                     currentIndex in threeDuaIndices -> 3
                                     currentIndex in twoDuaIndices -> 2
@@ -757,18 +758,20 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
     val context = LocalContext.current
     val systemUiController = rememberSystemUiController()
     var wordByWordPause by remember { mutableStateOf(2) }
-    val selectedVoice = remember { mutableStateOf("Male") }
 
     val MyArabicFont = FontFamily(Font(R.font.lateef_regular))
     val text_font = FontFamily(Font(R.font.montserrat_regular))
+    val text_font1 = FontFamily(Font(R.font.doodlestrickers))
     val settings = FontFamily(Font(R.font.mochypop_regular))
+
+    val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val savedVoice = sharedPref.getString("selected_voice", "Female")
+    val selectedVoice = remember { mutableStateOf(savedVoice ?: "Female") }
 
     val NavigationBarColor = colorResource(id = R.color.background_screen)
     val statusBarColor = colorResource(id = R.color.top_nav_new)
 
-    val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-
-    val fontSize = remember { mutableStateOf(sharedPref.getFloat("font_size", 32f)) }
+    val fontSize = remember { mutableStateOf(sharedPref.getFloat("font_size", 24f)) }
 
     val scrollState = rememberScrollState()
     val toggleOptions =
@@ -776,9 +779,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
 
     val savedLanguages =
         remember { mutableStateOf(LanguagePreferences.getSelectedLanguages(context)) }
-
     val selectedLanguages = remember { mutableStateListOf(*savedLanguages.value.toTypedArray()) }
-
 
     var readTitleEnabled by remember {
         mutableStateOf(
@@ -930,9 +931,9 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     Spacer(modifier = Modifier.height(15.dp))
                     Divider(Modifier.padding(vertical = 4.dp))
+                    var pauseSeconds by remember { mutableStateOf(2) }
 
                     toggleOptions.forEach { title ->
                         var isSwitchOn by remember { mutableStateOf(false) }
@@ -944,7 +945,14 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(Modifier.weight(1f)) {
-                                Text(title, fontFamily = text_font, fontWeight = FontWeight.W600, color = colorResource(R.color.heading_color), fontSize = 15.sp)
+                                Text(
+                                    title,
+                                    fontFamily = text_font,
+                                    fontWeight = FontWeight.W600,
+                                    color = colorResource(R.color.heading_color),
+                                    fontSize = 15.sp
+                                )
+
                                 if (title != "Word-by-Word Pause") {
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
@@ -957,34 +965,76 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                         fontSize = 10.sp,
                                         color = colorResource(R.color.heading_color)
                                     )
+                                } else {
+
+                                    Spacer(modifier = Modifier.height(18.dp))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        IconButton(
+                                            onClick = { if (pauseSeconds > 1) pauseSeconds-- },
+                                            modifier = Modifier.size(44.dp)
+                                        ) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.minus_icon),
+                                                contentDescription = "Minus"
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            "$pauseSeconds sec",
+                                            fontSize = 15.sp,
+                                            fontFamily = text_font,
+                                            color = colorResource(R.color.heading_color),
+                                            fontWeight = FontWeight.W700
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        IconButton(
+                                            onClick = { pauseSeconds++ },
+                                            modifier = Modifier.size(44.dp)
+                                        ) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.plus_icon),
+                                                contentDescription = "Plus"
+                                            )
+                                        }
+                                    }
+                                    Divider(Modifier.padding(vertical = 8.dp))
+
                                 }
                             }
 
-                            Switch(
-                                checked = when (title) {
-                                    "Reading Out Dua Title" -> readTitleEnabled
-                                    "Rewards" -> rewardsEnabled
-                                    "Auto Next Dua's" -> autoNextDuasEnabled
-                                    else -> false
-                                },
-                                onCheckedChange = { isChecked ->
-                                    when (title) {
-                                        "Reading Out Dua Title" -> readTitleEnabled = isChecked
-                                        "Rewards" -> rewardsEnabled = isChecked
-                                        "Auto Next Dua's" -> autoNextDuasEnabled = isChecked
-                                    }
-                                },
-                                modifier = Modifier.scale(1.0f),
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = Color.White,
-                                    checkedTrackColor = colorResource(R.color.check_box),
-                                    uncheckedThumbColor = colorResource(R.color.uncheckedThumbColor),
-                                    uncheckedTrackColor = colorResource(R.color.white)
+                            if (title != "Word-by-Word Pause") {
+                                Switch(
+                                    checked = when (title) {
+                                        "Reading Out Dua Title" -> readTitleEnabled
+                                        "Rewards" -> rewardsEnabled
+                                        "Auto Next Dua's" -> autoNextDuasEnabled
+                                        else -> false
+                                    },
+                                    onCheckedChange = { isChecked ->
+                                        when (title) {
+                                            "Reading Out Dua Title" -> readTitleEnabled = isChecked
+                                            "Rewards" -> rewardsEnabled = isChecked
+                                            "Auto Next Dua's" -> autoNextDuasEnabled = isChecked
+                                        }
+                                    },
+                                    modifier = Modifier.scale(1.0f),
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = Color.White,
+                                        checkedTrackColor = colorResource(R.color.check_box),
+                                        uncheckedThumbColor = colorResource(R.color.uncheckedThumbColor),
+                                        uncheckedTrackColor = colorResource(R.color.white)
+                                    )
                                 )
-                            )
+                            }
+                        }
+                        if (title != "Word-by-Word Pause") {
+                            Divider(Modifier.padding(vertical = 8.dp))
                         }
                     }
-
                     Spacer(modifier = Modifier.height(17.dp))
 
                     Text("Choose Voice", fontFamily = text_font, fontWeight = FontWeight.W600, color = colorResource(R.color.heading_color))
@@ -1029,6 +1079,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                             }
                         }
                     }
+
                 }
             }
 
@@ -1036,12 +1087,11 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
 
             Box(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(10.dp)
                     .fillMaxWidth(0.9f)
                     .height(46.dp)
                     .clickable {
                         CoroutineScope(Dispatchers.IO).launch {
-
                             LanguagePreferences.saveLanguages(context, selectedLanguages.toSet())
 
                             val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -1050,6 +1100,8 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 .putBoolean("rewards_enabled", rewardsEnabled)
                                 .putBoolean("auto_next_duas_enabled", autoNextDuasEnabled)
                                 .putFloat("font_size", fontSize.value)
+                                .putStringSet("selected_languages", selectedLanguages.toSet())
+                                .putString("selected_voice", selectedVoice.value)
                                 .apply()
 
                             withContext(Dispatchers.Main) {
@@ -1061,13 +1113,13 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                 Image(
                     painter = painterResource(id = R.drawable.save_changes_btn),
                     contentDescription = "Save",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Text(
                     text = "SAVE CHANGES",
                     color = Color.White,
                     fontSize = 14.sp,
-                    fontFamily = text_font,
+                    fontFamily = text_font1,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
@@ -1171,6 +1223,195 @@ fun DuaTabs(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues) {
+
+    val systemUiController = rememberSystemUiController()
+    val NavigationBarColor = colorResource(id = R.color.top_nav_new)
+    val statusBarColor = colorResource(id = R.color.top_nav_new)
+    var searchText by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val title = FontFamily(Font(R.font.mochypop_regular))
+
+    SideEffect {
+        systemUiController.setStatusBarColor(color = statusBarColor)
+        systemUiController.setNavigationBarColor(color = NavigationBarColor)
+    }
+
+    val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .background(colorResource(R.color.white))
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.top_bd),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+        )
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier,
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.padding(start = 6.dp, top = 12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.home_btn),
+                            contentDescription = "Back",
+                            modifier = Modifier.size(29.dp, 30.dp)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp)
+                    ) {
+                        Text(
+                            text ="My Dua Status",
+                            fontSize = 14.sp,
+                            color = colorResource(R.color.heading_color),
+                            fontFamily = title,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 12.dp)
+                        )
+
+                    }
+                    IconButton(
+                        onClick = { navController.navigate("SettingsScreen") },
+                        modifier = Modifier.padding(end = 6.dp, top = 12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.setting_btn),
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(29.dp, 30.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .padding(start = 16.dp, end = 16.dp),
+                // placeholder = { Text("Search Duas...", fontSize = 14.sp ) },
+                trailingIcon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_search),
+                        contentDescription = "Voice Search",
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clickable {
+                            }
+                    )
+                },
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    containerColor = colorResource(R.color.top_nav_new)
+                )
+            )
+
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .height(50.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.dua_bottom_bg),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .matchParentSize()
+                    .height(53.dp)
+            )
+
+            Box(
+                modifier = Modifier,
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(start = 15.dp, end = 15.dp, top = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+
+                    }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.favourite_icon),
+                            contentDescription = "Previous",
+                            modifier = Modifier.size(33.dp, 40.dp)
+                        )
+                    }
+
+                    IconButton(onClick = {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}")
+                            type = "text/plain"
+                        }
+
+                        val shareIntent = Intent.createChooser(sendIntent, "Share App")
+                        context.startActivity(shareIntent)
+                    }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.share_icon),
+                            contentDescription = "Share",
+                            modifier = Modifier.size(33.dp, 40.dp)
+                        )
+                    }
+
+
+                    IconButton(onClick = {
+                    }) {
+                        Image(
+                            painter = painterResource(id = R.drawable.info_icon),
+                            contentDescription = "Next",
+                            modifier = Modifier.size(33.dp, 40.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MyduaStatusScreenPreview() {
+    MyduaStatusScreen(
+        navController = rememberNavController(),
+        innerPadding = PaddingValues()
+    )
 }
 
 @Preview(showBackground = true)
