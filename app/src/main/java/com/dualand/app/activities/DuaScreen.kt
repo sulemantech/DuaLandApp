@@ -119,6 +119,7 @@ fun DuaScreen(
     var isReadTitleEnabled by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("") }
 
+
 //    val lifecycleOwner = LocalLifecycleOwner.current
 //
 //    DisposableEffect(lifecycleOwner) {
@@ -264,54 +265,98 @@ fun DuaScreen(
                 },
                 onCompleteDuaClick = {
                     selectedTab = "COMPLETE"
-                    fun playNextAudio(audioResId: Int, nextAction: () -> Unit) {
+
+                    val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                    val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
+                    val isAutoNextEnabled = sharedPref.getBoolean("auto_next_duas_enabled", false)
+
+                    // Function to play the audio for a specific dua
+                    fun playNextAudio(audioResId: Int, onComplete: () -> Unit) {
                         stopAudioPlayback()
                         globalMediaPlayer = MediaPlayer.create(context, audioResId)
                         globalMediaPlayer?.setOnCompletionListener {
                             globalMediaPlayer?.release()
                             globalMediaPlayer = null
-                            nextAction()
+                            onComplete() // Continue to next audio after completion
                         }
                         globalMediaPlayer?.start()
                         isPlaying = true
                     }
 
-                    val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                    val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
+                    // Function to get all duas for the current index (handling multiple duas per index)
+                    fun getDuasForIndex(index: Int): List<Dua> {
+                        return when {
+                            index in threeDuaIndices -> duas.subList(
+                                index,
+                                minOf(index + 3, duas.size)
+                            )
 
-//                    fun resetTabAfterComplete() {
-//                        selectedTab = ""
-//                        isPlaying = false
-//                    }
+                            index in twoDuaIndices -> duas.subList(
+                                index,
+                                minOf(index + 2, duas.size)
+                            )
 
-                    val playQueue = mutableListOf<Int>()
-
-                    val showCount = when {
-                        currentIndex in threeDuaIndices -> 3
-                        currentIndex in twoDuaIndices -> 2
-                        else -> 1
-                    }
-                    repeat(showCount) { offset ->
-                        val dua = duas.getOrNull(currentIndex + offset)
-                        dua?.let {
-                            if (isReadTitleEnabled) it.titleAudioResId?.let { titleResId ->
-                                playQueue.add(titleResId)
-                            }
-                            playQueue.add(it.fullAudioResId)
+                            else -> listOfNotNull(duas.getOrNull(index))
                         }
                     }
 
-                    fun playFromQueue(index: Int) {
-                        if (index >= playQueue.size) {
+                    // Building the audio queue: title + dua audios
+                    fun buildAudioQueue(index: Int): List<Int> {
+                        val queue = mutableListOf<Int>()
+                        val duasForIndex = getDuasForIndex(index)
+
+                        if (isReadTitleEnabled) {
+                            duasForIndex.firstOrNull()?.titleAudioResId?.let { queue.add(it) }
+                        }
+
+                        for (dua in duasForIndex) {
+                            queue.add(dua.fullAudioResId)
+                        }
+
+                        return queue
+                    }
+
+                    // Play the entire queue of audio files sequentially
+                    fun playQueue(queue: List<Int>, index: Int, onFinished: () -> Unit) {
+                        fun playAt(i: Int) {
+                            if (i >= queue.size) {
+                                onFinished() // All audios are played
+                                return
+                            }
+                            playNextAudio(queue[i]) {
+                                playAt(i + 1) // Continue to the next audio
+                            }
+                        }
+                        playAt(0) // Start playing the first item in the queue
+                    }
+
+                    // Function to play from the current index
+                    fun playFromIndex(index: Int) {
+                        if (index >= duas.size) {
                             isPlaying = false
                             return
                         }
-                        playNextAudio(playQueue[index]) {
-                            playFromQueue(index + 1)
+
+                        currentIndex = index
+                        isPlaying = true
+
+                        val audioQueue = buildAudioQueue(index)
+
+                        playQueue(audioQueue, index) {
+                            if (isAutoNextEnabled) {
+                                val nextIndex = index + getDuasForIndex(index).size
+                                if (nextIndex < duas.size) {
+                                    playFromIndex(nextIndex) // Auto-play next index
+                                } else {
+                                    isPlaying = false // No more duas
+                                }
+                            } else {
+                                isPlaying = false // Stop if auto-next is disabled
+                            }
                         }
                     }
-
-                    playFromQueue(0)
+                    // Start playing from the current index
+                    playFromIndex(currentIndex)
                 }
 
             )
@@ -335,9 +380,10 @@ fun DuaScreen(
                                     }
                                 } else if (dragAmount > 0) {
 
-                                    val possiblePrevIndex = (0 until currentIndex).lastOrNull { index ->
-                                        index in threeDuaIndices || index in twoDuaIndices || index !in threeDuaIndices && index !in twoDuaIndices
-                                    }
+                                    val possiblePrevIndex =
+                                        (0 until currentIndex).lastOrNull { index ->
+                                            index in threeDuaIndices || index in twoDuaIndices || index !in threeDuaIndices && index !in twoDuaIndices
+                                        }
                                     val decrement = when {
                                         possiblePrevIndex != null && possiblePrevIndex in threeDuaIndices -> 3
                                         possiblePrevIndex != null && possiblePrevIndex in twoDuaIndices -> 2
@@ -362,7 +408,9 @@ fun DuaScreen(
                                 .padding(innerPadding)
                                 .verticalScroll(rememberScrollState())
                         ) {
-                            for (i in currentIndex until (currentIndex + showCount).coerceAtMost(duas.size)) {
+                            for (i in currentIndex until (currentIndex + showCount).coerceAtMost(
+                                duas.size
+                            )) {
                                 val dua = duas[i]
 
                                 Row(
@@ -382,15 +430,61 @@ fun DuaScreen(
                                         )
                                     }
 
-                                    fun playWord(index: Int) {
+
+                                    fun playWord(
+                                        index: Int,
+                                        isAutoNextEnabled: Boolean = false,
+                                        isReadTitleEnabled: Boolean = false
+                                    ) {
                                         val dua = duas[currentPlayingIndex]
+
+                                        // Play title if enabled and this is the first word
+                                        if (index == 0 && isReadTitleEnabled) {
+                                            dua.titleAudioResId?.let { titleAudioId ->
+                                                globalMediaPlayer?.release()
+                                                globalMediaPlayer = MediaPlayer.create(context, titleAudioId)
+
+                                                globalMediaPlayer?.setOnCompletionListener {
+                                                    playWord(0, isAutoNextEnabled, false) // continue with word playback
+                                                }
+
+                                                globalMediaPlayer?.start()
+                                                return
+                                            }
+                                        }
+
+                                        // End of words for current dua
                                         if (index >= dua.wordAudioPairs.size) {
-                                            isPlaying = false
-                                            showListening = false
-                                            globalWordIndex = -1
+                                            if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
+                                                currentRepeat++
+                                                isRepeatingNow = true
+                                                currentlyRepeatingDuaIndex = currentPlayingIndex
+                                                playWord(0, isAutoNextEnabled, false)
+                                            } else {
+                                                // Reset playback state
+                                                isPlaying = false
+                                                showListening = false
+                                                globalWordIndex = -1
+                                                isRepeatMode = false
+                                                repeatCount = 0
+                                                currentRepeat = 0
+                                                isRepeatingNow = false
+                                                currentlyRepeatingDuaIndex = -1
+
+                                                // Auto-play next dua if enabled
+                                                if (isAutoNextEnabled && currentPlayingIndex + 1 < duas.size) {
+                                                    currentPlayingIndex++
+                                                    globalWordIndex = -1
+                                                    currentRepeat = 0
+                                                    isPlaying = true
+                                                    showListening = true
+                                                    playWord(0, true, isReadTitleEnabled)
+                                                }
+                                            }
                                             return
                                         }
 
+                                        // Play current word audio
                                         val (_, audioResId) = dua.wordAudioPairs[index]
 
                                         wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
@@ -410,36 +504,20 @@ fun DuaScreen(
 
                                             setOnCompletionListener {
                                                 showListening = true
-
                                                 wordHandler = Handler(Looper.getMainLooper())
                                                 wordRunnable = Runnable {
-                                                    if (index + 1 < dua.wordAudioPairs.size) {
-                                                        playWord(index + 1)
-                                                    } else {
-                                                        if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
-                                                            currentRepeat++
-                                                            isRepeatingNow = true
-                                                            currentlyRepeatingDuaIndex = currentPlayingIndex
-                                                            playWord(0)
-                                                        } else {
-                                                            isPlaying = false
-                                                            showListening = false
-                                                            globalWordIndex = -1
-                                                            isRepeatMode = false
-                                                            repeatCount = 0
-                                                            currentRepeat = 0
-                                                            isRepeatingNow = false
-                                                            currentlyRepeatingDuaIndex = -1
-                                                        }
-                                                    }
+                                                    playWord(index + 1, isAutoNextEnabled, false)
                                                 }
-
                                                 wordHandler?.postDelayed(wordRunnable!!, effectiveDuration.toLong())
                                             }
 
                                             start()
                                         }
                                     }
+
+                                    val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                                    val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
+                                    val isAutoNextEnabled = sharedPref.getBoolean("auto_next_duas_enabled", false)
 
                                     PlayWordByWordButton(
                                         isPlaying = isPlaying && currentPlayingIndex == i,
@@ -452,14 +530,21 @@ fun DuaScreen(
                                             } else {
                                                 stopAudioPlayback()
                                                 globalMediaPlayer?.release()
+
                                                 currentPlayingIndex = i
                                                 globalWordIndex = -1
                                                 isPlaying = true
                                                 showListening = true
-                                                playWord(0)
+
+                                                playWord(
+                                                    index = 0,
+                                                    isAutoNextEnabled = isAutoNextEnabled,
+                                                    isReadTitleEnabled = isReadTitleEnabled
+                                                )
                                             }
                                         }
                                     )
+
 
                                     Box(
                                         modifier = Modifier.padding(4.dp)
@@ -520,11 +605,14 @@ fun DuaScreen(
                                         fontWeight = FontWeight.SemiBold,
                                         textAlign = TextAlign.Center,
                                         color = colorResource(R.color.heading_color),
-                                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(start = 20.dp, end = 20.dp)
+                                        modifier = Modifier
+                                            .align(Alignment.CenterHorizontally)
+                                            .padding(start = 20.dp, end = 20.dp)
                                     )
                                 }
 
-                                val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                                val sharedPref =
+                                    context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                                 val savedFontSize = sharedPref.getFloat("font_size", 24f)
 
                                 val annotatedText = buildAnnotatedString {
@@ -559,7 +647,11 @@ fun DuaScreen(
                                             textAlign = TextAlign.Center
                                         ),
                                         onClick = { offset ->
-                                            annotatedText.getStringAnnotations("WORD", offset, offset)
+                                            annotatedText.getStringAnnotations(
+                                                "WORD",
+                                                offset,
+                                                offset
+                                            )
                                                 .firstOrNull()?.let { annotation ->
                                                     val clickedIndex = annotation.item.toInt()
                                                     globalMediaPlayer?.release()
@@ -605,7 +697,7 @@ fun DuaScreen(
                                                                 modifier = Modifier
                                                                     .align(Alignment.Center)
 
-                                                                )
+                                                            )
 
                                                         }
                                                     }
@@ -624,6 +716,7 @@ fun DuaScreen(
                                                     Spacer(modifier = Modifier.height(15.dp))
 
                                                 }
+
                                                 lang.equals("Hindi", ignoreCase = true) -> {
                                                     dua.hinditranslation?.let {
                                                         Text(
@@ -694,7 +787,7 @@ fun DuaScreen(
                             }
                             IconButton(onClick = {
                                 stopAudioPlayback()
-//                                selectedTab = ""
+
                                 val step = when {
                                     currentIndex in threeDuaIndices -> 3
                                     currentIndex in twoDuaIndices -> 2
@@ -801,6 +894,12 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                 .getBoolean("auto_next_duas_enabled", false)
         )
     }
+    var WordbyWordPauseEnabled by remember {
+        mutableStateOf(
+            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                .getBoolean("Word_by_Word_Pause_Enabled", false)
+        )
+    }
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -860,7 +959,12 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Dua Translation", fontFamily = text_font, fontWeight = FontWeight.W600, color = colorResource(R.color.heading_color))
+                    Text(
+                        "Dua Translation",
+                        fontFamily = text_font,
+                        fontWeight = FontWeight.W600,
+                        color = colorResource(R.color.heading_color)
+                    )
                     Spacer(modifier = Modifier.height(10.dp))
 
                     listOf("English", "Urdu", "Hindi").forEach { lang ->
@@ -882,12 +986,19 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(lang, fontSize = 16.sp, fontFamily = text_font, fontWeight = FontWeight.W500)
+                            Text(
+                                lang,
+                                fontSize = 16.sp,
+                                fontFamily = text_font,
+                                fontWeight = FontWeight.W500
+                            )
                             Spacer(modifier = Modifier.weight(1f))
                             Checkbox(
                                 checked = selectedLanguages.contains(lang),
                                 onCheckedChange = {
-                                    if (it) selectedLanguages.add(lang) else selectedLanguages.remove(lang)
+                                    if (it) selectedLanguages.add(lang) else selectedLanguages.remove(
+                                        lang
+                                    )
                                 },
                                 colors = CheckboxDefaults.colors(
                                     checkedColor = colorResource(R.color.check_box),
@@ -905,11 +1016,20 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Font Size", fontFamily = text_font, fontWeight = FontWeight.W600, color = colorResource(R.color.heading_color), fontSize = 14.sp)
+                        Text(
+                            "Font Size",
+                            fontFamily = text_font,
+                            fontWeight = FontWeight.W600,
+                            color = colorResource(R.color.heading_color),
+                            fontSize = 14.sp
+                        )
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = { if (fontSize.value > 10) fontSize.value -= 2f }) {
-                                Image(painter = painterResource(id = R.drawable.minus_icon), contentDescription = "Minus")
+                                Image(
+                                    painter = painterResource(id = R.drawable.minus_icon),
+                                    contentDescription = "Minus"
+                                )
                             }
                             Text(
                                 text = "${fontSize.value.toInt()}",
@@ -919,7 +1039,10 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 fontWeight = FontWeight.W700
                             )
                             IconButton(onClick = { fontSize.value += 2f }) {
-                                Image(painter = painterResource(id = R.drawable.plus_icon), contentDescription = "Plus")
+                                Image(
+                                    painter = painterResource(id = R.drawable.plus_icon),
+                                    contentDescription = "Plus"
+                                )
                             }
                         }
                     }
@@ -960,6 +1083,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                             "Reading Out Dua Title" -> "Reads out the dua title automatically"
                                             "Rewards" -> "Gives a reward when a dua is completed"
                                             "Auto Next Dua's" -> "Automatically move to the next dua"
+                                            "Word-by-Word Pause" -> "Automatically move to the next dua"
                                             else -> ""
                                         },
                                         fontSize = 10.sp,
@@ -1012,6 +1136,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                         "Reading Out Dua Title" -> readTitleEnabled
                                         "Rewards" -> rewardsEnabled
                                         "Auto Next Dua's" -> autoNextDuasEnabled
+                                        "Word-by-Word Pause" -> WordbyWordPauseEnabled
                                         else -> false
                                     },
                                     onCheckedChange = { isChecked ->
@@ -1019,6 +1144,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                             "Reading Out Dua Title" -> readTitleEnabled = isChecked
                                             "Rewards" -> rewardsEnabled = isChecked
                                             "Auto Next Dua's" -> autoNextDuasEnabled = isChecked
+                                            "Word-by-Word Pause" -> WordbyWordPauseEnabled =isChecked
                                         }
                                     },
                                     modifier = Modifier.scale(1.0f),
@@ -1037,7 +1163,12 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                     }
                     Spacer(modifier = Modifier.height(17.dp))
 
-                    Text("Choose Voice", fontFamily = text_font, fontWeight = FontWeight.W600, color = colorResource(R.color.heading_color))
+                    Text(
+                        "Choose Voice",
+                        fontFamily = text_font,
+                        fontWeight = FontWeight.W600,
+                        color = colorResource(R.color.heading_color)
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Row(
@@ -1052,7 +1183,12 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                         if (selectedVoice.value == gender) colorResource(R.color.check_box) else Color.Transparent,
                                         shape = RoundedCornerShape(10.dp)
                                     )
-                                    .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 10.dp)
+                                    .padding(
+                                        start = 25.dp,
+                                        end = 25.dp,
+                                        top = 15.dp,
+                                        bottom = 10.dp
+                                    )
                                     .clickable { selectedVoice.value = gender }
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1094,8 +1230,10 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                         CoroutineScope(Dispatchers.IO).launch {
                             LanguagePreferences.saveLanguages(context, selectedLanguages.toSet())
 
-                            val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                            sharedPref.edit()
+                            val sharedPref =
+                                context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                            sharedPref
+                                .edit()
                                 .putBoolean("read_title_enabled", readTitleEnabled)
                                 .putBoolean("rewards_enabled", rewardsEnabled)
                                 .putBoolean("auto_next_duas_enabled", autoNextDuasEnabled)
@@ -1284,7 +1422,7 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                         modifier = Modifier.padding(horizontal = 6.dp)
                     ) {
                         Text(
-                            text ="My Dua Status",
+                            text = "My Dua Status",
                             fontSize = 14.sp,
                             color = colorResource(R.color.heading_color),
                             fontFamily = title,
@@ -1375,7 +1513,10 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                     IconButton(onClick = {
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}")
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}"
+                            )
                             type = "text/plain"
                         }
 

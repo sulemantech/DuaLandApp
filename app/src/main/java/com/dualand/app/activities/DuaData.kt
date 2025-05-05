@@ -107,7 +107,7 @@ val duaList = listOf(
         )
     ),
     Dua(
-        arabic = "اَللّٰھُمَّ بِکَ اَصْبَحْنَا وَ بِکَ اَمْسَیْنَا وَ بِکَ نَحْیَا وَ بِکَ نَمُوْتُ وَ إِلَـيْكَ اَلْمَصِیْرِ",
+        arabic = "اَللّٰھُمَّ بِکَ اَصْبَحْنَا وَ بِکَ اَمْسَیْنَا وَ بِکَ نَحْیَا وَ بِکَ نَمُوْتُ وَ إِلَـيْكَ اَلْمَصِیْر",
         translation = "O Allah, by Your leave we have reached the morning and by Your leave we have reached the evening and by Your leave we live and die, and unto You is our return.",
         reference = " [Sunan al-Tirmidhī]",
         urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -124,8 +124,8 @@ val duaList = listOf(
             "اَللّٰھُمَّ بِکَ اَصْبَحْنَا" to R.raw.dua03_part01_audio01,
             "وَ بِکَ اَمْسَیْنَا" to R.raw.dua03_part01_audio02,
             "وَ بِکَ نَحْیَا" to R.raw.dua03_part01_audio03,
-            " وَ بِکَ نَمُوْتُ" to R.raw.dua03_part01_audio04,
-            "إِلَـيْكَ اَلْمَصِیْر" to R.raw.dua03_part01_audio05,
+            "وَ بِکَ نَمُوْتُ" to R.raw.dua03_part01_audio04,
+            "وَ إِلَـيْكَ اَلْمَصِیْر" to R.raw.dua03_part01_audio05,
 
             )
     ),
@@ -217,7 +217,7 @@ val duaList = listOf(
         )
     ),
     Dua(
-        arabic = "اَلْـحَمْدُ لِلّٰهِ الَّذِي  بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورَُِ",
+        arabic = "اَلْـحَمْدُ لِلّٰهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
         translation = "All praise is for Allah ho gave us life after death (sleep) and to Him is the resurrection.",
         hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
         reference = "[Ṣaḥīḥ al-Bukhārī]",
@@ -232,14 +232,14 @@ val duaList = listOf(
         steps = "Rub your face and your eyes with your hands to\n" +
                 "remove any remaining effects of sleep and say:",
         wordAudioPairs = listOf(
-            "اَلْـحَمْدُ لِلّٰهِ الَّذِي" to R.raw.dua07_part01_audio01,
+            "اَلْـحَمْدُ لِلّٰهِ الَّذِي " to R.raw.dua07_part01_audio01,
             "أَحْيَانَا" to R.raw.dua07_part01_audio02,
             "بَعْدَ مَا أَمَاتَنَا" to R.raw.dua07_part01_audio03,
-            "وَإِلَيْهِ النُّشُورَُِ" to R.raw.dua07_part01_audio04,
+            "وَإِلَيْهِ النُّشُورُ" to R.raw.dua07_part01_audio04,
         )
     ),
     Dua(
-        arabic = "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ مِنَ الْخُبُثِ وَالْخَبَائِثِِ",
+        arabic = "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ مِنَ الْخُبُثِ وَ الْخَبَائِثِ",
         translation = "O Allah, I seek refuge in You from the impure male jinns and impure female jinns.",
         reference = "[Ṣaḥīḥ al-Bukhārī]",
         urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -253,9 +253,9 @@ val duaList = listOf(
         duaNumber = "8. ",
         steps = "Enter with your left foot and say:",
         wordAudioPairs = listOf(
-            "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ" to R.raw.dua08_part01_audio01,
-            "مِنَ الْخُبُثِ" to R.raw.dua08_part01_audio02,
-            "َوَالْخَبَائِثِِ" to R.raw.dua08_part01_audio03,
+            "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ " to R.raw.dua08_part01_audio01,
+            "مِنَ الْخُبُثِ " to R.raw.dua08_part01_audio02,
+            "وَ الْخَبَائِثِ" to R.raw.dua08_part01_audio03,
         )
     ),
     Dua(
@@ -278,7 +278,7 @@ val duaList = listOf(
         )
     ),
     Dua(
-        arabic = "الحَمْدُ لِلّٰهِ الَّذِي كَسَانِي هَذَا الثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍُِِ",
+        arabic = "الحَمْدُ لِلّٰهِ الَّذِي كَسَانِي هَذَا الثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْر ِحَوْلٍ مِنِّي وَلَا قُوَّةٍ",
         translation = "All praise is for Allah Who has clothed me with this garment and provided it for me, with no power or might from myself. ",
         reference = "[Sunan Abu Dawūd]",
         urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -297,11 +297,11 @@ val duaList = listOf(
         wordAudioPairs = listOf(
             "الحَمْدُ لِلّٰهِ الَّذِي" to R.raw.dua10_part01_audio01,
             "كَسَانِي" to R.raw.dua10_part01_audio02,
-            "هَذَاالثَّوْبَ" to R.raw.dua10_part01_audio03,
+            "هَذَا الثَّوْبَ" to R.raw.dua10_part01_audio03,
             "وَرَزَقَنِيهِ" to R.raw.dua10_part01_audio04,
             "مِنْ غَيْرِ" to R.raw.dua10_part01_audio05,
             "حَوْلٍ مِنِّي" to R.raw.dua10_part01_audio06,
-            "وَلَا قُوَّةٍُِِ" to R.raw.dua10_part01_audio07,
+            "وَلَا قُوَّةٍ" to R.raw.dua10_part01_audio07,
         )
     ),
     Dua(
@@ -497,7 +497,7 @@ val duaList = listOf(
         textheading = "Du’a When Meeting\n" +
                 "a Muslim",
         wordAudioPairs = listOf(
-            "اَلسَّلَامُ عَلَیْکُمْ وَرَحْمَةُ اللّٰہِ وَ بَرَکَاتُہْ" to R.raw.dua16_part01_audio01
+            "اَلسَّلَامُ عَلَیْکُمْ وَرَحْمَةُ اللّٰہِ وَ بَرَکَاتُہُ" to R.raw.dua16_part01_audio01
 
         )
     ),
@@ -517,13 +517,13 @@ val duaList = listOf(
         textheading = "Du’a When Meeting\n" +
                 "a Muslim",
         wordAudioPairs = listOf(
-            "وَعَلَیْکُمُ السَّلَامُ وَ رَ حْمَةُ اللّٰہِ وَ بَرَکَاتُہ" to R.raw.dua16_part02_audio01
+            "وَعَلَیْکُمُ السَّلَامُ وَ رَ حْمَةُ اللّٰہِ وَ بَرَکَاتُہُ" to R.raw.dua16_part02_audio01
         )
     ),
 
 
     Dua(
-        arabic = "سُبْحَانَکَ اللّٰھُمَّ وَبِحَمْدِکَ،اَشْھَدُاَنْ لَّااِلٰہَ اِلَّااَنْتَ، اَسْتَغْفِرُکَ وَاَتُوْبُ اِلَیْکَِ",
+        arabic = "سُبْحَانَکَ اللّٰھُمَّ وَبِحَمْدِکَ،اَشْھَدُاَنْ لَّااِلٰہَ اِلَّااَنْتَ، اَسْتَغْفِرُکَ وَاَتُوْبُ اِلَیْکَ",
         translation = "Glory be to You O Allah, and all praise be to You! I bear witness that there is no true deity except You, I seek Your forgiveness and turn in repentance to You.",
         reference = " [Sunan Abu Dawūd]",
         urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -536,13 +536,13 @@ val duaList = listOf(
         duaNumber = "18. ",
         textheading = "Du’a at the End of a\n" +"Gathering",
         wordAudioPairs = listOf(
-            "سُبْحَانَکَ اللّٰھُمَّ وَبِحَمْدِکََّ" to R.raw.dua17_part01_audio01,
+            "سُبْحَانَکَ اللّٰھُمَّ وَبِحَمْدِکَ،" to R.raw.dua17_part01_audio01,
             "اَشْھَدُاَنْ لَّااِلٰہَ اِلَّااَنْتَ،" to R.raw.dua17_part01_audio02,
-            "اَسْتَغْفِرُکَ وَاَتُوْبُ اِلَیْکَِ" to R.raw.dua17_part01_audio03,
+            "اَسْتَغْفِرُکَ وَاَتُوْبُ اِلَیْکَ" to R.raw.dua17_part01_audio03,
         )
     ),
     Dua(
-        arabic = "لَا اِلٰہَ اِلَّا اللّٰہُ وَحْدَہُ لَا شَرِیْکَ لَہُ،لَہُ الْمُلْکُ وَلَہُ الْحَمْدُ  یُحْیی وَ یُمِیْتُ وَھُوَ حَی لَّا یَمُوْتُ بِیَدِہِ الْخَیْرُ وَھُوَ عَلٰی کُلِّ شَیْئٍ قَدِیْرَِ",
+        arabic = "لَا اِلٰہَ اِلَّا اللّٰہُ وَحْدَہُ لَا شَرِیْکَ لَہُ،لَہُ الْمُلْکُ وَلَہُ الْحَمْدُ  یُحْیی وَ یُمِیْتُ وَھُوَ حَی لَّا یَمُوْتُ بِیَدِہِ الْخَیْرُ وَھُوَ عَلٰی کُلِّ شَیْئٍ قَدِیْر",
         translation = "There is no true deity except Allah, alone, He has no partners. To Him belongs the dominion and for Him is all praise. He gives life and causes death,  and He is living and does not die. In His hand is all good and He is upon all things always All-Powerful.",
         reference = "[Sunan al-Tirmidhi]",
         urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -558,12 +558,12 @@ val duaList = listOf(
             "لَا اِلٰہَ اِلَّا اللّٰہُ" to R.raw.dua18_part01_audio01,
             "وَحْدَہُ لَا شَرِیْکَ لَہُ،" to R.raw.dua18_part01_audio02,
             "لَہُ الْمُلْکُ" to R.raw.dua18_part01_audio03,
-            "وَلَہُ الْحَمْد" to R.raw.dua18_part01_audio04,
+            "وَلَہُ الْحَمْدُ" to R.raw.dua18_part01_audio04,
             "یُحْیی" to R.raw.dua18_part01_audio05,
             "وَ یُمِیْتُ" to R.raw.dua18_part01_audio06,
             "وَھُوَ حَی لَّا یَمُوْتُ" to R.raw.dua18_part01_audio07,
             "بِیَدِہِ الْخَیْرُ" to R.raw.dua18_part01_audio08,
-            "وَھُوَ عَلٰی کُلِّ شَیْئٍ قَدِیْرُ" to R.raw.dua18_part01_audio09,
+            "وَھُوَ عَلٰی کُلِّ شَیْئٍ قَدِیْر" to R.raw.dua18_part01_audio09,
 
         )
     ),
@@ -927,7 +927,7 @@ val duaList = listOf(
 
     ),
     Dua(
-       arabic ="اَعُوْذُ بِوَجْہِ اللّٰہِ الْعَظِیْمِ الَّذِیْ لَیْسَ شَیْئ اَعْظَمَ مِنْہُ وَبِکَلِمَاتِ اللّٰہِ التَّامَّاتِ الَّتِیْ لَا یُجَاوِزُھُنَّ بَرّ وَّ لَا فَاجِر وَ بِاَسْمَائِ اللّٰہِ الْحُسْنٰی کُلِّھَا مَا عَلِمْتُ مِنْھَا وَ مَا لَمْ اَعْلَمْ مِنْ شَرِّ مَا خَلَقَ وَ بَرَاَ وَذَرَاَ",
+       arabic ="اَعُوْذُ بِوَجْہِ اللّٰہِ الْعَظِیْمِ الَّذِیْ لَیْسَ شَیْئ اَعْظَمَ مِنْہُ وَبِکَلِمَاتِ اللّٰہِ التَّامَّاتِ الَّتِیْ لَا یُجَاوِزُھُنَّ بَرّ وَّ لَا فَاجِر وَبِأَسْمَاءِ اللّٰہِ الْحُسْنَىٰ کُلِّھَا مَا عَلِمْتُ مِنْھَا وَ مَا لَمْ اَعْلَمْ مِنْ شَرِّ مَا خَلَقَ وَ بَرَاَ وَذَرَاَ",
         translation = "I seek refuge with the immense Face of Allah -\n" +
                 "there is nothing greater than it - and with the \n"+"complete words of Allah which neither the good\n"+"person nor the corrupt can exceed and with all\n"+"the most beautiful names of Allah, what I know of\n"+"them and what I do not know, from the evil of\n"+"what He has created and originated and multiplied.",
         reference = "[Mishkat ul-Masabih] ",
@@ -941,17 +941,17 @@ val duaList = listOf(
         duaNumber = "33. ",
         textheading = "Seeking Refuge\nwith Allah",
         wordAudioPairs = listOf(
-            "اَعُوْذُِ" to R.raw.dua33_part01_audio01,
+            "اَعُوْذُ" to R.raw.dua33_part01_audio01,
             "بِوَجْہِ اللّٰہِ الْعَظِیْمِ الَّذِیْ" to R.raw.dua33_part01_audio02,
-            "لَیْسَ شَیْئُ" to R.raw.dua33_part01_audio03,
-            "اَعْظَمَ مِنْہُ" to R.raw.dua33_part01_audio04,
+            "لَیْسَ شَیْئ" to R.raw.dua33_part01_audio03,
+            "اَعْظَمَ مِنْہ" to R.raw.dua33_part01_audio04,
             "وَبِکَلِمَاتِ اللّٰہِ التَّامَّاتِ الَّتِیْ" to R.raw.dua33_part01_audio05,
             "لَا یُجَاوِزُھُنَّ" to R.raw.dua33_part01_audio06,
             "بَرّ وَّ لَا فَاجِر" to R.raw.dua33_part01_audio08,
-            "وَبِاَسْمَائِ اللّٰہِ الْحُسْنٰی" to R.raw.dua33_part01_audio09,
+            "وَبِأَسْمَاءِ اللّٰہِ الْحُسْنَىٰ" to R.raw.dua33_part01_audio09,
             "کُلِّھَا" to R.raw.dua33_part01_audio10,
-            "مَا عَلِمْتُ مِنْھَاْ" to R.raw.dua33_part01_audio11,
-            "وَمَا لَمْ اَعْلَمْ" to R.raw.dua33_part01_audio12,
+            "مَا عَلِمْتُ مِنْھَا" to R.raw.dua33_part01_audio11,
+            "وَ مَا لَمْ اَعْلَمْ" to R.raw.dua33_part01_audio12,
             "مِنْ شَرِّ مَا" to R.raw.dua33_part01_audio13,
             "خَلَقَ" to R.raw.dua33_part01_audio14,
             "وَ بَرَاَ وَذَرَاَ" to R.raw.dua33_part01_audio15,
