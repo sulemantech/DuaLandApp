@@ -5,6 +5,7 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -270,20 +271,18 @@ fun DuaScreen(
                     val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
                     val isAutoNextEnabled = sharedPref.getBoolean("auto_next_duas_enabled", false)
 
-                    // Function to play the audio for a specific dua
                     fun playNextAudio(audioResId: Int, onComplete: () -> Unit) {
                         stopAudioPlayback()
                         globalMediaPlayer = MediaPlayer.create(context, audioResId)
                         globalMediaPlayer?.setOnCompletionListener {
                             globalMediaPlayer?.release()
                             globalMediaPlayer = null
-                            onComplete() // Continue to next audio after completion
+                            onComplete()
                         }
                         globalMediaPlayer?.start()
                         isPlaying = true
                     }
 
-                    // Function to get all duas for the current index (handling multiple duas per index)
                     fun getDuasForIndex(index: Int): List<Dua> {
                         return when {
                             index in threeDuaIndices -> duas.subList(
@@ -300,7 +299,6 @@ fun DuaScreen(
                         }
                     }
 
-                    // Building the audio queue: title + dua audios
                     fun buildAudioQueue(index: Int): List<Int> {
                         val queue = mutableListOf<Int>()
                         val duasForIndex = getDuasForIndex(index)
@@ -316,21 +314,19 @@ fun DuaScreen(
                         return queue
                     }
 
-                    // Play the entire queue of audio files sequentially
                     fun playQueue(queue: List<Int>, index: Int, onFinished: () -> Unit) {
                         fun playAt(i: Int) {
                             if (i >= queue.size) {
-                                onFinished() // All audios are played
+                                onFinished()
                                 return
                             }
                             playNextAudio(queue[i]) {
-                                playAt(i + 1) // Continue to the next audio
+                                playAt(i + 1)
                             }
                         }
-                        playAt(0) // Start playing the first item in the queue
+                        playAt(0)
                     }
 
-                    // Function to play from the current index
                     fun playFromIndex(index: Int) {
                         if (index >= duas.size) {
                             isPlaying = false
@@ -346,16 +342,15 @@ fun DuaScreen(
                             if (isAutoNextEnabled) {
                                 val nextIndex = index + getDuasForIndex(index).size
                                 if (nextIndex < duas.size) {
-                                    playFromIndex(nextIndex) // Auto-play next index
+                                    playFromIndex(nextIndex)
                                 } else {
-                                    isPlaying = false // No more duas
+                                    isPlaying = false
                                 }
                             } else {
-                                isPlaying = false // Stop if auto-next is disabled
+                                isPlaying = false
                             }
                         }
                     }
-                    // Start playing from the current index
                     playFromIndex(currentIndex)
                 }
 
@@ -422,30 +417,38 @@ fun DuaScreen(
                                         Alignment.CenterHorizontally
                                     )
                                 ) {
-                                    IconButton(onClick = { }) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.favourite_icon),
-                                            contentDescription = "Favourite",
-                                            modifier = Modifier.size(33.dp)
-                                        )
+                                    Box(
+                                        modifier = Modifier
+                                    ) {
+                                        IconButton(onClick = { }) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.favourite_icon),
+                                                contentDescription = "Favourite",
+                                                modifier = Modifier.size(33.dp)
+                                            )
+                                        }
                                     }
-
 
                                     fun playWord(
                                         index: Int,
                                         isAutoNextEnabled: Boolean = false,
                                         isReadTitleEnabled: Boolean = false
                                     ) {
-                                        val dua = duas[currentPlayingIndex]
+                                        if (currentPlayingIndex >= duas.size) {
+                                            isPlaying = false
+                                            return
+                                        }
 
-                                        // Play title if enabled and this is the first word
+                                        val dua = duas[currentPlayingIndex]
+                                        Log.d("DuaPlayback", "Playing Dua index: $currentPlayingIndex, word index: $index")
+
                                         if (index == 0 && isReadTitleEnabled) {
                                             dua.titleAudioResId?.let { titleAudioId ->
                                                 globalMediaPlayer?.release()
                                                 globalMediaPlayer = MediaPlayer.create(context, titleAudioId)
 
                                                 globalMediaPlayer?.setOnCompletionListener {
-                                                    playWord(0, isAutoNextEnabled, false) // continue with word playback
+                                                    playWord(0, isAutoNextEnabled, false)
                                                 }
 
                                                 globalMediaPlayer?.start()
@@ -453,7 +456,6 @@ fun DuaScreen(
                                             }
                                         }
 
-                                        // End of words for current dua
                                         if (index >= dua.wordAudioPairs.size) {
                                             if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
                                                 currentRepeat++
@@ -461,30 +463,40 @@ fun DuaScreen(
                                                 currentlyRepeatingDuaIndex = currentPlayingIndex
                                                 playWord(0, isAutoNextEnabled, false)
                                             } else {
-                                                // Reset playback state
-                                                isPlaying = false
-                                                showListening = false
-                                                globalWordIndex = -1
                                                 isRepeatMode = false
-                                                repeatCount = 0
                                                 currentRepeat = 0
                                                 isRepeatingNow = false
                                                 currentlyRepeatingDuaIndex = -1
 
-                                                // Auto-play next dua if enabled
                                                 if (isAutoNextEnabled && currentPlayingIndex + 1 < duas.size) {
                                                     currentPlayingIndex++
                                                     globalWordIndex = -1
-                                                    currentRepeat = 0
                                                     isPlaying = true
                                                     showListening = true
-                                                    playWord(0, true, isReadTitleEnabled)
+
+                                                    val nextDua = duas[currentPlayingIndex]
+                                                    Log.d("DuaPlayback", "Moving to next dua: index $currentPlayingIndex")
+
+                                                    if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
+                                                        globalMediaPlayer?.release()
+                                                        globalMediaPlayer = MediaPlayer.create(context, nextDua.titleAudioResId)
+
+                                                        globalMediaPlayer?.setOnCompletionListener {
+                                                            playWord(0, isAutoNextEnabled, false)
+                                                        }
+
+                                                        globalMediaPlayer?.start()
+                                                    } else {
+                                                        playWord(0, isAutoNextEnabled, isReadTitleEnabled)
+                                                    }
+                                                } else {
+                                                    isPlaying = false
+                                                    showListening = false
+                                                    globalWordIndex = -1
                                                 }
                                             }
                                             return
                                         }
-
-                                        // Play current word audio
                                         val (_, audioResId) = dua.wordAudioPairs[index]
 
                                         wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
@@ -515,6 +527,7 @@ fun DuaScreen(
                                         }
                                     }
 
+
                                     val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                                     val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
                                     val isAutoNextEnabled = sharedPref.getBoolean("auto_next_duas_enabled", false)
@@ -536,18 +549,23 @@ fun DuaScreen(
                                                 isPlaying = true
                                                 showListening = true
 
-                                                playWord(
-                                                    index = 0,
-                                                    isAutoNextEnabled = isAutoNextEnabled,
-                                                    isReadTitleEnabled = isReadTitleEnabled
-                                                )
+                                                val selectedDua = duas[currentPlayingIndex]
+
+                                                if (isReadTitleEnabled && selectedDua.titleAudioResId != null) {
+                                                    globalMediaPlayer = MediaPlayer.create(context, selectedDua.titleAudioResId)
+                                                    globalMediaPlayer?.setOnCompletionListener {
+                                                        playWord(0, isAutoNextEnabled, false)
+                                                    }
+                                                    globalMediaPlayer?.start()
+                                                } else {
+                                                    playWord(0, isAutoNextEnabled, isReadTitleEnabled)
+                                                }
                                             }
                                         }
                                     )
 
-
                                     Box(
-                                        modifier = Modifier.padding(4.dp)
+                                        modifier = Modifier.padding(top = 2.dp)
                                     ) {
                                         IconButton(
                                             onClick = {
