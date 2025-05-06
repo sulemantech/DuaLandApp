@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DuaDao {
     @Query("SELECT * FROM duas WHERE isFavorite = 1")
-    fun getFavoriteDuas(): Flow<List<Dua>>
+    fun getFavoriteDuas(): Flow<List<DuaFav>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDua(dua: Dua)
+    suspend fun insertDua(dua: DuaFav)
 
     @Update
-    suspend fun updateDua(dua: Dua)
+    suspend fun updateDua(dua: DuaFav)
 }

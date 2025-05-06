@@ -1,5 +1,7 @@
 package com.dualand.app.activities
 
+import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
@@ -12,9 +14,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +55,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
@@ -339,9 +344,13 @@ fun DuaScreen(
                         val audioQueue = buildAudioQueue(index)
 
                         playQueue(audioQueue, index) {
+                            Log.d("DEBUG", "After playQueue function index: $index")
+
                             if (isAutoNextEnabled) {
                                 val nextIndex = index + getDuasForIndex(index).size
                                 if (nextIndex < duas.size) {
+                                    Log.d("DEBUG", "nextIndex: $nextIndex, index: $index")
+
                                     playFromIndex(nextIndex)
                                 } else {
                                     isPlaying = false
@@ -1383,7 +1392,7 @@ fun DuaTabs(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues) {
+fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,  viewModel: DuaViewModel) {
 
     val systemUiController = rememberSystemUiController()
     val NavigationBarColor = colorResource(id = R.color.top_nav_new)
@@ -1392,12 +1401,17 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
     val context = LocalContext.current
     val title = FontFamily(Font(R.font.mochypop_regular))
 
+//    val viewModel: DuaViewModel = viewModel()
+//
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
     }
 
     val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
+
+    // Observe the list of favorite duas
+    val favoriteDuas by viewModel.favoriteDuas.collectAsState()
 
     Box(
         modifier = Modifier
@@ -1416,6 +1430,7 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
+            // Header with Back and Settings button
             Box(
                 modifier = Modifier,
                 contentAlignment = Alignment.Center
@@ -1447,8 +1462,8 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 12.dp)
                         )
-
                     }
+
                     IconButton(
                         onClick = { navController.navigate("SettingsScreen") },
                         modifier = Modifier.padding(end = 6.dp, top = 12.dp)
@@ -1463,6 +1478,8 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
             }
 
             Spacer(modifier = Modifier.height(30.dp))
+
+            // Search bar
             OutlinedTextField(
                 value = searchText,
                 onValueChange = { searchText = it },
@@ -1470,7 +1487,6 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                     .fillMaxWidth()
                     .height(48.dp)
                     .padding(start = 16.dp, end = 16.dp),
-                // placeholder = { Text("Search Duas...", fontSize = 14.sp ) },
                 trailingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_search),
@@ -1478,6 +1494,7 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                         modifier = Modifier
                             .size(42.dp)
                             .clickable {
+                                // Handle search action
                             }
                     )
                 },
@@ -1490,7 +1507,42 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                 )
             )
 
+            // Display list of favorite duas
+            LazyColumn {
+                items(favoriteDuas) { dua ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = dua.title,
+                            fontSize = 16.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        IconButton(
+                            onClick = { viewModel.toggleFavorite(dua) }
+                        ) {
+                            val icon = if (dua.isFavorite) {
+                                painterResource(id = R.drawable.favourite_active_icon)
+                            } else {
+                                painterResource(id = R.drawable.favourite_icon)
+                            }
+                            Image(
+                                painter = icon,
+                                contentDescription = "Favorite",
+                                modifier = Modifier.size(33.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
+
+        // Bottom bar with share button
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1518,9 +1570,7 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = {
-
-                    }) {
+                    IconButton(onClick = { /* Handle previous action */ }) {
                         Image(
                             painter = painterResource(id = R.drawable.favourite_icon),
                             contentDescription = "Previous",
@@ -1548,9 +1598,7 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                         )
                     }
 
-
-                    IconButton(onClick = {
-                    }) {
+                    IconButton(onClick = { /* Handle next action */ }) {
                         Image(
                             painter = painterResource(id = R.drawable.info_icon),
                             contentDescription = "Next",
@@ -1560,16 +1608,18 @@ fun MyduaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                 }
             }
         }
-
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
 @Composable
 fun MyduaStatusScreenPreview() {
-    MyduaStatusScreen(
+    val viewModel = DuaViewModel(Application())
+    MyDuaStatusScreen(
         navController = rememberNavController(),
-        innerPadding = PaddingValues()
+        innerPadding = PaddingValues(),
+        viewModel = viewModel
     )
 }
 

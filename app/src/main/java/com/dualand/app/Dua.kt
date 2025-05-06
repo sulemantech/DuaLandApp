@@ -4,9 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "duas")
-data class Dua(
-    @PrimaryKey val id: Int,
+data class DuaFav(
+   @PrimaryKey val id: Int,
     val title: String,
-    val arabic: String,
+    val arabicText: String,
+    val translation: String,
     val isFavorite: Boolean = false
 )
