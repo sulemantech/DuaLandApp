@@ -1,5 +1,7 @@
 package com.dualand.app.activities
 
+import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,9 +22,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -37,18 +41,15 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
     var searchText by remember { mutableStateOf("") }
     val context = LocalContext.current
     val title = FontFamily(Font(R.font.mochypop_regular))
+    val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
+    val favoriteDuas by viewModel.favoriteDuas.collectAsState()
 
-//    val viewModel: DuaViewModel = viewModel()
-//
+   // val viewModel: DuaViewModel = viewModel
+
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
     }
-
-    val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
-
-    // Observe the list of favorite duas
-    val favoriteDuas by viewModel.favoriteDuas.collectAsState()
 
     Box(
         modifier = Modifier
@@ -67,7 +68,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header with Back and Settings button
             Box(
                 modifier = Modifier,
                 contentAlignment = Alignment.Center
@@ -116,7 +116,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Search bar
             OutlinedTextField(
                 value = searchText,
                 onValueChange = { searchText = it },
@@ -131,7 +130,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         modifier = Modifier
                             .size(42.dp)
                             .clickable {
-                                // Handle search action
                             }
                     )
                 },
@@ -179,7 +177,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
             }
         }
 
-        // Bottom bar with share button
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -246,4 +243,16 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
             }
         }
     }
+}
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Preview(showBackground = true)
+@Composable
+fun MyduaStatusScreenPreview() {
+    val viewModel = DuaViewModel(Application())
+    MyDuaStatusScreen(
+        navController = rememberNavController(),
+        innerPadding = PaddingValues(),
+        viewModel = viewModel
+    )
 }

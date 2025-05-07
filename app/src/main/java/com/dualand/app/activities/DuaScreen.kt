@@ -1,27 +1,16 @@
 package com.dualand.app.activities
 
-import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
@@ -29,7 +18,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -50,21 +38,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.components.DuaTabs
 import com.dualand.app.components.PlayWordByWordButton
 import com.dualand.app.models.Dua
-
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -79,8 +61,24 @@ fun DuaScreen(
     val systemUiController = rememberSystemUiController()
     val duas = duaList
     val context = LocalContext.current
-    var mediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
     var currentIndex by remember { mutableStateOf(index.coerceIn(0, duas.lastIndex)) }
+    val NavigationBarColor = colorResource(id = R.color.top_nav_new)
+    val statusBarColor = colorResource(id = duas[currentIndex].statusBarColorResId)
+    val MyArabicFont = FontFamily(Font(R.font.al_quran))
+    val translationtext = FontFamily(Font(R.font.poppins_regular))
+    val reference = FontFamily(Font(R.font.poppins_semibold))
+    val title = FontFamily(Font(R.font.mochypop_regular))
+    var currentPlayingIndex by remember { mutableStateOf(-1) }
+    var globalWordIndex by remember { mutableStateOf(-1) }
+    var isPlaying by remember { mutableStateOf(false) }
+    var showListening by remember { mutableStateOf(false) }
+    var globalMediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
+    var repeatCount by remember { mutableStateOf(0) }
+    var currentRepeat by remember { mutableStateOf(0) }
+    var isRepeatingNow by remember { mutableStateOf(false) }
+    var isRepeatMode by remember { mutableStateOf(false) }
+    var currentlyRepeatingDuaIndex by remember { mutableStateOf(-1) }
+    var selectedTab by remember { mutableStateOf("") }
 
     val selectedLanguages = remember {
         mutableStateListOf<String>().apply {
@@ -103,59 +101,48 @@ fun DuaScreen(
         else -> 1
     }
 
-    val NavigationBarColor = colorResource(id = R.color.top_nav_new)
-    val statusBarColor = colorResource(id = duas[currentIndex].statusBarColorResId)
-
-    val MyArabicFont = FontFamily(Font(R.font.al_quran))
-    val translationtext = FontFamily(Font(R.font.poppins_regular))
-    val reference = FontFamily(Font(R.font.poppins_semibold))
-    val title = FontFamily(Font(R.font.mochypop_regular))
-
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
     }
 
-    var currentPlayingIndex by remember { mutableStateOf(-1) }
-    var globalWordIndex by remember { mutableStateOf(-1) }
-    var isPlaying by remember { mutableStateOf(false) }
-    var showListening by remember { mutableStateOf(false) }
-    var globalMediaPlayer: MediaPlayer? by remember { mutableStateOf(null) }
-    var repeatCount by remember { mutableStateOf(0) }
-    var currentRepeat by remember { mutableStateOf(0) }
-    var isRepeatingNow by remember { mutableStateOf(false) }
-    var isRepeatMode by remember { mutableStateOf(false) }
-    var currentlyRepeatingDuaIndex by remember { mutableStateOf(-1) }
-    var isReadTitleEnabled by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf("") }
-
-
-//    val lifecycleOwner = LocalLifecycleOwner.current
-//
-//    DisposableEffect(lifecycleOwner) {
-//        val observer = LifecycleEventObserver { _, event ->
-//            if (event == Lifecycle.Event.ON_PAUSE) {
-//                MediaPlayerManager.stopAudio()  // stop audio when app goes to background
-//            }
-//        }
-//
-//        lifecycleOwner.lifecycle.addObserver(observer)
-//
-//        onDispose {
-//            lifecycleOwner.lifecycle.removeObserver(observer)
-//        }
-//    }
-
-    fun stopAudioPlayback() {
-        globalMediaPlayer?.apply {
+    fun stopAudioPlayback(player: MediaPlayer?): MediaPlayer? {
+        player?.let {
             try {
-                stop()
+                if (it.isPlaying) {
+                    it.stop()
+                }
             } catch (e: IllegalStateException) {
                 e.printStackTrace()
             } finally {
-                release()
+                it.release()
             }
         }
+
+        isPlaying = false
+        showListening = false
+        globalWordIndex = -1
+
+        wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
+        wordHandler = null
+        wordRunnable = null
+
+        return null
+    }
+
+    fun stopAudioPlayback() {
+        globalMediaPlayer?.let { player ->
+            try {
+                if (player.isPlaying) {
+                    player.stop()
+                }
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            } finally {
+                player.release()
+            }
+        }
+
         globalMediaPlayer = null
         isPlaying = false
         showListening = false
@@ -166,13 +153,14 @@ fun DuaScreen(
         wordRunnable = null
     }
 
+
     DisposableEffect(Unit) {
         onDispose {
             stopAudioPlayback()
         }
     }
     LaunchedEffect(currentIndex) {
-        stopAudioPlayback()
+       // stopAudioPlayback()
         repeatCount = 0
         currentRepeat = 0
         isRepeatMode = false
@@ -251,16 +239,6 @@ fun DuaScreen(
                     .padding(top = 5.dp)
             )
 
-            fun playAudio(audioResId: Int) {
-                stopAudioPlayback()
-                globalMediaPlayer = MediaPlayer.create(context, audioResId).apply {
-                    start()
-                    setOnCompletionListener {
-                        release()
-                        globalMediaPlayer = null
-                    }
-                }
-            }
             DuaTabs(
                 dua = duas[currentIndex],
                 selectedTab = selectedTab,
@@ -284,26 +262,20 @@ fun DuaScreen(
                         stopAudioPlayback()
                         globalMediaPlayer = MediaPlayer.create(context, audioResId)
                         globalMediaPlayer?.setOnCompletionListener {
+                            stopAudioPlayback() // Clean up when done
                             globalMediaPlayer?.release()
                             globalMediaPlayer = null
                             onComplete()
                         }
                         globalMediaPlayer?.start()
                         isPlaying = true
+                        Log.d("DEBUG", "Playing audio: $audioResId")
                     }
 
                     fun getDuasForIndex(index: Int): List<Dua> {
                         return when {
-                            index in threeDuaIndices -> duas.subList(
-                                index,
-                                minOf(index + 3, duas.size)
-                            )
-
-                            index in twoDuaIndices -> duas.subList(
-                                index,
-                                minOf(index + 2, duas.size)
-                            )
-
+                            index in threeDuaIndices -> duas.subList(index, minOf(index + 3, duas.size))
+                            index in twoDuaIndices -> duas.subList(index, minOf(index + 2, duas.size))
                             else -> listOfNotNull(duas.getOrNull(index))
                         }
                     }
@@ -320,6 +292,7 @@ fun DuaScreen(
                             queue.add(dua.fullAudioResId)
                         }
 
+                        Log.d("DEBUG", "Audio Queue for index $index: $queue")
                         return queue
                     }
 
@@ -336,8 +309,16 @@ fun DuaScreen(
                         playAt(0)
                     }
 
+                    fun stopAudioPlayback() {
+                        if (globalMediaPlayer?.isPlaying == true) {
+                            Log.d("DEBUG", "Stopping previous audio playback")
+                            globalMediaPlayer?.stop()
+                        }
+                    }
+
                     fun playFromIndex(index: Int) {
                         if (index >= duas.size) {
+                            Log.d("DEBUG", "Index out of bounds: $index")
                             isPlaying = false
                             return
                         }
@@ -345,18 +326,22 @@ fun DuaScreen(
                         currentIndex = index
                         isPlaying = true
 
+                        Log.d("DEBUG", "Playing from index: $index")
+
                         val audioQueue = buildAudioQueue(index)
+                        
+                        stopAudioPlayback()
 
                         playQueue(audioQueue, index) {
-                            Log.d("DEBUG", "After playQueue function index: $index")
+                            Log.d("DEBUG", "After playQueue function for index: $index")
 
                             if (isAutoNextEnabled) {
                                 val nextIndex = index + getDuasForIndex(index).size
                                 if (nextIndex < duas.size) {
                                     Log.d("DEBUG", "nextIndex: $nextIndex, index: $index")
-
                                     playFromIndex(nextIndex)
                                 } else {
+                                    Log.d("DEBUG", "No more duas to play, stopping.")
                                     isPlaying = false
                                 }
                             } else {
@@ -364,12 +349,13 @@ fun DuaScreen(
                             }
                         }
                     }
+
+                    // When index changes, ensure that playFromIndex is called for the new index
+                    Log.d("DEBUG", "Starting to play from current index: $currentIndex")
                     playFromIndex(currentIndex)
                 }
-
             )
 
-            val scope = rememberCoroutineScope()
             Box(modifier = Modifier.fillMaxSize()) {
                 Box(
                     modifier = Modifier
@@ -847,24 +833,6 @@ fun DuaScreen(
 private var wordHandler: Handler? = null
 private var wordRunnable: Runnable? = null
 
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview(showBackground = true)
-@Composable
-fun MyduaStatusScreenPreview() {
-    val viewModel = DuaViewModel(Application())
-    MyDuaStatusScreen(
-        navController = rememberNavController(),
-        innerPadding = PaddingValues(),
-        viewModel = viewModel
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    SettingsScreen(navController = rememberNavController(), innerPadding = PaddingValues())
-}
 
 @Preview(showBackground = true)
 @Composable
