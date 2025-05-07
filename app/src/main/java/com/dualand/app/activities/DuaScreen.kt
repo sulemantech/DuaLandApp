@@ -469,6 +469,8 @@ fun DuaScreen(
 
                                                 if (isAutoNextEnabled && currentPlayingIndex + 1 < duas.size) {
                                                     currentPlayingIndex++
+                                                    //
+                                                    currentIndex = currentPlayingIndex;
                                                     globalWordIndex = -1
                                                     isPlaying = true
                                                     showListening = true
