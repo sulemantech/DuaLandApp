@@ -32,4 +32,5 @@
     <color name="heading_color">#212222</color>
     <color name="doodlecolor">#A32670</color>
     <color name="dashboard_color">#CDEBF3</color>
+    <color name="splash_color">#C0E5E5</color>
 </resources>

@@ -88,6 +88,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_AnimationDemo)
         setContent {
             AppNavigator(navController = rememberNavController())
         }
@@ -167,8 +168,8 @@ fun PlaceholderScreen(title: String) {
 fun SplashScreen(onFinished: () -> Unit) {
     val systemUiController = rememberSystemUiController()
 
-    val NavigationBarColor = colorResource(id = R.color.top_nav_new)
-    val statusBarColor = colorResource(id = R.color.top_nav_new)
+    val NavigationBarColor = colorResource(id = R.color.splash_color)
+    val statusBarColor = colorResource(id = R.color.splash_color)
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
@@ -186,11 +187,12 @@ fun SplashScreen(onFinished: () -> Unit) {
     ) {
         Image(
             painter = painterResource(id = R.drawable.splash_screen),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentDescription = "Splash Screen",
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize()
         )
     }
+
 }
 
 @Composable
