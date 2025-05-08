@@ -81,6 +81,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -94,6 +95,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigator(navController: NavHostController) {
@@ -134,14 +136,20 @@ fun AppNavigator(navController: NavHostController) {
         }
         composable("dua/{index}") { backStackEntry ->
             val index = backStackEntry.arguments?.getString("index")?.toIntOrNull() ?: 0
-            DuaScreen(index = index, navController = navController, innerPadding = PaddingValues(), stopAudioPlayback = {})
+            DuaScreen(
+                index = index,
+                navController = navController,
+                innerPadding = PaddingValues(),
+                stopAudioPlayback = {})
         }
         composable("home") {
             PlaceholderScreen(title = "Home Screen")
         }
-        composable("favorites") {
-            PlaceholderScreen(title = "Favorites Screen")
+        composable("myDuaStatusScreen/{duaId}") { backStackEntry ->
+            val duaId = backStackEntry.arguments?.getString("duaId") ?: return@composable
+            MyDuaStatusScreen(navController = navController, innerPadding = PaddingValues(), id = duaId)
         }
+
         composable("profile") {
             PlaceholderScreen(title = "Profile Screen")
         }
@@ -252,24 +260,24 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
         listOf(15, 16),         // card 13
         listOf(17),
         listOf(18),             // card 14
-        listOf(19, 20,21),     // card 15
+        listOf(19, 20, 21),     // card 15
         listOf(22, 23),         // card 16
         listOf(24),             // card 18
         listOf(25),             // card 19
         listOf(26),             // card 20
         listOf(27),         // card 21
-        listOf(28,29),             // card 22
+        listOf(28, 29),             // card 22
         listOf(30),         // card 23
         listOf(31, 32),         // card 23
         listOf(33),             // card 24
         listOf(34),             // card 25
         listOf(35),             // card 26
-        listOf(36, 37, 38) ,     // card 27
-        listOf(39) ,     // card 27
+        listOf(36, 37, 38),     // card 27
+        listOf(39),     // card 27
         listOf(40),      // card 27
-        listOf(41)  ,    // card 27
-        listOf(42)  ,    // card 27
-         listOf(43)  ,    // card 27
+        listOf(41),    // card 27
+        listOf(42),    // card 27
+        listOf(43),    // card 27
     )
 
     val duaList = duaCardMappings.mapIndexed { cardIndex, indexGroup ->
@@ -345,7 +353,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                     .fillMaxWidth()
                     .height(48.dp)
                     .padding(start = 16.dp, end = 16.dp),
-               // placeholder = { Text("Search Duas...", fontSize = 14.sp ) },
+                // placeholder = { Text("Search Duas...", fontSize = 14.sp ) },
                 trailingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_search),
@@ -414,7 +422,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
-
+                        navController.navigate("favorites")
                     }) {
                         Image(
                             painter = painterResource(id = R.drawable.favourite_icon),
@@ -422,11 +430,13 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                             modifier = Modifier.size(33.dp, 40.dp)
                         )
                     }
-
                     IconButton(onClick = {
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}")
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}"
+                            )
                             type = "text/plain"
                         }
 

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.dualand.app.DuaViewModel
@@ -33,8 +34,9 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,  viewModel: DuaViewModel) {
+fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,  id: String ) {
 
+    val viewModel: DuaViewModel = viewModel()
     val systemUiController = rememberSystemUiController()
     val NavigationBarColor = colorResource(id = R.color.top_nav_new)
     val statusBarColor = colorResource(id = R.color.top_nav_new)
@@ -43,8 +45,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
     val title = FontFamily(Font(R.font.mochypop_regular))
     val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
     val favoriteDuas by viewModel.favoriteDuas.collectAsState()
-
-   // val viewModel: DuaViewModel = viewModel
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -142,36 +142,52 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                 )
             )
 
-            // Display list of favorite duas
-            LazyColumn {
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 80.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
                 items(favoriteDuas) { dua ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                            .padding(16.dp)
+                            .background(
+                                color = colorResource(id = R.color.grey),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = dua.title,
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1f)
+
+                        Image(
+                            painter = painterResource(id = dua.image),
+                            contentDescription = "Dua Image",
+                            modifier = Modifier
+                                .size(60.dp)
+                                .padding(end = 12.dp)
                         )
 
-                        IconButton(
-                            onClick = { viewModel.toggleFavorite(dua) }
+                        Column(
+                            modifier = Modifier.weight(1f)
                         ) {
-                            val icon = if (dua.isFavorite) {
-                                painterResource(id = R.drawable.favourite_active_icon)
-                            } else {
-                                painterResource(id = R.drawable.favourite_icon)
-                            }
-                            Image(
-                                painter = icon,
-                                contentDescription = "Favorite",
-                                modifier = Modifier.size(33.dp)
+                            Text(
+                                text = dua.textheading,
+                                fontSize = 16.sp,
+                                color = Color.Black
+                            )
+
+                            Text(
+                                text = "Dua No: ${dua.duaNumber}",
+                                fontSize = 14.sp,
+                                color = Color.Gray
                             )
                         }
+                        Icon(
+                            painter = painterResource(id = R.drawable.favourite_active_icon),
+                            contentDescription = "Favourite",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
                 }
             }
@@ -249,10 +265,9 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
 @Preview(showBackground = true)
 @Composable
 fun MyduaStatusScreenPreview() {
-    val viewModel = DuaViewModel(Application())
     MyDuaStatusScreen(
         navController = rememberNavController(),
         innerPadding = PaddingValues(),
-        viewModel = viewModel
+        id = "sampleDuaId"
     )
 }

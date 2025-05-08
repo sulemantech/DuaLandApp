@@ -38,8 +38,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.components.DuaTabs
 import com.dualand.app.components.PlayWordByWordButton
@@ -58,6 +60,8 @@ fun DuaScreen(
     navController: NavController,
     stopAudioPlayback: () -> Unit
 ) {
+    val viewModel: DuaViewModel = viewModel()
+
     val systemUiController = rememberSystemUiController()
     val duas = duaList
     val context = LocalContext.current
@@ -350,7 +354,6 @@ fun DuaScreen(
                         }
                     }
 
-                    // When index changes, ensure that playFromIndex is called for the new index
                     Log.d("DEBUG", "Starting to play from current index: $currentIndex")
                     playFromIndex(currentIndex)
                 }
@@ -416,17 +419,8 @@ fun DuaScreen(
                                         Alignment.CenterHorizontally
                                     )
                                 ) {
-                                    Box(
-                                        modifier = Modifier
-                                    ) {
-                                        IconButton(onClick = { }) {
-                                            Image(
-                                                painter = painterResource(id = R.drawable.favourite_icon),
-                                                contentDescription = "Favourite",
-                                                modifier = Modifier.size(33.dp)
-                                            )
-                                        }
-                                    }
+                                    FavouriteButton(duaId = "someDuaId", isInitiallyFavourite = true, navController = navController, onFavouriteClick = { duaId, isFav ->
+                                    })
 
                                     fun playWord(
                                         index: Int,
@@ -834,6 +828,34 @@ fun DuaScreen(
 
 private var wordHandler: Handler? = null
 private var wordRunnable: Runnable? = null
+
+@Composable
+fun FavouriteButton(
+    duaId: String,
+    isInitiallyFavourite: Boolean,
+    onFavouriteClick: (String, Boolean) -> Unit,
+    navController: NavController // Added navController
+) {
+    var isFavourite by remember { mutableStateOf(isInitiallyFavourite) }
+
+    Box {
+        IconButton(onClick = {
+            isFavourite = !isFavourite
+            onFavouriteClick(duaId, isFavourite)
+
+            // Navigate to MyDuaStatusScreen after toggling favorite
+            navController.navigate("myDuaStatusScreen/$duaId") // Pass duaId as argument
+        }) {
+            Image(
+                painter = painterResource(
+                    id = if (isFavourite) R.drawable.favourite_icon else R.drawable.favourite_active_icon
+                ),
+                contentDescription = "Add dua in Favourite",
+                modifier = Modifier.size(33.dp)
+            )
+        }
+    }
+}
 
 
 @Preview(showBackground = true)
