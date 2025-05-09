@@ -4,25 +4,27 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.dualand.app.models.FavoriteDuaDao
+import com.dualand.app.models.FavoriteDuaEntity
 
 
-@Database(entities = [DuaFav::class], version = 1, exportSchema = false)
-abstract class DuaDatabase : RoomDatabase() {
-    abstract fun duaDao(): DuaDao
+@Database(entities = [FavoriteDuaEntity::class], version = 2)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun favoriteDuaDao(): FavoriteDuaDao
 
     companion object {
         @Volatile
-        private var INSTANCE: DuaDatabase? = null
+        private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): DuaDatabase {
+        fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                Room.databaseBuilder(
                     context.applicationContext,
-                    DuaDatabase::class.java,
+                    AppDatabase::class.java,
                     "dua_database"
-                ).build()
-                INSTANCE = instance
-                instance
+                )
+                    .fallbackToDestructiveMigration()
+                    .build().also { INSTANCE = it }
             }
         }
     }

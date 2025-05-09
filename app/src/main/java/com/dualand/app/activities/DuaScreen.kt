@@ -1,6 +1,7 @@
 package com.dualand.app.activities
 
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
@@ -43,9 +44,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
+import com.dualand.app.activities.DuaDataProvider.duaList
 import com.dualand.app.components.DuaTabs
 import com.dualand.app.components.PlayWordByWordButton
 import com.dualand.app.models.Dua
+import com.dualand.app.models.FavoriteDuaEntity
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,7 +71,7 @@ fun DuaScreen(
     var currentIndex by remember { mutableStateOf(index.coerceIn(0, duas.lastIndex)) }
     val NavigationBarColor = colorResource(id = R.color.top_nav_new)
     val statusBarColor = colorResource(id = duas[currentIndex].statusBarColorResId)
-    val MyArabicFont = FontFamily(Font(R.font.al_quran))
+    val MyArabicFont = FontFamily(Font(R.font.vazirmatn_regular))
     val translationtext = FontFamily(Font(R.font.poppins_regular))
     val reference = FontFamily(Font(R.font.poppins_semibold))
     val title = FontFamily(Font(R.font.mochypop_regular))
@@ -210,14 +213,16 @@ fun DuaScreen(
                         modifier = Modifier.padding(top = 10.dp)
                     )
 
-                    Text(
-                        text = duas[currentIndex].textheading,
-                        fontSize = 14.sp,
-                        color = colorResource(R.color.heading_color),
-                        fontFamily = title,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 10.dp)
-                    )
+                    duas[currentIndex].textheading?.let {
+                        Text(
+                            text = it,
+                            fontSize = 14.sp,
+                            color = colorResource(R.color.heading_color),
+                            fontFamily = title,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
+                    }
                 }
 
 
@@ -419,8 +424,12 @@ fun DuaScreen(
                                         Alignment.CenterHorizontally
                                     )
                                 ) {
-                                    FavouriteButton(duaId = "someDuaId", isInitiallyFavourite = true, navController = navController, onFavouriteClick = { duaId, isFav ->
-                                    })
+                                    FavouriteButton(
+                                        duaNumber = dua.duaNumber,
+                                        textHeading = dua.textheading,
+                                        imageResId = dua.image,
+                                        viewModel = viewModel
+                                    )
 
                                     fun playWord(
                                         index: Int,
@@ -624,6 +633,8 @@ fun DuaScreen(
                                     )
                                 }
 
+                                Spacer(modifier = Modifier.height(5.dp))
+
                                 val sharedPref =
                                     context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                                 val savedFontSize = sharedPref.getFloat("font_size", 24f)
@@ -799,6 +810,35 @@ fun DuaScreen(
                                 )
                             }
                             IconButton(onClick = {
+                                val sendIntent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}"
+                                    )
+                                    type = "text/plain"
+                                }
+
+                                val shareIntent = Intent.createChooser(sendIntent, "Share App")
+                                context.startActivity(shareIntent)
+                            }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.share_icon),
+                                    contentDescription = "Share",
+                                    modifier = Modifier.size(33.dp, 40.dp)
+                                )
+                            }
+
+                            IconButton(onClick = {
+                                navController.navigate("favorites")
+                            }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.favourite_icon_dua),
+                                    contentDescription = "Favorites Dua",
+                                    modifier = Modifier.size(33.dp, 40.dp)
+                                )
+                            }
+                            IconButton(onClick = {
                                 stopAudioPlayback()
 
                                 val step = when {
@@ -831,29 +871,33 @@ private var wordRunnable: Runnable? = null
 
 @Composable
 fun FavouriteButton(
-    duaId: String,
-    isInitiallyFavourite: Boolean,
-    onFavouriteClick: (String, Boolean) -> Unit,
-    navController: NavController // Added navController
+    duaNumber: String,
+    textHeading: String?,
+    imageResId: Int,
+    viewModel: DuaViewModel
 ) {
-    var isFavourite by remember { mutableStateOf(isInitiallyFavourite) }
+    val scope = rememberCoroutineScope()
+    var isFav by remember { mutableStateOf(false) }
 
-    Box {
-        IconButton(onClick = {
-            isFavourite = !isFavourite
-            onFavouriteClick(duaId, isFavourite)
+    LaunchedEffect(duaNumber) {
+        isFav = viewModel.isFavorite(duaNumber)
+    }
 
-            // Navigate to MyDuaStatusScreen after toggling favorite
-            navController.navigate("myDuaStatusScreen/$duaId") // Pass duaId as argument
-        }) {
-            Image(
-                painter = painterResource(
-                    id = if (isFavourite) R.drawable.favourite_icon else R.drawable.favourite_active_icon
-                ),
-                contentDescription = "Add dua in Favourite",
-                modifier = Modifier.size(33.dp)
-            )
+    IconButton(onClick = {
+        scope.launch {
+            if (textHeading != null) {
+                viewModel.toggleFavorite(duaNumber, textHeading, imageResId)
+            }
+            isFav = !isFav
         }
+    }) {
+        Image(
+            painter = painterResource(
+                id = if (isFav) R.drawable.favourite_active_icon else R.drawable.favourite_icon
+            ),
+            contentDescription = null,
+            modifier = Modifier.size(30.dp)
+        )
     }
 }
 
