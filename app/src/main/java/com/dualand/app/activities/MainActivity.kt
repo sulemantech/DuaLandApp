@@ -49,11 +49,14 @@ import androidx.compose.foundation.lazy.grid.*
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextField
@@ -66,6 +69,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
@@ -168,29 +172,40 @@ fun SplashScreen(onFinished: () -> Unit) {
 
     val NavigationBarColor = colorResource(id = R.color.splash_color)
     val statusBarColor = colorResource(id = R.color.splash_color)
+
+    // Set the status bar and navigation bar colors
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
     }
 
+    // Delay to simulate splash screen display
     LaunchedEffect(true) {
         delay(2000)
         onFinished()
     }
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp
+
     Box(
         modifier = Modifier
-            .fillMaxSize()
-
+            .fillMaxSize()  // Fill the whole screen
+            .padding(start = 0.dp, end = 0.dp) // Can adjust if needed for smaller screens
     ) {
+        // Set the image based on screen size
         Image(
             painter = painterResource(id = R.drawable.splash_screen),
             contentDescription = "Splash Screen",
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.fillMaxSize()
+            contentScale = when {
+                screenWidth >= 720 -> ContentScale.FillBounds  // Tablets, maintain aspect ratio and crop if needed
+                else -> ContentScale.FillBounds  // Smaller screens, fill the screen
+            },
+            modifier = Modifier
+                .fillMaxSize()  // Ensure the image fills the available space
         )
     }
-
 }
 
 @Composable
@@ -236,11 +251,11 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
     var showSearchBar by remember { mutableStateOf(false) }
     val duaCardMappings = listOf(
         listOf(0, 1), listOf(2, 3), listOf(4), listOf(5), listOf(6, 7), listOf(8),
-        listOf(9), listOf(10), listOf(11), listOf(12), listOf(13), listOf(14),
-        listOf(15, 16), listOf(17), listOf(18), listOf(19, 20, 21), listOf(22, 23),
-        listOf(24), listOf(25), listOf(26), listOf(27), listOf(28, 29), listOf(30),
-        listOf(31, 32), listOf(33), listOf(34), listOf(35), listOf(36, 37, 38),
-        listOf(39), listOf(40), listOf(41), listOf(42), listOf(43)
+        listOf(9), listOf(10), listOf(11), listOf(12), listOf(13),
+        listOf(14), listOf(15,16), listOf(17), listOf(18,19,20), listOf(21,22), listOf( 23),
+        listOf(24), listOf(25), listOf(26), listOf(27,28), listOf(29), listOf(30,31),
+        listOf(32), listOf(33), listOf(34), listOf(35,36,37), listOf(38),
+        listOf(39), listOf(40), listOf(41), listOf(42)
     )
 
     val allDuas: List<Dua> = DuaDataProvider.duaList
@@ -276,7 +291,6 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
             dua.textheading?.contains(searchText, ignoreCase = true) == true
         }
     }
-
 
     Box(
         modifier = Modifier
@@ -365,24 +379,20 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                                 onSearch = {
                                     showSearchBar = false
                                 }
-                            )
-                        )
-                        DropdownMenu(
-                            expanded = suggestionList.isNotEmpty(),
-                            onDismissRequest = {},
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            suggestionList.forEach { dua ->
-                                DropdownMenuItem(
-                                    text = { dua.textheading?.let { Text(it) } },
-                                    onClick = {
-                                        searchText = dua.textheading.toString()
-                                       // navController.navigate("dua/${duaCardMappings[duaList.indexOf(dua)].first()}")
-                                        showSearchBar = false
+                            ),
+                            singleLine = true,
+                            trailingIcon = {
+                                if (searchText.isNotEmpty()) {
+                                    IconButton(onClick = { searchText = "" }) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.close_btn),
+                                            contentDescription = "Search",
+                                            modifier = Modifier.size(width = 29.dp, height = 30.dp)
+                                        )
                                     }
-                                )
+                                }
                             }
-                        }
+                        )
                     }
                 }
 
@@ -520,7 +530,10 @@ fun DuaCard(
                 interactionSource = remember { MutableInteractionSource() }
             ),
         shape = RoundedCornerShape(6.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+       // elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent // <-- transparent background
+        )
     ) {
         Image(
             painter = painterResource(id = imageRes),

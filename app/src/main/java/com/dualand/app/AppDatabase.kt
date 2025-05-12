@@ -5,10 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.dualand.app.models.FavoriteDuaDao
-import com.dualand.app.models.FavoriteDuaEntity
+import com.dualand.app.models.DuaStatusEntity
 
 
-@Database(entities = [FavoriteDuaEntity::class], version = 2)
+@Database(entities = [DuaStatusEntity::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteDuaDao(): FavoriteDuaDao
 

@@ -1,5 +1,6 @@
 package com.dualand.app.activities
 
+import androidx.compose.material3.MaterialTheme
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Intent
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,7 +39,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
+import com.dualand.app.activities.DuaDataProvider.duaList
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,9 +55,15 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
     val context = LocalContext.current
     val title = FontFamily(Font(R.font.mochypop_regular))
     val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
-    val favoriteDuas by viewModel.favoriteDuas.collectAsState()
+    val duaStatuses by viewModel.allDuas.collectAsState()
+    val allDuas = duaList.filter { !it.textheading.isNullOrBlank() }
     var showDialog by remember { mutableStateOf(false) }
     var selectedFilters by remember { mutableStateOf(listOf<String>()) } // Track selected filters
+    var expanded by remember { mutableStateOf(false) }
+    var selectedFilter by remember { mutableStateOf("All") }
+    // In your ViewModel or composable, track the index of the current Dua
+    var index by remember { mutableStateOf(0) }
+
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -114,7 +125,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                         modifier = Modifier.padding(end = 6.dp, top = 12.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.setting_btn),
+                            painter = painterResource(id = R.drawable.icon_dua_setting),
                             contentDescription = "Settings",
                             modifier = Modifier.size(29.dp, 30.dp)
                         )
@@ -169,240 +180,234 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                     modifier = Modifier
                         .size(24.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .clickable { showDialog = true }
+                        .clickable { expanded = true }
                 )
             }
 
             Divider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp))
+            val filteredDuas = allDuas.filter { dua ->
+                val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
+                when (selectedFilter) {
+                    "All" -> true
+                    "Favorite" -> status?.favorite == true
+                    "Memorized" -> status?.status == "Memorized"
+                    "In Practice" -> status?.status == "In Practice"
+                    else -> false
+                }
+            }
 
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 80.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(favoriteDuas) { dua ->
+                items(filteredDuas) { dua ->
+                    val currentDuaStatus = duaStatuses.find { it.duaNumber == dua.duaNumber }
+                    val currentStatus = currentDuaStatus?.status ?: "In Practice"
+                    val isMemorized = currentStatus == "Memorized"
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp, start = 12.dp,end=12.dp),
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
-                            painter = painterResource(id = dua.imageResId),
+                            painter = painterResource(id = dua.image),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(50.dp)
                                 .clip(RoundedCornerShape(6.dp))
-                                .border(1.dp, Color.Transparent, RoundedCornerShape(6.dp))
                         )
+
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "${dua.duaNumber}${dua.textHeading}",
+                                text = "${dua.duaNumber}${dua.textheading}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
                                 color = Color.Black
                             )
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                val indexInOriginalList = duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-//                                    TagButton(text = "Memorized", bgColor = Color(0xFFB9B9B9)) {
-//                                    }
-                                   // Spacer(modifier = Modifier.width(4.dp))
-                                    TagButton(text = "Practice Now", bgColor = colorResource(R.color.highlited_color)) {
+                                TagButton(
+                                    text = when (currentStatus) {
+                                        "Memorized" -> "Memorized"
+                                        "In Practice" -> "In Practice"
+                                        else -> "Not Started"
+                                    },
+                                    backgroundDrawable = when (currentStatus) {
+                                        "Memorized" -> R.drawable.memorized_btn
+                                        "In Practice" -> R.drawable.practice_now_btn
+                                        else -> null
+                                    },
+                                    width = when (currentStatus) {
+                                        "Memorized" -> 94.dp
+                                        "In Practice" -> 75.dp
+                                        else -> 80.dp
+                                    },
+                                    height = 25.dp,
+                                    onClick = {
+                                        if (currentStatus == "In Practice" && indexInOriginalList != -1) {
+                                            navController.navigate("dua/$indexInOriginalList")
+                                        }
+                                    }
+                                )
 
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Box(
+                                    modifier = Modifier.size(24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (currentDuaStatus?.favorite == true) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.favourite_active_icon),
+                                            contentDescription = "Favorite",
+                                            modifier = Modifier.fillMaxSize()
+                                        )
                                     }
                                 }
-                                Spacer(modifier = Modifier.width(7.dp))
-                                Icon(
-                                    painter = painterResource(id = R.drawable.favourite_active_icon),
-                                    contentDescription = null,
-                                    tint = Color.Unspecified,
-                                    modifier = Modifier.size(24.dp)
-                                )
                             }
-
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
-                        var isChecked by remember { mutableStateOf(false) }
+                        Spacer(modifier = Modifier.width(12.dp))
 
-                        Switch(
-                            checked = isChecked,
-                            onCheckedChange = { isChecked = it },
-                            modifier = Modifier.scale(1.0f),
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = colorResource(R.color.check_box),
-                                uncheckedThumbColor = colorResource(R.color.uncheckedThumbColor),
-                                uncheckedTrackColor = colorResource(R.color.white)
+                        Column(horizontalAlignment = Alignment.End) {
+                            Switch(
+                                checked = isMemorized,
+                                onCheckedChange = { isChecked ->
+                                    val newStatus = if (isChecked) "Memorized" else "In Practice"
+                                    viewModel.updateDuaStatus(
+                                        duaNumber = dua.duaNumber,
+                                        newStatus = newStatus
+                                    )
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = colorResource(R.color.check_box),
+                                    uncheckedThumbColor = colorResource(R.color.uncheckedThumbColor),
+                                    uncheckedTrackColor = colorResource(R.color.white)
+                                )
                             )
-                        )
-
+                        }
                     }
-
                     Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                 }
             }
         }
+        val filterIconModifier = Modifier
+            .align(Alignment.TopEnd)
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .height(50.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.dua_bottom_bg),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .matchParentSize()
-                    .height(53.dp)
-            )
+        FilterDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            selectedFilter = selectedFilter,
+            onFilterSelected = { selectedFilter = it }
+        )
+    }
+}
 
-            Box(
-                modifier = Modifier,
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(start = 15.dp, end = 15.dp, top = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { /* Handle previous action */ }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.favourite_icon),
-                            contentDescription = "Previous",
-                            modifier = Modifier.size(33.dp, 40.dp)
+@Composable
+fun FilterDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    selectedFilter: String,
+    onFilterSelected: (String) -> Unit
+) {
+    val filters = listOf("All", "Memorized", "In Practice", "Favorite")
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.background(Color.White)
+    ) {
+        filters.forEachIndexed { index, filter ->
+            DropdownMenuItem(
+                onClick = {
+                    onFilterSelected(filter)
+                    onDismissRequest()
+                },
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = filter,
+                            modifier = Modifier.weight(1f),
                         )
-                    }
-                    IconButton(onClick = {
-                        navController.navigate("favorites")
-                    }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.favourite_icon_dua),
-                            contentDescription = "Favorites Dua",
-                            modifier = Modifier.size(33.dp, 40.dp)
-                        )
-                    }
-                    IconButton(onClick = {
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}"
+
+                        if (filter == selectedFilter) {
+                            Text(
+                                text = "✓",
+                                color = colorResource(R.color.highlited_color),
                             )
-                            type = "text/plain"
                         }
-
-                        val shareIntent = Intent.createChooser(sendIntent, "Share App")
-                        context.startActivity(shareIntent)
-                    }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.share_icon),
-                            contentDescription = "Share",
-                            modifier = Modifier.size(33.dp, 40.dp)
-                        )
-                    }
-
-                    IconButton(onClick = { /* Handle next action */ }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.info_icon),
-                            contentDescription = "Next",
-                            modifier = Modifier.size(33.dp, 40.dp)
-                        )
                     }
                 }
+            )
+            if (index < filters.size - 1) {
+                Divider()
             }
         }
     }
-    
-    FilterDialog(
-        showDialog = showDialog,
-        onDismiss = { showDialog = false },
-        selectedFilters = selectedFilters,
-        onFilterChange = { filter, isSelected ->
-            selectedFilters = if (isSelected) {
-                selectedFilters + filter
-            } else {
-                selectedFilters - filter
-            }
-        }
-    )
 }
 
 @Composable
 fun TagButton(
     text: String,
-    bgColor: Color,
-    onClick: () -> Unit
+    bgColor: Color? = null,
+    backgroundDrawable: Int? = null, // e.g., R.drawable.in_practice_bg
+    width: Dp? = null,
+    height: Dp? = null,
+    onClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
-            .background(bgColor, shape = RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .then(
+                if (backgroundDrawable != null) {
+                    Modifier.background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Transparent)
+                        )
+                    ) // Placeholder to maintain shape
+                } else Modifier.background(bgColor ?: Color.Gray)
+            )
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-}
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .let {
 
-@Composable
-fun FilterDialog(
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    selectedFilters: List<String>,
-    onFilterChange: (String, Boolean) -> Unit
-) {
-    val filters = listOf("All", "Memorized", "In Practice","Favorite","Not Started")
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            text = {
-                Column {
-                    filters.forEach { filter ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onFilterChange(filter, !selectedFilters.contains(filter))
-                                }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = selectedFilters.contains(filter),
-                                onCheckedChange = {
-                                    onFilterChange(filter, it)
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = filter)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("Done")
-                }
+                Modifier.then(
+                    if (width != null && height != null) {
+                        Modifier.size(width, height)
+                    } else Modifier
+                )
             }
-        )
+    ) {
+        if (backgroundDrawable != null) {
+            Image(
+                painter = painterResource(id = backgroundDrawable),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
+
     }
 }
-
+//in practice me FilterDropdownMenu select py in pratcie wly hi any chahiye
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
 @Composable

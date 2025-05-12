@@ -14,6 +14,6 @@ object LanguagePreferences {
 
     fun getSelectedLanguages(context: Context): Set<String> {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getStringSet(SELECTED_LANGUAGES_KEY, setOf("English", "Hindi")) ?: setOf("English", "Hindi")
+        return prefs.getStringSet(SELECTED_LANGUAGES_KEY, setOf("English")) ?: setOf("English")
     }
 }

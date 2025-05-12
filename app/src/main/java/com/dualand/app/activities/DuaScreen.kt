@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,7 +50,6 @@ import com.dualand.app.activities.DuaDataProvider.duaList
 import com.dualand.app.components.DuaTabs
 import com.dualand.app.components.PlayWordByWordButton
 import com.dualand.app.models.Dua
-import com.dualand.app.models.FavoriteDuaEntity
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -87,6 +88,13 @@ fun DuaScreen(
     var currentlyRepeatingDuaIndex by remember { mutableStateOf(-1) }
     var selectedTab by remember { mutableStateOf("") }
 
+    @Composable
+    fun isTablet(): Boolean {
+        val configuration = LocalConfiguration.current
+        val screenWidthDp = configuration.screenWidthDp
+        return screenWidthDp >= 600 // 600dp+ is typically considered a tablet
+    }
+
     val selectedLanguages = remember {
         mutableStateListOf<String>().apply {
             CoroutineScope(Dispatchers.IO).launch {
@@ -99,8 +107,8 @@ fun DuaScreen(
         }
     }
 
-    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15, 16, 19, 21, 22, 23, 28, 29, 31, 32)
-    val threeDuaIndices = setOf(19, 20, 21, 36, 37, 38)
+    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15,16, 19, 21,22, 27, 28, 30,31)
+    val threeDuaIndices = setOf(18,19, 20, 35, 36,37)
 
     val showCount = when {
         currentIndex in threeDuaIndices -> 3
@@ -231,12 +239,15 @@ fun DuaScreen(
                     modifier = Modifier.padding(end = 4.dp, top = 5.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.setting_btn),
+                        painter = painterResource(id = R.drawable.icon_dua_setting),
                         contentDescription = "Settings",
                         modifier = Modifier.size(29.dp, 30.dp)
                     )
                 }
             }
+
+            val isTablet = isTablet()
+            val imageHeight = if (isTablet) 500.dp else 230.dp
 
             Image(
                 painter = painterResource(id = duas[currentIndex].image),
@@ -244,7 +255,7 @@ fun DuaScreen(
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(230.dp)
+                    .height(imageHeight)
                     .padding(top = 5.dp)
             )
 
@@ -716,7 +727,7 @@ fun DuaScreen(
                                                             Text(
                                                                 text = it,
                                                                 fontFamily = translationtext,
-                                                                fontSize = 13.sp,
+                                                                fontSize =responsiveFontSize(),
                                                                 textAlign = TextAlign.Center,
                                                                 modifier = Modifier
                                                                     .align(Alignment.Center)
@@ -733,7 +744,7 @@ fun DuaScreen(
                                                         Text(
                                                             text = it,
                                                             fontFamily = translationtext,
-                                                            fontSize = 13.sp,
+                                                            fontSize =responsiveFontSize(),
                                                             textAlign = TextAlign.Center,
                                                         )
                                                     }
@@ -746,7 +757,7 @@ fun DuaScreen(
                                                         Text(
                                                             text = it,
                                                             fontFamily = translationtext,
-                                                            fontSize = 13.sp,
+                                                            fontSize = responsiveFontSize(),
                                                             textAlign = TextAlign.Center,
                                                         )
                                                     }
@@ -870,6 +881,17 @@ private var wordHandler: Handler? = null
 private var wordRunnable: Runnable? = null
 
 @Composable
+fun responsiveFontSize(): TextUnit {
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp
+    return when {
+        screenWidthDp >= 720 -> 18.sp // tablets
+        screenWidthDp >= 600 -> 16.sp // large phones or small tablets
+        else -> 13.sp // normal phones
+    }
+}
+
+@Composable
 fun FavouriteButton(
     duaNumber: String,
     textHeading: String?,
@@ -886,7 +908,7 @@ fun FavouriteButton(
     IconButton(onClick = {
         scope.launch {
             if (textHeading != null) {
-                viewModel.toggleFavorite(duaNumber, textHeading, imageResId)
+                viewModel.toggleFavorite(duaNumber, status = "")
             }
             isFav = !isFav
         }
