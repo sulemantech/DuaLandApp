@@ -34,10 +34,10 @@ fun DuaTabs(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(55.dp)
+            .height(45.dp)
     ) {
         Image(
-            painter = painterResource(id = R.drawable.complete_dua_word_by_word_dua_button),
+            painter = painterResource(id = R.drawable.tab_bg_pink),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.matchParentSize()
@@ -45,8 +45,7 @@ fun DuaTabs(
 
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 5.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -54,46 +53,49 @@ fun DuaTabs(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
+                    .fillMaxSize()
+                    .padding(top = 5.dp)
                     .clickable {
                         onStopCompleteDua()
                         onTabSelected("WORD")
                         onPlayWordByWordButton()
-                    }
+                    },
+                contentAlignment = Alignment.Center
             ) {
                 if (currentTab == "WORD") {
                     Image(
-                        painter = painterResource(id = R.drawable.selected_tab1),
+                        painter = painterResource(id = R.drawable.rectangle_tab),
                         contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.matchParentSize()
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .matchParentSize()
+
                     )
                 }
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "WORD BY WORD",
-                        color = if (currentTab == "WORD") Color.Black else Color.White,
-                        fontFamily = MyArabicFont,
-                        fontSize = 18.sp
-                    )
-                }
+
+                Text(
+                    text = "WORD BY WORD",
+                    color = if (currentTab == "WORD") Color.White else Color.Black,
+                    fontFamily = MyArabicFont,
+                    fontSize = 18.sp
+                )
             }
+
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
+                    .padding(5.dp)
                     .clickable {
                         onTabSelected("COMPLETE")
                         onStopCompleteDua()
                         onCompleteDuaClick(dua.fullAudioResId)
-                    }
+                    },
+                contentAlignment = Alignment.Center
             ) {
                 if (currentTab == "COMPLETE") {
                     Image(
-                        painter = painterResource(id = R.drawable.selected_tab2),
+                        painter = painterResource(id = R.drawable.rectangle_tab),
                         contentDescription = null,
                         contentScale = ContentScale.FillBounds,
                         modifier = Modifier.matchParentSize()
@@ -106,7 +108,7 @@ fun DuaTabs(
                 ) {
                     Text(
                         text = "COMPLETE DUA",
-                        color = if (currentTab == "COMPLETE") Color.Black else Color.White,
+                        color = if (currentTab == "COMPLETE")Color.White else Color.Black,
                         fontFamily = MyArabicFont,
                         fontSize = 18.sp
                     )

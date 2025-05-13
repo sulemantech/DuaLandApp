@@ -7,5 +7,5 @@ import androidx.room.PrimaryKey
 data class DuaStatusEntity(
     @PrimaryKey val duaNumber: String,
     val favorite: Boolean = false,
-    val status: String  // "Memorized", "In Practice", "Not Started"
+    val status: String = "Not Started"
 )

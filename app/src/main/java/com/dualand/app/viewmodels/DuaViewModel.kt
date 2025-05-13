@@ -3,6 +3,7 @@ package com.dualand.app
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.dualand.app.models.Dua
 import com.dualand.app.models.DuaStatusEntity
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,9 +44,38 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     // Update status (e.g., Memorized, In Practice, Not Started)
     fun updateDuaStatus(duaNumber: String, newStatus: String) {
         viewModelScope.launch {
-            dao.updateDuaStatus(duaNumber, newStatus)
+            val existingDua = dao.getDuaStatusByNumber(duaNumber)
+            if (existingDua != null) {
+                dao.updateDuaStatus(duaNumber, newStatus)
+            } else {
+                // Insert with default favorite = false
+                val newDua = DuaStatusEntity(
+                    duaNumber = duaNumber,
+                    favorite = false,
+                    status = newStatus
+                )
+                dao.insertFavorite(newDua)
+            }
         }
     }
+
+    fun ensureAllDuasAreTracked(duaList: List<Dua>) {
+        viewModelScope.launch {
+            duaList.forEach { dua ->
+                val existing = dao.getDuaStatusByNumber(dua.duaNumber)
+                if (existing == null) {
+                    dao.insertFavorite(
+                        DuaStatusEntity(
+                            duaNumber = dua.duaNumber,
+                            favorite = false,
+                            status = "In Practice"
+                        )
+                    )
+                }
+            }
+        }
+    }
+
 
     // Get Duas by specific status
     fun getDuasByStatus(status: String): StateFlow<List<DuaStatusEntity>> {

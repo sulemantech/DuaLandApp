@@ -437,7 +437,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = {
-                    navController.navigate("favorites")
+                    //navController.navigate("favorites")
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.favourite_icon),

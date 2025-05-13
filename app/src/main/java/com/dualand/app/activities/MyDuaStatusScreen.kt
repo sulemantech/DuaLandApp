@@ -174,14 +174,26 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                     fontSize = 16.sp,
                     color = Color.Black
                 )
-                Image(
-                    painter = painterResource(R.drawable.filter_icon),
-                    contentDescription = "Filter Icon",
+                Box(
                     modifier = Modifier
-                        .size(24.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { expanded = true }
-                )
+                        .wrapContentSize(Alignment.TopEnd) // align right
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.filter_icon),
+                        contentDescription = "Filter Icon",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { expanded = true }
+                    )
+
+                    FilterDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        selectedFilter = selectedFilter,
+                        onFilterSelected = { selectedFilter = it }
+                    )
+                }
             }
 
             Divider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp))
@@ -191,7 +203,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                     "All" -> true
                     "Favorite" -> status?.favorite == true
                     "Memorized" -> status?.status == "Memorized"
-                    "In Practice" -> status?.status == "In Practice"
+                    "In Practice" -> status?.status == "In Practice" // do not default
                     else -> false
                 }
             }
@@ -202,7 +214,8 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
             ) {
                 items(filteredDuas) { dua ->
                     val currentDuaStatus = duaStatuses.find { it.duaNumber == dua.duaNumber }
-                    val currentStatus = currentDuaStatus?.status ?: "In Practice"
+                    val isFavorite = currentDuaStatus?.favorite == true
+                    val currentStatus = currentDuaStatus?.status ?: "Not Started"
                     val isMemorized = currentStatus == "Memorized"
 
                     Row(
@@ -235,17 +248,19 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                val indexInOriginalList = duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
+                                val indexInOriginalList =
+                                    duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
 
                                 TagButton(
                                     text = when (currentStatus) {
                                         "Memorized" -> "Memorized"
                                         "In Practice" -> "In Practice"
-                                        else -> "Not Started"
+                                        else -> "All"
                                     },
-                                    backgroundDrawable = when (currentStatus) {
-                                        "Memorized" -> R.drawable.memorized_btn
-                                        "In Practice" -> R.drawable.practice_now_btn
+                                    backgroundDrawable = when {
+                                        currentStatus == "Memorized" -> R.drawable.memorized_btn_new
+                                        currentStatus == "In Practice" -> R.drawable.practice_now_btn
+                                        isFavorite -> R.drawable.practice_now_btn
                                         else -> null
                                     },
                                     width = when (currentStatus) {
@@ -260,7 +275,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                                         }
                                     }
                                 )
-
 
                                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -286,10 +300,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                                 checked = isMemorized,
                                 onCheckedChange = { isChecked ->
                                     val newStatus = if (isChecked) "Memorized" else "In Practice"
-                                    viewModel.updateDuaStatus(
-                                        duaNumber = dua.duaNumber,
-                                        newStatus = newStatus
-                                    )
+                                    viewModel.updateDuaStatus(dua.duaNumber.toString(), newStatus)
                                 },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
@@ -304,17 +315,37 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                 }
             }
         }
+//        LaunchedEffect(Unit) {
+//            viewModel.ensureAllDuasAreTracked(duaList)
+//        }
+
         val filterIconModifier = Modifier
             .align(Alignment.TopEnd)
 
-        FilterDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            selectedFilter = selectedFilter,
-            onFilterSelected = { selectedFilter = it }
-        )
+//        Box(
+//            modifier = Modifier
+//                .wrapContentSize(Alignment.TopEnd) // align right
+//        ) {
+//            Image(
+//                painter = painterResource(R.drawable.filter_icon),
+//                contentDescription = "Filter Icon",
+//                modifier = Modifier
+//                    .size(24.dp)
+//                    .clip(RoundedCornerShape(8.dp))
+//                    .clickable { expanded = true }
+//            )
+//
+//            FilterDropdownMenu(
+//                expanded = expanded,
+//                onDismissRequest = { expanded = false },
+//                selectedFilter = selectedFilter,
+//                onFilterSelected = { selectedFilter = it }
+//            )
+//        }
+
     }
 }
+
 
 @Composable
 fun FilterDropdownMenu(
@@ -407,6 +438,7 @@ fun TagButton(
 
     }
 }
+
 //in practice me FilterDropdownMenu select py in pratcie wly hi any chahiye
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
