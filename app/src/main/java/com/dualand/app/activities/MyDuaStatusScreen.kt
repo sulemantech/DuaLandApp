@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
@@ -29,6 +30,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.W500
+import androidx.compose.ui.text.font.FontWeight.Companion.W600
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -64,6 +68,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
     // In your ViewModel or composable, track the index of the current Dua
     var index by remember { mutableStateOf(0) }
 
+    val text_font = FontFamily(Font(R.font.montserrat_regular))
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -140,14 +145,14 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                 onValueChange = { searchText = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(50.dp)
                     .padding(start = 16.dp, end = 16.dp),
                 trailingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_search),
                         contentDescription = "Voice Search",
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(44.dp)
                             .clickable {
                             }
                     )
@@ -158,6 +163,13 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White,
                     containerColor = colorResource(R.color.top_nav_new)
+                ),
+                placeholder = {
+                    Text("Search Dua...", fontFamily = text_font)
+
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    capitalization = KeyboardCapitalization.Sentences
                 )
             )
 
@@ -197,17 +209,22 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
             }
 
             Divider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp))
+
             val filteredDuas = allDuas.filter { dua ->
                 val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
-                when (selectedFilter) {
+
+                val matchesSearch = dua.textheading?.contains(searchText, ignoreCase = true) == true
+
+                val matchesFilter = when (selectedFilter) {
                     "All" -> true
                     "Favorite" -> status?.favorite == true
                     "Memorized" -> status?.status == "Memorized"
-                    "In Practice" -> status?.status == "In Practice" // do not default
+                    "In Practice" -> status?.status == "In Practice"
                     else -> false
                 }
-            }
 
+                matchesSearch && matchesFilter
+            }
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 80.dp),
                 modifier = Modifier.fillMaxSize()
@@ -215,7 +232,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                 items(filteredDuas) { dua ->
                     val currentDuaStatus = duaStatuses.find { it.duaNumber == dua.duaNumber }
                     val isFavorite = currentDuaStatus?.favorite == true
-                    val currentStatus = currentDuaStatus?.status ?: "Not Started"
+                    val currentStatus = currentDuaStatus?.status ?: "In Practice"
                     val isMemorized = currentStatus == "Memorized"
 
                     Row(
@@ -354,12 +371,15 @@ fun FilterDropdownMenu(
     selectedFilter: String,
     onFilterSelected: (String) -> Unit
 ) {
+    val text_font = FontFamily(Font(R.font.montserrat_regular))
     val filters = listOf("All", "Memorized", "In Practice", "Favorite")
 
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        modifier = Modifier.background(Color.White)
+        modifier = Modifier
+            .background(Color.White)
+            .width(200.dp)
     ) {
         filters.forEachIndexed { index, filter ->
             DropdownMenuItem(
@@ -375,6 +395,9 @@ fun FilterDropdownMenu(
                         Text(
                             text = filter,
                             modifier = Modifier.weight(1f),
+                            fontFamily = text_font,
+                            fontSize = 14.sp,
+                            fontWeight = W600
                         )
 
                         if (filter == selectedFilter) {
@@ -432,14 +455,14 @@ fun TagButton(
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .matchParentSize()
-                    .clip(RoundedCornerShape(12.dp))
+
             )
         }
 
     }
 }
 
-//in practice me FilterDropdownMenu select py in pratcie wly hi any chahiye
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
 @Composable

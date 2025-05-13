@@ -191,19 +191,23 @@ fun SplashScreen(onFinished: () -> Unit) {
 
     Box(
         modifier = Modifier
-            .fillMaxSize()  // Fill the whole screen
-            .padding(start = 0.dp, end = 0.dp) // Can adjust if needed for smaller screens
+            .fillMaxSize()
     ) {
-        // Set the image based on screen size
+        // Background image (full screen)
         Image(
-            painter = painterResource(id = R.drawable.splash_screen),
+            painter = painterResource(id = R.drawable.splash),
             contentDescription = "Splash Screen",
-            contentScale = when {
-                screenWidth >= 720 -> ContentScale.FillBounds  // Tablets, maintain aspect ratio and crop if needed
-                else -> ContentScale.FillBounds  // Smaller screens, fill the screen
-            },
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // Centered logo
+        Image(
+            painter = painterResource(id = R.drawable.splash_logo), // replace with your actual logo ID
+            contentDescription = "App Logo",
             modifier = Modifier
-                .fillMaxSize()  // Ensure the image fills the available space
+                .align(Alignment.Center)
+                .size(280.dp) // Adjust size as needed
         )
     }
 }
@@ -437,7 +441,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = {
-                    //navController.navigate("favorites")
+                    navController.navigate("favorites")
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.favourite_icon),

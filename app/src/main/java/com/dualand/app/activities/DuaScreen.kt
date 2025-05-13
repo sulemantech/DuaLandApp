@@ -259,6 +259,7 @@ fun DuaScreen(
                     .padding(top = 5.dp)
             )
 
+            Spacer(modifier = Modifier.height(9.dp))
             DuaTabs(
                 dua = duas[currentIndex],
                 selectedTab = selectedTab,
