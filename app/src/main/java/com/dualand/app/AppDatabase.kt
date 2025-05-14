@@ -8,7 +8,7 @@ import com.dualand.app.models.FavoriteDuaDao
 import com.dualand.app.models.DuaStatusEntity
 
 
-@Database(entities = [DuaStatusEntity::class], version = 4)
+@Database(entities = [DuaStatusEntity::class], version = 5)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteDuaDao(): FavoriteDuaDao
 

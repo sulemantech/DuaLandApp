@@ -1,20 +1,16 @@
 package com.dualand.app.activities
 
-import androidx.compose.material3.MaterialTheme
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme.colors
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.W500
+import androidx.compose.ui.text.font.FontWeight.Companion.W400
 import androidx.compose.ui.text.font.FontWeight.Companion.W600
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -45,12 +41,10 @@ import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.activities.DuaDataProvider.duaList
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues) {
-
+fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues, initialFilter: String = "All") {
     val viewModel: DuaViewModel = viewModel()
     val systemUiController = rememberSystemUiController()
     val NavigationBarColor = colorResource(id = R.color.top_nav_new)
@@ -62,13 +56,18 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
     val duaStatuses by viewModel.allDuas.collectAsState()
     val allDuas = duaList.filter { !it.textheading.isNullOrBlank() }
     var showDialog by remember { mutableStateOf(false) }
-    var selectedFilters by remember { mutableStateOf(listOf<String>()) } // Track selected filters
+    var selectedFilters by remember { mutableStateOf(listOf<String>()) }
     var expanded by remember { mutableStateOf(false) }
-    var selectedFilter by remember { mutableStateOf("All") }
-    // In your ViewModel or composable, track the index of the current Dua
+  //  var selectedFilter by remember { mutableStateOf("All") }
     var index by remember { mutableStateOf(0) }
 
     val text_font = FontFamily(Font(R.font.montserrat_regular))
+    var selectedFilter by remember { mutableStateOf(initialFilter) }
+
+    if (duaStatuses.isEmpty()) {
+        Spacer(modifier = Modifier.height(0.dp))
+        return
+    }
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -162,7 +161,8 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White,
-                    containerColor = colorResource(R.color.top_nav_new)
+                    containerColor = colorResource(R.color.top_nav_new),
+                    cursorColor = colorResource(R.color.highlited_color)
                 ),
                 placeholder = {
                     Text("Search Dua...", fontFamily = text_font)
@@ -182,13 +182,14 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
             ) {
                 Text(
                     text = "Filter By",
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = W600,
                     fontSize = 16.sp,
-                    color = Color.Black
-                )
+                    color = colorResource(R.color.heading_color),
+                    fontFamily = text_font
+                    )
                 Box(
                     modifier = Modifier
-                        .wrapContentSize(Alignment.TopEnd) // align right
+                        .wrapContentSize(Alignment.TopEnd)
                 ) {
                     Image(
                         painter = painterResource(R.drawable.filter_icon),
@@ -247,7 +248,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(50.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(RoundedCornerShape(4.dp))
                         )
 
                         Spacer(modifier = Modifier.width(12.dp))
@@ -255,46 +256,41 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "${dua.duaNumber}${dua.textheading}",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = Color.Black
-                            )
+                                fontWeight =W400,
+                                fontSize = 12.sp,
+                                fontFamily = title,
+                                color = colorResource(R.color.heading_color),
+                                )
 
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                val indexInOriginalList =
-                                    duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
+                                val originalIndex = duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
 
                                 TagButton(
-                                    text = when (currentStatus) {
-                                        "Memorized" -> "Memorized"
-                                        "In Practice" -> "In Practice"
-                                        else -> "All"
-                                    },
-                                    backgroundDrawable = when {
-                                        currentStatus == "Memorized" -> R.drawable.memorized_btn_new
-                                        currentStatus == "In Practice" -> R.drawable.practice_now_btn
-                                        isFavorite -> R.drawable.practice_now_btn
-                                        else -> null
-                                    },
+                                    text = currentStatus,
+                                    backgroundDrawable = when (currentStatus) {
+                                        "Memorized" -> R.drawable.memorized_btn_new
+                                        "In Practice" -> R.drawable.practice_now_btn
+                                        else -> R.drawable.practice_now_btn
+                                   },
                                     width = when (currentStatus) {
-                                        "Memorized" -> 94.dp
-                                        "In Practice" -> 75.dp
+                                        "Memorized" -> 100.dp
+                                        "In Practice" ->84.dp
                                         else -> 80.dp
                                     },
-                                    height = 25.dp,
+                                    height = 28.dp,
                                     onClick = {
-                                        if (currentStatus == "In Practice" && indexInOriginalList != -1) {
-                                            navController.navigate("dua/$indexInOriginalList")
+                                        if (currentStatus == "In Practice" && originalIndex != -1) {
+                                            navController.navigate("dua/$originalIndex")
+                                        } else {
+                                            Toast.makeText(context, "Memorized Dua", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 )
-
                                 Spacer(modifier = Modifier.width(8.dp))
-
                                 Box(
                                     modifier = Modifier.size(24.dp),
                                     contentAlignment = Alignment.Center
@@ -319,6 +315,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                                     val newStatus = if (isChecked) "Memorized" else "In Practice"
                                     viewModel.updateDuaStatus(dua.duaNumber.toString(), newStatus)
                                 },
+                                modifier = Modifier.scale(1.0f),
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
                                     checkedTrackColor = colorResource(R.color.check_box),
@@ -332,37 +329,81 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues)
                 }
             }
         }
-//        LaunchedEffect(Unit) {
-//            viewModel.ensureAllDuasAreTracked(duaList)
-//        }
+        LaunchedEffect(Unit) {
+            viewModel.ensureAllDuasAreTracked(duaList)
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .height(50.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.dua_bottom_bg),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.matchParentSize()
+            )
 
-        val filterIconModifier = Modifier
-            .align(Alignment.TopEnd)
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp, top = 5.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-//        Box(
-//            modifier = Modifier
-//                .wrapContentSize(Alignment.TopEnd) // align right
-//        ) {
-//            Image(
-//                painter = painterResource(R.drawable.filter_icon),
-//                contentDescription = "Filter Icon",
-//                modifier = Modifier
-//                    .size(24.dp)
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .clickable { expanded = true }
-//            )
-//
-//            FilterDropdownMenu(
-//                expanded = expanded,
-//                onDismissRequest = { expanded = false },
-//                selectedFilter = selectedFilter,
-//                onFilterSelected = { selectedFilter = it }
-//            )
-//        }
+                IconButton(onClick = {
+                    navController.navigate("favorites?filterType=Favorite")
+                }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.favourite_icon),
+                        contentDescription = "Favorites From menu",
+                        modifier = Modifier.size(33.dp, 40.dp)
+                    )
+                }
+                IconButton(onClick = {
+                   // navController.navigate("favorites?filterType=All")
+                }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.favourite_icon_dua),
+                        contentDescription = "Favorites Dua",
+                        modifier = Modifier.size(33.dp, 40.dp)
+                    )
+                }
+                IconButton(onClick = {
+                    val sendIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}"
+                        )
+                        type = "text/plain"
+                    }
+                    val shareIntent = Intent.createChooser(sendIntent, "Share App")
+                    context.startActivity(shareIntent)
+                }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.share_icon),
+                        contentDescription = "Share",
+                        modifier = Modifier.size(33.dp, 40.dp)
+                    )
+                }
 
+                IconButton(onClick = {
+                    // TODO: Add info screen logic
+                }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.info_icon),
+                        contentDescription = "Info",
+                        modifier = Modifier.size(33.dp, 40.dp)
+                    )
+                }
+            }
+        }
     }
 }
-
 
 @Composable
 fun FilterDropdownMenu(
@@ -379,7 +420,7 @@ fun FilterDropdownMenu(
         onDismissRequest = onDismissRequest,
         modifier = Modifier
             .background(Color.White)
-            .width(200.dp)
+            .width(170.dp)
     ) {
         filters.forEachIndexed { index, filter ->
             DropdownMenuItem(
@@ -397,9 +438,9 @@ fun FilterDropdownMenu(
                             modifier = Modifier.weight(1f),
                             fontFamily = text_font,
                             fontSize = 14.sp,
+                            color = colorResource(R.color.heading_color),
                             fontWeight = W600
                         )
-
                         if (filter == selectedFilter) {
                             Text(
                                 text = "✓",
@@ -420,48 +461,35 @@ fun FilterDropdownMenu(
 fun TagButton(
     text: String,
     bgColor: Color? = null,
-    backgroundDrawable: Int? = null, // e.g., R.drawable.in_practice_bg
+    backgroundDrawable: Int? = null,
     width: Dp? = null,
     height: Dp? = null,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
             .then(
-                if (backgroundDrawable != null) {
-                    Modifier.background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Transparent)
-                        )
-                    ) // Placeholder to maintain shape
-                } else Modifier.background(bgColor ?: Color.Gray)
+                if (width != null && height != null) Modifier.size(width, height)
+                else Modifier.wrapContentSize()
             )
+           // .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .let {
-
-                Modifier.then(
-                    if (width != null && height != null) {
-                        Modifier.size(width, height)
-                    } else Modifier
-                )
-            }
+            .background(
+                color = bgColor ?: Color.Transparent,
+               // shape = RoundedCornerShape(12.dp)
+            ),
+        contentAlignment = Alignment.Center
     ) {
         if (backgroundDrawable != null) {
             Image(
                 painter = painterResource(id = backgroundDrawable),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .matchParentSize()
-
+                modifier = Modifier.matchParentSize()
             )
         }
-
     }
 }
-
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)

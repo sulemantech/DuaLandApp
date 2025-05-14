@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
@@ -92,7 +93,7 @@ fun DuaScreen(
     fun isTablet(): Boolean {
         val configuration = LocalConfiguration.current
         val screenWidthDp = configuration.screenWidthDp
-        return screenWidthDp >= 600 // 600dp+ is typically considered a tablet
+        return screenWidthDp >= 600
     }
 
     val selectedLanguages = remember {
@@ -107,8 +108,8 @@ fun DuaScreen(
         }
     }
 
-    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15,16, 19, 21,22, 27, 28, 30,31)
-    val threeDuaIndices = setOf(18,19, 20, 35, 36,37)
+    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15,16, 21,22, 27, 28, 30,31)
+    val threeDuaIndices = setOf(18,19,20, 35, 36,37)
 
     val showCount = when {
         currentIndex in threeDuaIndices -> 3
@@ -268,6 +269,8 @@ fun DuaScreen(
                 },
                 onStopCompleteDua = {
                     stopAudioPlayback()
+                    isPlaying = false
+                    showListening = false
                 },
                 onPlayWordByWordButton = {
                     //playWord(0)
@@ -283,7 +286,7 @@ fun DuaScreen(
                         stopAudioPlayback()
                         globalMediaPlayer = MediaPlayer.create(context, audioResId)
                         globalMediaPlayer?.setOnCompletionListener {
-                            stopAudioPlayback() // Clean up when done
+                            stopAudioPlayback()
                             globalMediaPlayer?.release()
                             globalMediaPlayer = null
                             onComplete()
@@ -350,7 +353,7 @@ fun DuaScreen(
                         Log.d("DEBUG", "Playing from index: $index")
 
                         val audioQueue = buildAudioQueue(index)
-                        
+
                         stopAudioPlayback()
 
                         playQueue(audioQueue, index) {
@@ -411,6 +414,13 @@ fun DuaScreen(
                             }
                         }
                 ) {
+
+                    val scrollState = rememberScrollState()
+
+                    LaunchedEffect(currentIndex) {
+                        scrollState.animateScrollTo(0)
+                    }
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -420,8 +430,9 @@ fun DuaScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(innerPadding)
-                                .verticalScroll(rememberScrollState())
+                                .verticalScroll(scrollState)
                         ) {
+
                             for (i in currentIndex until (currentIndex + showCount).coerceAtMost(
                                 duas.size
                             )) {
@@ -452,7 +463,6 @@ fun DuaScreen(
                                             isPlaying = false
                                             return
                                         }
-
                                         val dua = duas[currentPlayingIndex]
                                         Log.d("DuaPlayback", "Playing Dua index: $currentPlayingIndex, word index: $index")
 
@@ -482,30 +492,66 @@ fun DuaScreen(
                                                 isRepeatingNow = false
                                                 currentlyRepeatingDuaIndex = -1
 
-                                                if (isAutoNextEnabled && currentPlayingIndex + 1 < duas.size) {
-                                                    currentPlayingIndex++
-                                                    //
-                                                    currentIndex = currentPlayingIndex;
-                                                    globalWordIndex = -1
-                                                    isPlaying = true
-                                                    showListening = true
+                                                if (isAutoNextEnabled) {
+                                                    val showCount = when {
+                                                        currentIndex in threeDuaIndices -> 3
+                                                        currentIndex in twoDuaIndices -> 2
+                                                        else -> 1
+                                                    }
 
-                                                    val nextDua = duas[currentPlayingIndex]
-                                                    Log.d("DuaPlayback", "Moving to next dua: index $currentPlayingIndex")
+                                                    val groupStartIndex = currentIndex
+                                                    val groupEndIndexExclusive = (groupStartIndex + showCount).coerceAtMost(duas.size)
 
-                                                    if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
-                                                        globalMediaPlayer?.release()
-                                                        globalMediaPlayer = MediaPlayer.create(context, nextDua.titleAudioResId)
+                                                    val nextDuaInGroup = currentPlayingIndex + 1
+                                                    if (nextDuaInGroup < groupEndIndexExclusive) {
+                                                        currentPlayingIndex = nextDuaInGroup
+                                                        globalWordIndex = -1
+                                                        isPlaying = true
+                                                        showListening = true
 
-                                                        globalMediaPlayer?.setOnCompletionListener {
-                                                            playWord(0, isAutoNextEnabled, false)
+                                                        val nextDua = duas[currentPlayingIndex]
+                                                        Log.d("DuaPlayback", "Playing next Dua in same group: index $currentPlayingIndex")
+
+                                                        if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
+                                                            globalMediaPlayer?.release()
+                                                            globalMediaPlayer = MediaPlayer.create(context, nextDua.titleAudioResId)
+                                                            globalMediaPlayer?.setOnCompletionListener {
+                                                                playWord(0, isAutoNextEnabled, false)
+                                                            }
+                                                            globalMediaPlayer?.start()
+                                                        } else {
+                                                            playWord(0, isAutoNextEnabled, isReadTitleEnabled)
                                                         }
-
-                                                        globalMediaPlayer?.start()
                                                     } else {
-                                                        playWord(0, isAutoNextEnabled, isReadTitleEnabled)
+                                                        val nextGroupStartIndex = groupEndIndexExclusive
+                                                        if (nextGroupStartIndex < duas.size) {
+                                                            currentPlayingIndex = nextGroupStartIndex
+                                                            currentIndex = currentPlayingIndex
+                                                            globalWordIndex = -1
+                                                            isPlaying = true
+                                                            showListening = true
+
+                                                            val nextDua = duas[currentPlayingIndex]
+                                                            Log.d("DuaPlayback", "Moving to next group: index $currentPlayingIndex")
+
+                                                            if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
+                                                                globalMediaPlayer?.release()
+                                                                globalMediaPlayer = MediaPlayer.create(context, nextDua.titleAudioResId)
+                                                                globalMediaPlayer?.setOnCompletionListener {
+                                                                    playWord(0, isAutoNextEnabled, false)
+                                                                }
+                                                                globalMediaPlayer?.start()
+                                                            } else {
+                                                                playWord(0, isAutoNextEnabled, isReadTitleEnabled)
+                                                            }
+                                                        } else {
+                                                            isPlaying = false
+                                                            showListening = false
+                                                            globalWordIndex = -1
+                                                        }
                                                     }
                                                 } else {
+                                                    // AutoNext disabled — stop here
                                                     isPlaying = false
                                                     showListening = false
                                                     globalWordIndex = -1
@@ -513,6 +559,7 @@ fun DuaScreen(
                                             }
                                             return
                                         }
+
                                         val (_, audioResId) = dua.wordAudioPairs[index]
 
                                         wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
@@ -842,7 +889,7 @@ fun DuaScreen(
                             }
 
                             IconButton(onClick = {
-                                navController.navigate("favorites")
+                                navController.navigate("favorites?filterType=All")
                             }) {
                                 Image(
                                     painter = painterResource(id = R.drawable.favourite_icon_dua),

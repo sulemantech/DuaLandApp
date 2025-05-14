@@ -72,6 +72,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.lifecycle.Lifecycle
@@ -136,13 +138,19 @@ fun AppNavigator(navController: NavHostController) {
                 index = index,
                 navController = navController,
                 innerPadding = PaddingValues(),
-                stopAudioPlayback = {})
+                stopAudioPlayback = {}
+            )
         }
         composable("home") {
             PlaceholderScreen(title = "Home Screen")
         }
-        composable("favorites") {
-            MyDuaStatusScreen(navController = navController, innerPadding = PaddingValues())
+        composable("favorites?filterType={filterType}") { backStackEntry ->
+            val filterType = backStackEntry.arguments?.getString("filterType") ?: "All"
+            MyDuaStatusScreen(
+                navController = navController,
+                innerPadding = PaddingValues(),
+                initialFilter = filterType
+            )
         }
         composable("profile") {
             PlaceholderScreen(title = "Profile Screen")
@@ -173,13 +181,11 @@ fun SplashScreen(onFinished: () -> Unit) {
     val NavigationBarColor = colorResource(id = R.color.splash_color)
     val statusBarColor = colorResource(id = R.color.splash_color)
 
-    // Set the status bar and navigation bar colors
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
     }
 
-    // Delay to simulate splash screen display
     LaunchedEffect(true) {
         delay(2000)
         onFinished()
@@ -193,7 +199,6 @@ fun SplashScreen(onFinished: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Background image (full screen)
         Image(
             painter = painterResource(id = R.drawable.splash),
             contentDescription = "Splash Screen",
@@ -201,13 +206,12 @@ fun SplashScreen(onFinished: () -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
 
-        // Centered logo
         Image(
-            painter = painterResource(id = R.drawable.splash_logo), // replace with your actual logo ID
+            painter = painterResource(id = R.drawable.splash_logo),
             contentDescription = "App Logo",
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(280.dp) // Adjust size as needed
+                .size(280.dp)
         )
     }
 }
@@ -245,6 +249,8 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
     val statusBarColor = colorResource(id = R.color.top_nav_new)
     val navBarColor = colorResource(id = R.color.top_nav_new)
     val context = LocalContext.current
+    val text_font = FontFamily(Font(R.font.montserrat_regular))
+
 
     SideEffect {
         systemUiController.setStatusBarColor(statusBarColor)
@@ -371,7 +377,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                         TextField(
                             value = searchText,
                             onValueChange = { searchText = it },
-                            placeholder = { Text("Search Dua...") },
+                            placeholder = { Text("Search Dua...",fontFamily = text_font) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(Color.Transparent),
@@ -440,17 +446,18 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 IconButton(onClick = {
-                    navController.navigate("favorites")
+                    navController.navigate("favorites?filterType=Favorite")
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.favourite_icon),
-                        contentDescription = "Favorites",
+                        contentDescription = "Favorites From menu",
                         modifier = Modifier.size(33.dp, 40.dp)
                     )
                 }
                 IconButton(onClick = {
-                    navController.navigate("favorites")
+                    navController.navigate("favorites?filterType=All")
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.favourite_icon_dua),

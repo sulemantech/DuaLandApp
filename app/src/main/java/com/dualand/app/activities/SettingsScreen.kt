@@ -256,31 +256,58 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    title,
-                                    fontFamily = text_font,
-                                    fontWeight = FontWeight.W600,
-                                    color = colorResource(R.color.heading_color),
-                                    fontSize = 15.sp
-                                )
-
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        title,
+                                        fontFamily = text_font,
+                                        fontWeight = FontWeight.W600,
+                                        color = colorResource(R.color.heading_color),
+                                        fontSize = 15.sp,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Switch(
+                                        checked = when (title) {
+                                            "Reading Out Dua Title" -> readTitleEnabled
+                                            "Rewards" -> rewardsEnabled
+                                            "Auto Next Dua's" -> autoNextDuasEnabled
+                                            "Word-by-Word Pause" -> WordbyWordPauseEnabled
+                                            else -> false
+                                        },
+                                        onCheckedChange = { isChecked ->
+                                            when (title) {
+                                                "Reading Out Dua Title" -> readTitleEnabled = isChecked
+                                                "Rewards" -> rewardsEnabled = isChecked
+                                                "Auto Next Dua's" -> autoNextDuasEnabled = isChecked
+                                                "Word-by-Word Pause" -> WordbyWordPauseEnabled = isChecked
+                                            }
+                                        },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = Color.White,
+                                            checkedTrackColor = colorResource(R.color.check_box),
+                                            uncheckedThumbColor = colorResource(R.color.uncheckedThumbColor),
+                                            uncheckedTrackColor = colorResource(R.color.white)
+                                        )
+                                    )
+                                }
                                 if (title != "Word-by-Word Pause") {
-                                    Spacer(modifier = Modifier.height(4.dp))
+
                                     Text(
                                         when (title) {
                                             "Reading Out Dua Title" -> "Reads out the dua title automatically"
                                             "Rewards" -> "Gives a reward when a dua is completed"
                                             "Auto Next Dua's" -> "Automatically move to the next dua"
-                                            "Word-by-Word Pause" -> "Automatically move to the next dua"
                                             else -> ""
                                         },
-                                        fontSize = 10.sp,
-                                        color = colorResource(R.color.heading_color)
-                                    )
+                                        fontSize = 12.sp,
+                                        color = colorResource(R.color.heading_color))
                                 } else {
-
-                                    Spacer(modifier = Modifier.height(18.dp))
+                                    Spacer(modifier = Modifier.height(5.dp))
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.Center,
@@ -314,41 +341,12 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                             )
                                         }
                                     }
-                                    Divider(Modifier.padding(vertical = 8.dp))
-
                                 }
                             }
+                        }
 
-                            if (title != "Word-by-Word Pause") {
-                                Switch(
-                                    checked = when (title) {
-                                        "Reading Out Dua Title" -> readTitleEnabled
-                                        "Rewards" -> rewardsEnabled
-                                        "Auto Next Dua's" -> autoNextDuasEnabled
-                                        "Word-by-Word Pause" -> WordbyWordPauseEnabled
-                                        else -> false
-                                    },
-                                    onCheckedChange = { isChecked ->
-                                        when (title) {
-                                            "Reading Out Dua Title" -> readTitleEnabled = isChecked
-                                            "Rewards" -> rewardsEnabled = isChecked
-                                            "Auto Next Dua's" -> autoNextDuasEnabled = isChecked
-                                            "Word-by-Word Pause" -> WordbyWordPauseEnabled =isChecked
-                                        }
-                                    },
-                                    modifier = Modifier.scale(1.0f),
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = Color.White,
-                                        checkedTrackColor = colorResource(R.color.check_box),
-                                        uncheckedThumbColor = colorResource(R.color.uncheckedThumbColor),
-                                        uncheckedTrackColor = colorResource(R.color.white)
-                                    )
-                                )
-                            }
-                        }
-                        if (title != "Word-by-Word Pause") {
-                            Divider(Modifier.padding(vertical = 8.dp))
-                        }
+                        Divider(Modifier.padding(vertical = 1.dp))
+
                     }
                     Spacer(modifier = Modifier.height(17.dp))
 
