@@ -90,8 +90,8 @@ fun DuaScreen(
     var isRepeatingNow by remember { mutableStateOf(false) }
     var isRepeatMode by remember { mutableStateOf(false) }
     var currentlyRepeatingDuaIndex by remember { mutableStateOf(-1) }
-  //  var selectedTab by remember { mutableStateOf("") }
-    var selectedTab by rememberSaveable { mutableStateOf("WORD_BY_WORD") }
+    // var selectedTab by remember { mutableStateOf("") }
+    var selectedTab by rememberSaveable { mutableStateOf("WORD") }
 
     @Composable
     fun isTablet(): Boolean {
@@ -112,8 +112,8 @@ fun DuaScreen(
         }
     }
 
-    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15,16, 21,22, 27, 28, 30,31)
-    val threeDuaIndices = setOf(18,19,20, 35, 36,37)
+    val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15, 16, 21, 22, 27, 28, 30, 31)
+    val threeDuaIndices = setOf(18, 19, 20, 35, 36, 37)
 
     val showCount = when {
         currentIndex in threeDuaIndices -> 3
@@ -156,7 +156,7 @@ fun DuaScreen(
         }
     }
     LaunchedEffect(currentIndex) {
-       // stopAudioPlayback()
+        // stopAudioPlayback()
         repeatCount = 0
         currentRepeat = 0
         isRepeatMode = false
@@ -214,7 +214,6 @@ fun DuaScreen(
                     }
                 }
 
-
                 IconButton(
                     onClick = { navController.navigate("SettingsScreen") },
                     modifier = Modifier.padding(end = 4.dp, top = 5.dp)
@@ -256,7 +255,7 @@ fun DuaScreen(
                     //playWord(0)
                 },
                 onCompleteDuaClick = {
-                    selectedTab = "COMPLETE"
+                    selectedTab = selectedTab
 
                     isPlaying = false
                     showListening = false
@@ -281,8 +280,16 @@ fun DuaScreen(
 
                     fun getDuasForIndex(index: Int): List<Dua> {
                         return when {
-                            index in threeDuaIndices -> duas.subList(index, minOf(index + 3, duas.size))
-                            index in twoDuaIndices -> duas.subList(index, minOf(index + 2, duas.size))
+                            index in threeDuaIndices -> duas.subList(
+                                index,
+                                minOf(index + 3, duas.size)
+                            )
+
+                            index in twoDuaIndices -> duas.subList(
+                                index,
+                                minOf(index + 2, duas.size)
+                            )
+
                             else -> listOfNotNull(duas.getOrNull(index))
                         }
                     }
@@ -311,9 +318,8 @@ fun DuaScreen(
                                 return
                             }
 
-                            // Set currentPlayingIndex based on audio type (title or full)
                             currentPlayingIndex = when {
-                                isReadTitleEnabled && i == 0 -> index // Title audio, show it with first dua
+                                isReadTitleEnabled && i == 0 -> index
                                 else -> {
                                     val duaStart = if (isReadTitleEnabled) 1 else 0
                                     val duaIndex = index + (i - duaStart)
@@ -718,11 +724,18 @@ fun DuaScreen(
                                                     onClick = {
                                                         when {
                                                             repeatCount < 5 -> repeatCount++
-                                                            repeatCount == Int.MAX_VALUE -> repeatCount = 1
-                                                            else -> repeatCount = Int.MAX_VALUE
+                                                            repeatCount == 5 -> repeatCount =
+                                                                Int.MAX_VALUE
+
+                                                            repeatCount == Int.MAX_VALUE -> {
+                                                                repeatCount = 0
+                                                                isRepeatMode = false
+                                                            }
                                                         }
-                                                        isRepeatMode = true
-                                                        currentRepeat = 0
+                                                        if (repeatCount > 0) {
+                                                            isRepeatMode = true
+                                                            currentRepeat = 0
+                                                        }
                                                     },
                                                     modifier = Modifier.align(Alignment.TopEnd)
                                                 ) {
@@ -734,13 +747,17 @@ fun DuaScreen(
                                                 }
 
                                                 if (isRepeatingNow && currentPlayingIndex == i && repeatCount > 0) {
-                                                    val badgeText = if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
+                                                    val badgeText =
+                                                        if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
 
                                                     Box(
                                                         contentAlignment = Alignment.Center,
                                                         modifier = Modifier
                                                             .size(18.dp)
-                                                            .background(Color.Red, shape = CircleShape)
+                                                            .background(
+                                                                Color.Red,
+                                                                shape = CircleShape
+                                                            )
                                                             .align(Alignment.TopEnd)
                                                             .offset(x = (-2).dp, y = 2.dp)
                                                     ) {

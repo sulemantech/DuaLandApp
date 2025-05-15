@@ -64,11 +64,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
     val text_font = FontFamily(Font(R.font.montserrat_regular))
     var selectedFilter by remember { mutableStateOf(initialFilter) }
 
-    if (duaStatuses.isEmpty()) {
-        Spacer(modifier = Modifier.height(0.dp))
-        return
-    }
-
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
@@ -269,27 +264,32 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                             ) {
                                 val originalIndex = duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
 
+                                val actualStatus = when {
+                                    currentStatus == "Memorized" -> "Memorized"
+                                    else -> "In Practice"
+                                }
+
                                 TagButton(
-                                    text = currentStatus,
-                                    backgroundDrawable = when (currentStatus) {
+                                    text = actualStatus,
+                                    backgroundDrawable = when (actualStatus) {
                                         "Memorized" -> R.drawable.memorized_btn_new
-                                        "In Practice" -> R.drawable.practice_now_btn
                                         else -> R.drawable.practice_now_btn
-                                   },
-                                    width = when (currentStatus) {
+                                    },
+                                    width = when (actualStatus) {
                                         "Memorized" -> 100.dp
-                                        "In Practice" ->84.dp
-                                        else -> 80.dp
+                                        else -> 84.dp
                                     },
                                     height = 28.dp,
                                     onClick = {
-                                        if (currentStatus == "In Practice" && originalIndex != -1) {
+                                        if (actualStatus == "In Practice" && originalIndex != -1) {
                                             navController.navigate("dua/$originalIndex")
-                                        } else {
+                                        } else if (actualStatus == "Memorized") {
                                             Toast.makeText(context, "Memorized Dua", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 )
+
+
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Box(
                                     modifier = Modifier.size(24.dp),
@@ -404,7 +404,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
         }
     }
 }
-
+//isko thk krdo jab is screen py aty hn to esy lgta hai switch abi on ho rhy hn is liye switch already on hi hony chahiye
 @Composable
 fun FilterDropdownMenu(
     expanded: Boolean,

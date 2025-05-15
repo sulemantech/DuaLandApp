@@ -245,6 +245,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                     )
                     Spacer(modifier = Modifier.height(15.dp))
                     Divider(Modifier.padding(vertical = 4.dp))
+
                     var pauseSeconds by remember { mutableStateOf(2) }
 
                     toggleOptions.forEach { title ->
@@ -424,6 +425,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 .putBoolean("read_title_enabled", readTitleEnabled)
                                 .putBoolean("rewards_enabled", rewardsEnabled)
                                 .putBoolean("auto_next_duas_enabled", autoNextDuasEnabled)
+                                .putBoolean("Word_by_Word_Pause_Enabled", WordbyWordPauseEnabled)
                                 .putFloat("font_size", fontSize.value)
                                 .putStringSet("selected_languages", selectedLanguages.toSet())
                                 .putString("selected_voice", selectedVoice.value)
