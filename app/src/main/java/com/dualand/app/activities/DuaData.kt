@@ -116,7 +116,7 @@ object DuaDataProvider {
                 "اَللّٰھُمَّ بِکَ اَصْبَحْنَا" to R.raw.dua03_part01_audio01,
                 "وَ بِکَ اَمْسَیْنَا" to R.raw.dua03_part01_audio02,
                 "وَ بِکَ نَحْیَا" to R.raw.dua03_part01_audio03,
-                "وَ بِکَ نَمُوْتُ " to R.raw.dua03_part01_audio04,
+                "وَ بِکَ نَمُوْتُ" to R.raw.dua03_part01_audio04,
                 "وَ اِلَيْكَ الْمَصِیْرُ" to R.raw.dua03_part01_audio05,
             )
         ),
@@ -228,9 +228,9 @@ object DuaDataProvider {
             steps = "Rub your face and your eyes with your hands to\n" +
                     "remove any remaining effects of sleep and say:",
             wordAudioPairs = listOf(
-                "اَلْـحَمْدُ لِلّٰهِ الَّذِیْ " to R.raw.dua07_part01_audio01,
+                "اَلْـحَمْدُ لِلّٰهِ الَّذِیْ" to R.raw.dua07_part01_audio01,
                 "اَحْيَانَا" to R.raw.dua07_part01_audio02,
-                " بَعْدَ مَا اَمَاتَنَا" to R.raw.dua07_part01_audio03,
+                "بَعْدَ مَا اَمَاتَنَا" to R.raw.dua07_part01_audio03,
                 "وَاِلَيْهِ النُّشُوْرُ" to R.raw.dua07_part01_audio04,
             )
         ),
@@ -296,7 +296,7 @@ object DuaDataProvider {
             wordAudioPairs = listOf(
                 "اَلْحَمْدُ لِلّٰهِ الَّذِىْ" to R.raw.dua10_part01_audio01,
                 "كَسَانِى" to R.raw.dua10_part01_audio02,
-                "هٰذَاالثَّوْبَ" to R.raw.dua10_part01_audio03,
+                "هٰذَا الثَّوْبَ" to R.raw.dua10_part01_audio03,
                 "وَرَزَقَنِيْهِ" to R.raw.dua10_part01_audio04,
                 "مِنْ غَيْرِ" to R.raw.dua10_part01_audio05,
                 "حَوْلٍ مِّنِّى" to R.raw.dua10_part01_audio06,
@@ -384,7 +384,7 @@ object DuaDataProvider {
         ),
         Dua(
             id = 18,
-            arabic = "اَللّٰهُمَّ إِنِّیْ أَعُوْذُبِکَ مِنْ مُنْکَرَاتِ الْأخلاَقِ،  وَالْأعْمَالِ، وَالْأھْوَاءِِ",
+            arabic = "اَللّٰهُمَّ إِنِّیْ أَعُوْذُبِکَ مِنْ مُنْکَرَاتِ الْأَخْلَاقِ، وَالْأَعْمَالِ، وَالْأَھْوَاءِ",
             translation = "O Allah! Verily, I seek refuge in You from bad manners, deeds and desires.",
             reference = "[Sunan al-Tirmidhī]",
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -395,13 +395,13 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_bad_ikhlaq,
             image = R.drawable.dua_14,
             duaNumber = "14. ",
-            textheading = "Du’a from protection\n" +
+            textheading = "Du’a for protection\n" +
                     "from Bad Akhlaq",
             wordAudioPairs = listOf(
                 "اَللّٰهُمَّ إِنِّیْ أَعُوْذُبِکَ" to R.raw.dua14_part01_audio01,
-                "مِنْ مُنْکَرَاتِ الْأخلاَقِ،" to R.raw.dua14_part01_audio02,
-                "وَالْأعْمَالِ،" to R.raw.dua14_part01_audio03,
-                "وَالْأھْوَاءِ" to R.raw.dua14_part01_audio04,
+                "مِنْ مُنْکَرَاتِ الْأَخْلَاقِ،" to R.raw.dua14_part01_audio02,
+                "وَالْأَعْمَالِ،" to R.raw.dua14_part01_audio03,
+                "وَالْأَھْوَاءِ" to R.raw.dua14_part01_audio04,
             )
         ),
         Dua(
@@ -460,7 +460,7 @@ object DuaDataProvider {
                 "ھٰذَا" to R.raw.dua15_part03_audio04,
                 "وَمَاکُنَّا" to R.raw.dua15_part03_audio05,
                 "لَہ مُقْرِنِیْنَo" to R.raw.dua15_part03_audio06,
-                "وَاِنَّآاِلٰی" to R.raw.dua15_part03_audio07,
+                "وَاِنَّآ اِلٰی" to R.raw.dua15_part03_audio07,
                 "رَبِّنَا" to R.raw.dua15_part03_audio08,
                 "لَمُنْقَلِبُوْنَo" to R.raw.dua15_part03_audio09,
             )
@@ -501,7 +501,7 @@ object DuaDataProvider {
             steps = "Reply to the Greeting:",
           //  textheading = "Du’a When Meeting\n" + "a Muslim",
             wordAudioPairs = listOf(
-                "وَعَلَیْکُمُ السَّلَامُ وَ رَ حْمَةُ اللّٰہِ وَ بَرَکَاتُہُ" to R.raw.dua16_part02_audio01
+                "وَعَلَیْکُمُ السَّلَامُ وَرَحْمَةُ اللّٰہِ وَبَرَکَاتُہُ" to R.raw.dua16_part02_audio01
             )
         ),
 
@@ -541,9 +541,9 @@ object DuaDataProvider {
             duaNumber = "18. ",
             textheading = "Du’a When Entering the\n" + "Market",
             wordAudioPairs = listOf(
-                "لَا اِلٰہَ اِلَّا اللّٰہُ " to R.raw.dua18_part01_audio01,
-                "وَحْدَہٗ  لَا شَرِیْکَ لَهٗ،" to R.raw.dua18_part01_audio02,
-                " لَہُ الْمُلْکُ" to R.raw.dua18_part01_audio03,
+                "لَا اِلٰہَ اِلَّا اللّٰہُ" to R.raw.dua18_part01_audio01,
+                "وَحْدَہٗ لَا شَرِیْکَ لَهٗ،" to R.raw.dua18_part01_audio02,
+                "لَہُ الْمُلْکُ" to R.raw.dua18_part01_audio03,
                 "وَلَہُ الْحَمْدُ" to R.raw.dua18_part01_audio04,
                 "یُحْیِی" to R.raw.dua18_part01_audio05,
                 "وَ یُمِیْتُ" to R.raw.dua18_part01_audio06,
@@ -649,7 +649,7 @@ object DuaDataProvider {
             duaNumber = "22. ",
             textheading = "Du’a after Eating\n& Drinking",
             wordAudioPairs = listOf(
-                "اَلّٰھُمَّ بَارِکْ لَناَ فِیْہِ  " to R.raw.dua22_part01_audio01,
+                "اَلّٰھُمَّ بَارِکْ لَناَ فِیْہِ" to R.raw.dua22_part01_audio01,
                 "وَاَطْعِمْنَا" to R.raw.dua22_part01_audio02,
                 "خَیْرًا مِّنْہُ" to R.raw.dua22_part01_audio03,
             )
@@ -672,7 +672,7 @@ object DuaDataProvider {
             wordAudioPairs = listOf(
                 "لَا بَأْسَ" to R.raw.dua24_part01_audio01,
                 "طَهُورٌ" to R.raw.dua24_part01_audio02,
-                " إِنْ شَاءَ اللَّهُ" to R.raw.dua24_part01_audio03,
+                "إِنْ شَاءَ اللَّهُ" to R.raw.dua24_part01_audio03,
             )
         ),
         Dua(
@@ -708,8 +708,7 @@ object DuaDataProvider {
             image = R.drawable.dua_25,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             duaNumber = "24. ",
-            textheading = "Du’a for one \n" +
-                    "Afflicted by a Calamity",
+            textheading = "Du’a for one Afflicted\nby a Calamity",
             wordAudioPairs = listOf(
                 "اِنَّا لِلّٰہِ" to R.raw.dua25_part01_audio01,
                 "وَاِنَّا اِلَیْہِ" to R.raw.dua25_part01_audio02,
@@ -740,9 +739,9 @@ object DuaDataProvider {
                 "عَافَانِی" to R.raw.dua26_part01_audio02,
                 "مِمَّا ابْتَلَاکَ" to R.raw.dua26_part01_audio03,
                 "بِهِ" to R.raw.dua26_part01_audio04,
-                "وَ فَضَّلَنِی " to R.raw.dua26_part01_audio05,
+                "وَ فَضَّلَنِی" to R.raw.dua26_part01_audio05,
                 "عَلٰی کَثِیْرٍ" to R.raw.dua26_part01_audio06,
-                "مِمَّنْ خَلَقَ " to R.raw.dua26_part01_audio07,
+                "مِمَّنْ خَلَقَ" to R.raw.dua26_part01_audio07,
                 "تَفْضِيْلًا" to R.raw.dua26_part01_audio08
             )
         ),
@@ -839,8 +838,8 @@ object DuaDataProvider {
             duaNumber = "28. ",
             textheading = "Du‘a when it Rains",
             wordAudioPairs = listOf(
-                " اَلّٰھُمَّ اجْعَلْہُ" to R.raw.dua29_part01_audio01,
-                "  صَیِّباً  نَافِعاً" to R.raw.dua29_part01_audio02,
+                "اَلّٰھُمَّ اجْعَلْہُ" to R.raw.dua29_part01_audio01,
+                "صَیِّباً نَافِعاً" to R.raw.dua29_part01_audio02,
             )
         ),
         Dua(
@@ -916,12 +915,12 @@ object DuaDataProvider {
                 "مَااسْتَطَعْتُ،" to R.raw.dua32_part01_audio08,
                 "اَعُوْذُبِکَ" to R.raw.dua32_part01_audio09,
                 "مِنْ شَرِّ" to R.raw.dua32_part01_audio10,
-                " مَاصَنَعْتُ،" to R.raw.dua32_part01_audio11,
+                "مَاصَنَعْتُ،" to R.raw.dua32_part01_audio11,
                 "اَبُوْءُلَکَ" to R.raw.dua32_part01_audio12,
                 "بِنِعْمَتِکَ" to R.raw.dua32_part01_audio13,
                 "عَلَیَّ" to R.raw.dua32_part01_audio14,
                 "وَاَبُوْءُ" to R.raw.dua32_part01_audio15,
-                "بِذَنْبِی " to R.raw.dua32_part01_audio16,
+                "بِذَنْبِی" to R.raw.dua32_part01_audio16,
                 "فَاغْفِرْلِیْ" to R.raw.dua32_part01_audio17,
                 "فَاِنَّهُ" to R.raw.dua32_part01_audio18,
                 "لَا یَغْفِرُالذُّنُوْبَ" to R.raw.dua32_part01_audio19,

@@ -18,11 +18,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -87,7 +90,8 @@ fun DuaScreen(
     var isRepeatingNow by remember { mutableStateOf(false) }
     var isRepeatMode by remember { mutableStateOf(false) }
     var currentlyRepeatingDuaIndex by remember { mutableStateOf(-1) }
-    var selectedTab by remember { mutableStateOf("") }
+  //  var selectedTab by remember { mutableStateOf("") }
+    var selectedTab by rememberSaveable { mutableStateOf("WORD_BY_WORD") }
 
     @Composable
     fun isTablet(): Boolean {
@@ -120,30 +124,6 @@ fun DuaScreen(
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
-    }
-
-    fun stopAudioPlayback(player: MediaPlayer?): MediaPlayer? {
-        player?.let {
-            try {
-                if (it.isPlaying) {
-                    it.stop()
-                }
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-            } finally {
-                it.release()
-            }
-        }
-
-        isPlaying = false
-        showListening = false
-        globalWordIndex = -1
-
-        wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
-        wordHandler = null
-        wordRunnable = null
-
-        return null
     }
 
     fun stopAudioPlayback() {
@@ -278,6 +258,9 @@ fun DuaScreen(
                 onCompleteDuaClick = {
                     selectedTab = "COMPLETE"
 
+                    isPlaying = false
+                    showListening = false
+                    currentPlayingIndex = -1
                     val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                     val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
                     val isAutoNextEnabled = sharedPref.getBoolean("auto_next_duas_enabled", false)
@@ -316,65 +299,74 @@ fun DuaScreen(
                             queue.add(dua.fullAudioResId)
                         }
 
-                        Log.d("DEBUG", "Audio Queue for index $index: $queue")
                         return queue
                     }
 
                     fun playQueue(queue: List<Int>, index: Int, onFinished: () -> Unit) {
+                        val duasForIndex = getDuasForIndex(index)
+
                         fun playAt(i: Int) {
                             if (i >= queue.size) {
                                 onFinished()
                                 return
                             }
+
+                            // Set currentPlayingIndex based on audio type (title or full)
+                            currentPlayingIndex = when {
+                                isReadTitleEnabled && i == 0 -> index // Title audio, show it with first dua
+                                else -> {
+                                    val duaStart = if (isReadTitleEnabled) 1 else 0
+                                    val duaIndex = index + (i - duaStart)
+                                    duaIndex
+                                }
+                            }
+
                             playNextAudio(queue[i]) {
                                 playAt(i + 1)
                             }
                         }
+
                         playAt(0)
                     }
 
+
                     fun stopAudioPlayback() {
                         if (globalMediaPlayer?.isPlaying == true) {
-                            Log.d("DEBUG", "Stopping previous audio playback")
                             globalMediaPlayer?.stop()
                         }
                     }
 
                     fun playFromIndex(index: Int) {
                         if (index >= duas.size) {
-                            Log.d("DEBUG", "Index out of bounds: $index")
                             isPlaying = false
+                            showListening = false
                             return
                         }
 
                         currentIndex = index
+                        currentPlayingIndex = index
                         isPlaying = true
-
-                        Log.d("DEBUG", "Playing from index: $index")
+                        showListening = true
 
                         val audioQueue = buildAudioQueue(index)
 
                         stopAudioPlayback()
-
                         playQueue(audioQueue, index) {
-                            Log.d("DEBUG", "After playQueue function for index: $index")
-
                             if (isAutoNextEnabled) {
                                 val nextIndex = index + getDuasForIndex(index).size
                                 if (nextIndex < duas.size) {
-                                    Log.d("DEBUG", "nextIndex: $nextIndex, index: $index")
                                     playFromIndex(nextIndex)
                                 } else {
-                                    Log.d("DEBUG", "No more duas to play, stopping.")
                                     isPlaying = false
+                                    showListening = false
                                 }
                             } else {
                                 isPlaying = false
+                                showListening = false
                             }
                         }
                     }
 
-                    Log.d("DEBUG", "Starting to play from current index: $currentIndex")
                     playFromIndex(currentIndex)
                 }
             )
@@ -416,10 +408,18 @@ fun DuaScreen(
                 ) {
 
                     val scrollState = rememberScrollState()
+                    val duaPositions = remember { mutableMapOf<Int, Int>() }
 
-                    LaunchedEffect(currentIndex) {
-                        scrollState.animateScrollTo(0)
+                    LaunchedEffect(currentPlayingIndex) {
+                        duaPositions[currentPlayingIndex]?.let { yOffset ->
+                            scrollState.animateScrollTo(yOffset)
+                        }
                     }
+
+
+//                    LaunchedEffect(currentIndex) {
+//                        scrollState.animateScrollTo(0)
+//                    }
 
                     Column(
                         modifier = Modifier
@@ -438,396 +438,490 @@ fun DuaScreen(
                             )) {
                                 val dua = duas[i]
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(
-                                        -10.dp,
-                                        Alignment.CenterHorizontally
-                                    )
+                                Box(
+                                    modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                                        duaPositions[i] =
+                                            layoutCoordinates.positionInParent().y.toInt()
+                                    }
                                 ) {
-                                    FavouriteButton(
-                                        duaNumber = dua.duaNumber,
-                                        textHeading = dua.textheading,
-                                        imageResId = dua.image,
-                                        viewModel = viewModel
-                                    )
+                                    Column {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 12.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(
+                                                -10.dp,
+                                                Alignment.CenterHorizontally
+                                            )
+                                        ) {
+                                            FavouriteButton(
+                                                duaNumber = dua.duaNumber,
+                                                textHeading = dua.textheading,
+                                                imageResId = dua.image,
+                                                viewModel = viewModel
+                                            )
 
-                                    fun playWord(
-                                        index: Int,
-                                        isAutoNextEnabled: Boolean = false,
-                                        isReadTitleEnabled: Boolean = false
-                                    ) {
-                                        if (currentPlayingIndex >= duas.size) {
-                                            isPlaying = false
-                                            return
-                                        }
-                                        val dua = duas[currentPlayingIndex]
-                                        Log.d("DuaPlayback", "Playing Dua index: $currentPlayingIndex, word index: $index")
+                                            fun playWord(
+                                                index: Int,
+                                                isAutoNextEnabled: Boolean = false,
+                                                isReadTitleEnabled: Boolean = false
+                                            ) {
+                                                if (currentPlayingIndex >= duas.size) {
+                                                    isPlaying = false
+                                                    return
+                                                }
+                                                val dua = duas[currentPlayingIndex]
+                                                Log.d(
+                                                    "DuaPlayback",
+                                                    "Playing Dua index: $currentPlayingIndex, word index: $index"
+                                                )
 
-                                        if (index == 0 && isReadTitleEnabled) {
-                                            dua.titleAudioResId?.let { titleAudioId ->
-                                                globalMediaPlayer?.release()
-                                                globalMediaPlayer = MediaPlayer.create(context, titleAudioId)
+                                                if (index == 0 && isReadTitleEnabled) {
+                                                    dua.titleAudioResId?.let { titleAudioId ->
+                                                        globalMediaPlayer?.release()
+                                                        globalMediaPlayer = MediaPlayer.create(
+                                                            context,
+                                                            titleAudioId
+                                                        )
 
-                                                globalMediaPlayer?.setOnCompletionListener {
-                                                    playWord(0, isAutoNextEnabled, false)
+                                                        globalMediaPlayer?.setOnCompletionListener {
+                                                            playWord(0, isAutoNextEnabled, false)
+                                                        }
+
+                                                        globalMediaPlayer?.start()
+                                                        return
+                                                    }
                                                 }
 
-                                                globalMediaPlayer?.start()
-                                                return
-                                            }
-                                        }
-
-                                        if (index >= dua.wordAudioPairs.size) {
-                                            if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
-                                                currentRepeat++
-                                                isRepeatingNow = true
-                                                currentlyRepeatingDuaIndex = currentPlayingIndex
-                                                playWord(0, isAutoNextEnabled, false)
-                                            } else {
-                                                isRepeatMode = false
-                                                currentRepeat = 0
-                                                isRepeatingNow = false
-                                                currentlyRepeatingDuaIndex = -1
-
-                                                if (isAutoNextEnabled) {
-                                                    val showCount = when {
-                                                        currentIndex in threeDuaIndices -> 3
-                                                        currentIndex in twoDuaIndices -> 2
-                                                        else -> 1
-                                                    }
-
-                                                    val groupStartIndex = currentIndex
-                                                    val groupEndIndexExclusive = (groupStartIndex + showCount).coerceAtMost(duas.size)
-
-                                                    val nextDuaInGroup = currentPlayingIndex + 1
-                                                    if (nextDuaInGroup < groupEndIndexExclusive) {
-                                                        currentPlayingIndex = nextDuaInGroup
-                                                        globalWordIndex = -1
-                                                        isPlaying = true
-                                                        showListening = true
-
-                                                        val nextDua = duas[currentPlayingIndex]
-                                                        Log.d("DuaPlayback", "Playing next Dua in same group: index $currentPlayingIndex")
-
-                                                        if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
-                                                            globalMediaPlayer?.release()
-                                                            globalMediaPlayer = MediaPlayer.create(context, nextDua.titleAudioResId)
-                                                            globalMediaPlayer?.setOnCompletionListener {
-                                                                playWord(0, isAutoNextEnabled, false)
-                                                            }
-                                                            globalMediaPlayer?.start()
-                                                        } else {
-                                                            playWord(0, isAutoNextEnabled, isReadTitleEnabled)
-                                                        }
+                                                if (index >= dua.wordAudioPairs.size) {
+                                                    if (isRepeatMode && (repeatCount == Int.MAX_VALUE || currentRepeat < repeatCount)) {
+                                                        currentRepeat++
+                                                        isRepeatingNow = true
+                                                        currentlyRepeatingDuaIndex =
+                                                            currentPlayingIndex
+                                                        playWord(0, isAutoNextEnabled, false)
                                                     } else {
-                                                        val nextGroupStartIndex = groupEndIndexExclusive
-                                                        if (nextGroupStartIndex < duas.size) {
-                                                            currentPlayingIndex = nextGroupStartIndex
-                                                            currentIndex = currentPlayingIndex
-                                                            globalWordIndex = -1
-                                                            isPlaying = true
-                                                            showListening = true
+                                                        isRepeatMode = false
+                                                        currentRepeat = 0
+                                                        isRepeatingNow = false
+                                                        currentlyRepeatingDuaIndex = -1
 
-                                                            val nextDua = duas[currentPlayingIndex]
-                                                            Log.d("DuaPlayback", "Moving to next group: index $currentPlayingIndex")
+                                                        if (isAutoNextEnabled) {
+                                                            val showCount = when {
+                                                                currentIndex in threeDuaIndices -> 3
+                                                                currentIndex in twoDuaIndices -> 2
+                                                                else -> 1
+                                                            }
 
-                                                            if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
-                                                                globalMediaPlayer?.release()
-                                                                globalMediaPlayer = MediaPlayer.create(context, nextDua.titleAudioResId)
-                                                                globalMediaPlayer?.setOnCompletionListener {
-                                                                    playWord(0, isAutoNextEnabled, false)
+                                                            val groupStartIndex = currentIndex
+                                                            val groupEndIndexExclusive =
+                                                                (groupStartIndex + showCount).coerceAtMost(
+                                                                    duas.size
+                                                                )
+
+                                                            val nextDuaInGroup =
+                                                                currentPlayingIndex + 1
+                                                            if (nextDuaInGroup < groupEndIndexExclusive) {
+                                                                currentPlayingIndex = nextDuaInGroup
+                                                                globalWordIndex = -1
+                                                                isPlaying = true
+                                                                showListening = true
+
+                                                                val nextDua =
+                                                                    duas[currentPlayingIndex]
+                                                                Log.d(
+                                                                    "DuaPlayback",
+                                                                    "Playing next Dua in same group: index $currentPlayingIndex"
+                                                                )
+
+                                                                if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
+                                                                    globalMediaPlayer?.release()
+                                                                    globalMediaPlayer =
+                                                                        MediaPlayer.create(
+                                                                            context,
+                                                                            nextDua.titleAudioResId
+                                                                        )
+                                                                    globalMediaPlayer?.setOnCompletionListener {
+                                                                        playWord(
+                                                                            0,
+                                                                            isAutoNextEnabled,
+                                                                            false
+                                                                        )
+                                                                    }
+                                                                    globalMediaPlayer?.start()
+                                                                } else {
+                                                                    playWord(
+                                                                        0,
+                                                                        isAutoNextEnabled,
+                                                                        isReadTitleEnabled
+                                                                    )
                                                                 }
-                                                                globalMediaPlayer?.start()
                                                             } else {
-                                                                playWord(0, isAutoNextEnabled, isReadTitleEnabled)
+                                                                val nextGroupStartIndex =
+                                                                    groupEndIndexExclusive
+                                                                if (nextGroupStartIndex < duas.size) {
+                                                                    currentPlayingIndex =
+                                                                        nextGroupStartIndex
+                                                                    currentIndex =
+                                                                        currentPlayingIndex
+                                                                    globalWordIndex = -1
+                                                                    isPlaying = true
+                                                                    showListening = true
+
+                                                                    val nextDua =
+                                                                        duas[currentPlayingIndex]
+                                                                    Log.d(
+                                                                        "DuaPlayback",
+                                                                        "Moving to next group: index $currentPlayingIndex"
+                                                                    )
+
+                                                                    if (isReadTitleEnabled && nextDua.titleAudioResId != null) {
+                                                                        globalMediaPlayer?.release()
+                                                                        globalMediaPlayer =
+                                                                            MediaPlayer.create(
+                                                                                context,
+                                                                                nextDua.titleAudioResId
+                                                                            )
+                                                                        globalMediaPlayer?.setOnCompletionListener {
+                                                                            playWord(
+                                                                                0,
+                                                                                isAutoNextEnabled,
+                                                                                false
+                                                                            )
+                                                                        }
+                                                                        globalMediaPlayer?.start()
+                                                                    } else {
+                                                                        playWord(
+                                                                            0,
+                                                                            isAutoNextEnabled,
+                                                                            isReadTitleEnabled
+                                                                        )
+                                                                    }
+                                                                } else {
+                                                                    isPlaying = false
+                                                                    showListening = false
+                                                                    globalWordIndex = -1
+                                                                }
                                                             }
                                                         } else {
+                                                            // AutoNext disabled — stop here
                                                             isPlaying = false
                                                             showListening = false
                                                             globalWordIndex = -1
                                                         }
                                                     }
-                                                } else {
-                                                    // AutoNext disabled — stop here
-                                                    isPlaying = false
-                                                    showListening = false
-                                                    globalWordIndex = -1
+                                                    return
                                                 }
-                                            }
-                                            return
-                                        }
 
-                                        val (_, audioResId) = dua.wordAudioPairs[index]
+                                                val (_, audioResId) = dua.wordAudioPairs[index]
 
-                                        wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
-                                        wordHandler = null
-                                        wordRunnable = null
+                                                wordHandler?.removeCallbacks(
+                                                    wordRunnable ?: Runnable {})
+                                                wordHandler = null
+                                                wordRunnable = null
 
-                                        globalMediaPlayer?.release()
-                                        globalMediaPlayer = MediaPlayer.create(context, audioResId)
-
-                                        globalWordIndex = index
-                                        showListening = false
-
-                                        globalMediaPlayer?.apply {
-                                            val rawDuration = duration
-                                            val silencePadding = 500
-                                            val effectiveDuration = (rawDuration - silencePadding).coerceAtLeast(100)
-
-                                            setOnCompletionListener {
-                                                showListening = true
-                                                wordHandler = Handler(Looper.getMainLooper())
-                                                wordRunnable = Runnable {
-                                                    playWord(index + 1, isAutoNextEnabled, false)
-                                                }
-                                                wordHandler?.postDelayed(wordRunnable!!, effectiveDuration.toLong())
-                                            }
-
-                                            start()
-                                        }
-                                    }
-
-
-                                    val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                                    val isReadTitleEnabled = sharedPref.getBoolean("read_title_enabled", false)
-                                    val isAutoNextEnabled = sharedPref.getBoolean("auto_next_duas_enabled", false)
-
-                                    PlayWordByWordButton(
-                                        isPlaying = isPlaying && currentPlayingIndex == i,
-                                        showListening = showListening && currentPlayingIndex == i,
-                                        onClick = {
-                                            if (isPlaying && currentPlayingIndex == i) {
-                                                globalMediaPlayer?.pause()
-                                                isPlaying = false
-                                                showListening = false
-                                            } else {
-                                                stopAudioPlayback()
                                                 globalMediaPlayer?.release()
+                                                globalMediaPlayer =
+                                                    MediaPlayer.create(context, audioResId)
 
-                                                currentPlayingIndex = i
-                                                globalWordIndex = -1
-                                                isPlaying = true
-                                                showListening = true
+                                                globalWordIndex = index
+                                                showListening = false
 
-                                                val selectedDua = duas[currentPlayingIndex]
+                                                globalMediaPlayer?.apply {
+                                                    val rawDuration = duration
+                                                    val silencePadding = 500
+                                                    val effectiveDuration =
+                                                        (rawDuration - silencePadding).coerceAtLeast(
+                                                            100
+                                                        )
 
-                                                if (isReadTitleEnabled && selectedDua.titleAudioResId != null) {
-                                                    globalMediaPlayer = MediaPlayer.create(context, selectedDua.titleAudioResId)
-                                                    globalMediaPlayer?.setOnCompletionListener {
-                                                        playWord(0, isAutoNextEnabled, false)
-                                                    }
-                                                    globalMediaPlayer?.start()
-                                                } else {
-                                                    playWord(0, isAutoNextEnabled, isReadTitleEnabled)
-                                                }
-                                            }
-                                        }
-                                    )
-
-                                    Box(
-                                        modifier = Modifier.padding(top = 2.dp)
-                                    ) {
-                                        IconButton(
-                                            onClick = {
-                                                if (repeatCount < 5) {
-                                                    repeatCount++
-                                                } else {
-                                                    repeatCount = Int.MAX_VALUE
-                                                }
-                                                isRepeatMode = true
-                                                currentRepeat = 0
-                                            },
-                                            modifier = Modifier
-                                                .align(Alignment.TopEnd)
-                                        ) {
-                                            Image(
-                                                painter = painterResource(id = R.drawable.repeat_off_btn),
-                                                contentDescription = "Repeat",
-                                                modifier = Modifier.size(33.dp)
-                                            )
-                                        }
-
-                                        if (isRepeatingNow && currentPlayingIndex == i && repeatCount > 0) {
-                                            val badgeText =
-                                                if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
-
-                                            Box(
-                                                contentAlignment = Alignment.Center,
-                                                modifier = Modifier
-                                                    .size(18.dp)
-                                                    .background(Color.Red, shape = CircleShape)
-                                                    .align(Alignment.TopEnd)
-                                                    .offset(x = (-2).dp, y = 2.dp)
-                                            ) {
-                                                Text(
-                                                    text = badgeText,
-                                                    color = Color.White,
-                                                    fontSize = 10.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
-
-                                    }
-
-
-                                }
-
-                                Spacer(modifier = Modifier.height(9.dp))
-
-                                dua.steps?.let {
-                                    Text(
-                                        text = it,
-                                        fontSize = 12.sp,
-                                        fontFamily = translationtext,
-                                        fontWeight = FontWeight.SemiBold,
-                                        textAlign = TextAlign.Center,
-                                        color = colorResource(R.color.heading_color),
-                                        modifier = Modifier
-                                            .align(Alignment.CenterHorizontally)
-                                            .padding(start = 20.dp, end = 20.dp)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(5.dp))
-
-                                val sharedPref =
-                                    context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                                val savedFontSize = sharedPref.getFloat("font_size", 24f)
-
-                                val annotatedText = buildAnnotatedString {
-                                    dua.wordAudioPairs.forEachIndexed { index, pair ->
-                                        pushStringAnnotation("WORD", index.toString())
-                                        withStyle(
-                                            style = SpanStyle(
-                                                color = if (globalWordIndex == index && currentPlayingIndex == i)
-                                                    colorResource(R.color.highlited_color)
-                                                else colorResource(R.color.arabic_color),
-                                                fontWeight = if (globalWordIndex == index && currentPlayingIndex == i)
-                                                    FontWeight.Bold
-                                                else FontWeight.Normal
-                                            )
-                                        ) {
-                                            append(pair.first + " ")
-                                        }
-                                        pop()
-                                    }
-                                }
-
-                                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                    ClickableText(
-                                        text = annotatedText,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 25.dp, end = 25.dp),
-                                        style = TextStyle(
-                                            fontSize = savedFontSize.sp,
-                                            fontFamily = MyArabicFont,
-                                            textDirection = TextDirection.Rtl,
-                                            textAlign = TextAlign.Center
-                                        ),
-                                        onClick = { offset ->
-                                            annotatedText.getStringAnnotations(
-                                                "WORD",
-                                                offset,
-                                                offset
-                                            )
-                                                .firstOrNull()?.let { annotation ->
-                                                    val clickedIndex = annotation.item.toInt()
-                                                    globalMediaPlayer?.release()
-                                                    globalMediaPlayer = MediaPlayer.create(
-                                                        context,
-                                                        dua.wordAudioPairs[clickedIndex].second
-                                                    )
-                                                    currentPlayingIndex = i
-                                                    globalWordIndex = clickedIndex
-                                                    globalMediaPlayer?.setOnCompletionListener {
-                                                        globalWordIndex = -1
-                                                    }
-                                                    globalMediaPlayer?.start()
-                                                }
-                                        }
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(5.dp))
-                                Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp)) {
-                                    if (selectedLanguages.isEmpty()) {
-                                        Box(modifier = Modifier.fillMaxWidth()) {
-                                            Text(
-                                                text = "No translation language selected.",
-                                                fontFamily = translationtext,
-                                                color = Color.Gray,
-                                                textAlign = TextAlign.Center,
-                                                fontSize = 14.sp,
-                                                modifier = Modifier
-                                                    .align(Alignment.Center)
-                                            )
-                                        }
-                                    } else {
-                                        selectedLanguages.forEach { lang ->
-                                            when {
-                                                lang.equals("English", ignoreCase = true) -> {
-                                                    dua.translation?.let {
-                                                        Box(modifier = Modifier.fillMaxWidth()) {
-                                                            Text(
-                                                                text = it,
-                                                                fontFamily = translationtext,
-                                                                fontSize =responsiveFontSize(),
-                                                                textAlign = TextAlign.Center,
-                                                                modifier = Modifier
-                                                                    .align(Alignment.Center)
-
+                                                    setOnCompletionListener {
+                                                        showListening = true
+                                                        wordHandler =
+                                                            Handler(Looper.getMainLooper())
+                                                        wordRunnable = Runnable {
+                                                            playWord(
+                                                                index + 1,
+                                                                isAutoNextEnabled,
+                                                                false
                                                             )
+                                                        }
+                                                        wordHandler?.postDelayed(
+                                                            wordRunnable!!,
+                                                            effectiveDuration.toLong()
+                                                        )
+                                                    }
 
+                                                    start()
+                                                }
+                                            }
+
+
+                                            val sharedPref = context.getSharedPreferences(
+                                                "app_prefs",
+                                                Context.MODE_PRIVATE
+                                            )
+                                            val isReadTitleEnabled =
+                                                sharedPref.getBoolean("read_title_enabled", false)
+                                            val isAutoNextEnabled = sharedPref.getBoolean(
+                                                "auto_next_duas_enabled",
+                                                false
+                                            )
+
+                                            PlayWordByWordButton(
+                                                isPlaying = isPlaying && currentPlayingIndex == i,
+                                                showListening = showListening && currentPlayingIndex == i,
+                                                onClick = {
+                                                    if (isPlaying && currentPlayingIndex == i) {
+                                                        globalMediaPlayer?.pause()
+                                                        isPlaying = false
+                                                        showListening = false
+                                                    } else {
+                                                        stopAudioPlayback()
+                                                        globalMediaPlayer?.release()
+
+                                                        currentPlayingIndex = i
+                                                        globalWordIndex = -1
+                                                        isPlaying = true
+                                                        showListening = true
+
+                                                        val selectedDua = duas[currentPlayingIndex]
+
+                                                        if (isReadTitleEnabled && selectedDua.titleAudioResId != null) {
+                                                            globalMediaPlayer = MediaPlayer.create(
+                                                                context,
+                                                                selectedDua.titleAudioResId
+                                                            )
+                                                            globalMediaPlayer?.setOnCompletionListener {
+                                                                playWord(
+                                                                    0,
+                                                                    isAutoNextEnabled,
+                                                                    false
+                                                                )
+                                                            }
+                                                            globalMediaPlayer?.start()
+                                                        } else {
+                                                            playWord(
+                                                                0,
+                                                                isAutoNextEnabled,
+                                                                isReadTitleEnabled
+                                                            )
                                                         }
                                                     }
-                                                    Spacer(modifier = Modifier.height(10.dp))
+                                                }
+                                            )
+
+                                            Box(
+                                                modifier = Modifier.padding(top = 2.dp)
+                                            ) {
+                                                IconButton(
+                                                    onClick = {
+                                                        when {
+                                                            repeatCount < 5 -> repeatCount++
+                                                            repeatCount == Int.MAX_VALUE -> repeatCount = 1
+                                                            else -> repeatCount = Int.MAX_VALUE
+                                                        }
+                                                        isRepeatMode = true
+                                                        currentRepeat = 0
+                                                    },
+                                                    modifier = Modifier.align(Alignment.TopEnd)
+                                                ) {
+                                                    Image(
+                                                        painter = painterResource(id = R.drawable.repeat_off_btn),
+                                                        contentDescription = "Repeat",
+                                                        modifier = Modifier.size(33.dp)
+                                                    )
                                                 }
 
-                                                lang.equals("Urdu", ignoreCase = true) -> {
-                                                    dua.urdu?.let {
+                                                if (isRepeatingNow && currentPlayingIndex == i && repeatCount > 0) {
+                                                    val badgeText = if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
+
+                                                    Box(
+                                                        contentAlignment = Alignment.Center,
+                                                        modifier = Modifier
+                                                            .size(18.dp)
+                                                            .background(Color.Red, shape = CircleShape)
+                                                            .align(Alignment.TopEnd)
+                                                            .offset(x = (-2).dp, y = 2.dp)
+                                                    ) {
                                                         Text(
-                                                            text = it,
-                                                            fontFamily = translationtext,
-                                                            fontSize =responsiveFontSize(),
-                                                            textAlign = TextAlign.Center,
+                                                            text = badgeText,
+                                                            color = Color.White,
+                                                            fontSize = 10.sp,
+                                                            fontWeight = FontWeight.Bold
                                                         )
                                                     }
-                                                    Spacer(modifier = Modifier.height(15.dp))
-
-                                                }
-
-                                                lang.equals("Hindi", ignoreCase = true) -> {
-                                                    dua.hinditranslation?.let {
-                                                        Text(
-                                                            text = it,
-                                                            fontFamily = translationtext,
-                                                            fontSize = responsiveFontSize(),
-                                                            textAlign = TextAlign.Center,
-                                                        )
-                                                    }
-                                                    Spacer(modifier = Modifier.height(15.dp))
                                                 }
                                             }
+
+                                        }
+
+                                        Spacer(modifier = Modifier.height(9.dp))
+
+                                        dua.steps?.let {
+                                            Text(
+                                                text = it,
+                                                fontSize = 12.sp,
+                                                fontFamily = translationtext,
+                                                fontWeight = FontWeight.SemiBold,
+                                                textAlign = TextAlign.Center,
+                                                color = colorResource(R.color.heading_color),
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterHorizontally)
+                                                    .padding(start = 20.dp, end = 20.dp)
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.height(5.dp))
+
+                                        val sharedPref =
+                                            context.getSharedPreferences(
+                                                "app_prefs",
+                                                Context.MODE_PRIVATE
+                                            )
+                                        val savedFontSize = sharedPref.getFloat("font_size", 24f)
+
+                                        val annotatedText = buildAnnotatedString {
+                                            dua.wordAudioPairs.forEachIndexed { index, pair ->
+                                                pushStringAnnotation("WORD", index.toString())
+                                                withStyle(
+                                                    style = SpanStyle(
+                                                        color = if (globalWordIndex == index && currentPlayingIndex == i)
+                                                            colorResource(R.color.highlited_color)
+                                                        else colorResource(R.color.arabic_color),
+                                                        fontWeight = if (globalWordIndex == index && currentPlayingIndex == i)
+                                                            FontWeight.Bold
+                                                        else FontWeight.Normal
+                                                    )
+                                                ) {
+                                                    append(pair.first + " ")
+                                                }
+                                                pop()
+                                            }
+                                        }
+
+                                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                            ClickableText(
+                                                text = annotatedText,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(start = 25.dp, end = 25.dp),
+                                                style = TextStyle(
+                                                    fontSize = savedFontSize.sp,
+                                                    fontFamily = MyArabicFont,
+                                                    textDirection = TextDirection.Rtl,
+                                                    textAlign = TextAlign.Center
+                                                ),
+                                                onClick = { offset ->
+                                                    annotatedText.getStringAnnotations(
+                                                        "WORD",
+                                                        offset,
+                                                        offset
+                                                    )
+                                                        .firstOrNull()?.let { annotation ->
+                                                            val clickedIndex =
+                                                                annotation.item.toInt()
+                                                            globalMediaPlayer?.release()
+                                                            globalMediaPlayer = MediaPlayer.create(
+                                                                context,
+                                                                dua.wordAudioPairs[clickedIndex].second
+                                                            )
+                                                            currentPlayingIndex = i
+                                                            globalWordIndex = clickedIndex
+                                                            globalMediaPlayer?.setOnCompletionListener {
+                                                                globalWordIndex = -1
+                                                            }
+                                                            globalMediaPlayer?.start()
+                                                        }
+                                                }
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(5.dp))
+                                        Column(
+                                            modifier = Modifier.padding(
+                                                start = 20.dp,
+                                                end = 20.dp
+                                            )
+                                        ) {
+                                            if (selectedLanguages.isEmpty()) {
+                                                Box(modifier = Modifier.fillMaxWidth()) {
+                                                    Text(
+                                                        text = "No translation language selected.",
+                                                        fontFamily = translationtext,
+                                                        color = Color.Gray,
+                                                        textAlign = TextAlign.Center,
+                                                        fontSize = 14.sp,
+                                                        modifier = Modifier
+                                                            .align(Alignment.Center)
+                                                    )
+                                                }
+                                            } else {
+                                                selectedLanguages.forEach { lang ->
+                                                    when {
+                                                        lang.equals(
+                                                            "English",
+                                                            ignoreCase = true
+                                                        ) -> {
+                                                            dua.translation?.let {
+                                                                Box(modifier = Modifier.fillMaxWidth()) {
+                                                                    Text(
+                                                                        text = it,
+                                                                        fontFamily = translationtext,
+                                                                        fontSize = responsiveFontSize(),
+                                                                        textAlign = TextAlign.Center,
+                                                                        modifier = Modifier
+                                                                            .align(Alignment.Center)
+
+                                                                    )
+
+                                                                }
+                                                            }
+                                                            Spacer(modifier = Modifier.height(10.dp))
+                                                        }
+
+                                                        lang.equals("Urdu", ignoreCase = true) -> {
+                                                            dua.urdu?.let {
+                                                                Text(
+                                                                    text = it,
+                                                                    fontFamily = translationtext,
+                                                                    fontSize = responsiveFontSize(),
+                                                                    textAlign = TextAlign.Center,
+                                                                )
+                                                            }
+                                                            Spacer(modifier = Modifier.height(15.dp))
+
+                                                        }
+
+                                                        lang.equals("Hindi", ignoreCase = true) -> {
+                                                            dua.hinditranslation?.let {
+                                                                Text(
+                                                                    text = it,
+                                                                    fontFamily = translationtext,
+                                                                    fontSize = responsiveFontSize(),
+                                                                    textAlign = TextAlign.Center,
+                                                                )
+                                                            }
+                                                            Spacer(modifier = Modifier.height(15.dp))
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                        }
+                                        Box(modifier = Modifier.fillMaxWidth()) {
+                                            Text(
+                                                text = dua.reference,
+                                                fontSize = 10.sp,
+                                                fontFamily = reference,
+                                                color = colorResource(R.color.reference_color),
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier
+                                                    .align(Alignment.Center)
+                                                    .padding(bottom = 20.dp)
+                                            )
                                         }
                                     }
-                                    Spacer(modifier = Modifier.height(5.dp))
-
-                                }
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    Text(
-                                        text = dua.reference,
-                                        fontSize = 10.sp,
-                                        fontFamily = reference,
-                                        color = colorResource(R.color.reference_color),
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .padding(bottom = 20.dp)
-                                    )
                                 }
                             }
                         }
