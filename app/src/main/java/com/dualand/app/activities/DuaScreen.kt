@@ -180,7 +180,7 @@ fun DuaScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { navController.popBackStack() },
+                    onClick = { navController.navigate("learn") },
                     modifier = Modifier.padding(start = 4.dp, top = 5.dp)
                 ) {
                     Image(
@@ -384,21 +384,19 @@ fun DuaScreen(
                         .pointerInput(currentIndex) {
                             detectHorizontalDragGestures { _, dragAmount ->
                                 if (dragAmount < 0) {
-
                                     val increment = when {
                                         currentIndex in threeDuaIndices -> 3
                                         currentIndex in twoDuaIndices -> 2
                                         else -> 1
                                     }
                                     if (currentIndex + increment <= duas.lastIndex) {
+                                        stopAudioPlayback()
                                         currentIndex += increment
                                     }
                                 } else if (dragAmount > 0) {
-
-                                    val possiblePrevIndex =
-                                        (0 until currentIndex).lastOrNull { index ->
-                                            index in threeDuaIndices || index in twoDuaIndices || index !in threeDuaIndices && index !in twoDuaIndices
-                                        }
+                                    val possiblePrevIndex = (0 until currentIndex).lastOrNull { index ->
+                                        index in threeDuaIndices || index in twoDuaIndices || index !in threeDuaIndices && index !in twoDuaIndices
+                                    }
                                     val decrement = when {
                                         possiblePrevIndex != null && possiblePrevIndex in threeDuaIndices -> 3
                                         possiblePrevIndex != null && possiblePrevIndex in twoDuaIndices -> 2
@@ -406,11 +404,13 @@ fun DuaScreen(
                                     }
                                     val newIndex = currentIndex - decrement
                                     if (newIndex >= 0) {
+                                        stopAudioPlayback()
                                         currentIndex = newIndex
                                     }
                                 }
                             }
                         }
+
                 ) {
 
                     val scrollState = rememberScrollState()
@@ -421,7 +421,6 @@ fun DuaScreen(
                             scrollState.animateScrollTo(yOffset)
                         }
                     }
-
 
 //                    LaunchedEffect(currentIndex) {
 //                        scrollState.animateScrollTo(0)
@@ -746,7 +745,7 @@ fun DuaScreen(
                                                     )
                                                 }
 
-                                                if (isRepeatingNow && currentPlayingIndex == i && repeatCount > 0) {
+                                                if (repeatCount > 0 && currentPlayingIndex == i) {
                                                     val badgeText =
                                                         if (repeatCount == Int.MAX_VALUE) "∞" else repeatCount.toString()
 
@@ -980,6 +979,15 @@ fun DuaScreen(
                                 )
                             }
                             IconButton(onClick = {
+                                navController.navigate("favorites?filterType=All")
+                            }) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.favourite_icon_dua),
+                                    contentDescription = "Favorites Dua",
+                                    modifier = Modifier.size(33.dp, 40.dp)
+                                )
+                            }
+                            IconButton(onClick = {
                                 val sendIntent = Intent().apply {
                                     action = Intent.ACTION_SEND
                                     putExtra(
@@ -999,15 +1007,6 @@ fun DuaScreen(
                                 )
                             }
 
-                            IconButton(onClick = {
-                                navController.navigate("favorites?filterType=All")
-                            }) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.favourite_icon_dua),
-                                    contentDescription = "Favorites Dua",
-                                    modifier = Modifier.size(33.dp, 40.dp)
-                                )
-                            }
                             IconButton(onClick = {
                                 stopAudioPlayback()
 

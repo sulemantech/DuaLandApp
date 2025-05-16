@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
@@ -110,7 +111,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         modifier = Modifier.padding(horizontal = 6.dp)
                     ) {
                         Text(
-                            text = "My Dua Status",
+                            text = if (selectedFilter == "Favorite") "Favorite Dua" else "My Dua Status",
                             fontSize = 14.sp,
                             color = colorResource(R.color.heading_color),
                             fontFamily = title,
@@ -354,8 +355,18 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+                val currentFilterType = navBackStackEntry?.arguments?.getString("filterType") ?: "All"
+
                 IconButton(onClick = {
-                    navController.navigate("favorites?filterType=Favorite")
+                    val targetFilter = "Favorite"
+                    if (currentRoute?.startsWith("favorites") == true && currentFilterType == targetFilter) {
+                        return@IconButton
+                    }
+                    navController.navigate("favorites?filterType=$targetFilter") {
+                        launchSingleTop = true
+                    }
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.favourite_icon),
@@ -363,8 +374,15 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         modifier = Modifier.size(33.dp, 40.dp)
                     )
                 }
+
                 IconButton(onClick = {
-                   // navController.navigate("favorites?filterType=All")
+                    val targetFilter = "All"
+                    if (currentRoute?.startsWith("favorites") == true && currentFilterType == targetFilter) {
+                        return@IconButton
+                    }
+                    navController.navigate("favorites?filterType=$targetFilter") {
+                        launchSingleTop = true
+                    }
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.favourite_icon_dua),
@@ -372,6 +390,8 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         modifier = Modifier.size(33.dp, 40.dp)
                     )
                 }
+
+
                 IconButton(onClick = {
                     val sendIntent = Intent().apply {
                         action = Intent.ACTION_SEND
@@ -392,7 +412,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                 }
 
                 IconButton(onClick = {
-                    // TODO: Add info screen logic
+
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.info_icon),
@@ -404,7 +424,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
         }
     }
 }
-//isko thk krdo jab is screen py aty hn to esy lgta hai switch abi on ho rhy hn is liye switch already on hi hony chahiye
+
 @Composable
 fun FilterDropdownMenu(
     expanded: Boolean,
@@ -413,7 +433,7 @@ fun FilterDropdownMenu(
     onFilterSelected: (String) -> Unit
 ) {
     val text_font = FontFamily(Font(R.font.montserrat_regular))
-    val filters = listOf("All", "Memorized", "In Practice", "Favorite")
+    val filters = listOf("All", "Memorized", "In Practice")
 
     DropdownMenu(
         expanded = expanded,
