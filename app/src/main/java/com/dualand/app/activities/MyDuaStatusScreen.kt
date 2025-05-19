@@ -97,7 +97,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = { navController.popBackStack() },
+                        onClick = { navController.navigate("learn") },
                         modifier = Modifier.padding(start = 6.dp, top = 12.dp)
                     ) {
                         Image(
@@ -111,7 +111,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         modifier = Modifier.padding(horizontal = 6.dp)
                     ) {
                         Text(
-                            text = if (selectedFilter == "Favorite") "Favorite Dua" else "My Dua Status",
+                            text = if (selectedFilter == "Favorite") "My Favorite Dua" else "My Dua Status",
                             fontSize = 14.sp,
                             color = colorResource(R.color.heading_color),
                             fontFamily = title,
@@ -314,7 +314,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                 checked = isMemorized,
                                 onCheckedChange = { isChecked ->
                                     val newStatus = if (isChecked) "Memorized" else "In Practice"
-                                    viewModel.updateDuaStatus(dua.duaNumber.toString(), newStatus)
+                                    viewModel.updateDuaStatus(dua.duaNumber, newStatus)
                                 },
                                 modifier = Modifier.scale(1.0f),
                                 colors = SwitchDefaults.colors(
@@ -411,8 +411,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                     )
                 }
 
-                IconButton(onClick = {
-
+                IconButton(onClick = {navController.navigate("InfoScreen")
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.info_icon),
@@ -433,7 +432,11 @@ fun FilterDropdownMenu(
     onFilterSelected: (String) -> Unit
 ) {
     val text_font = FontFamily(Font(R.font.montserrat_regular))
-    val filters = listOf("All", "Memorized", "In Practice")
+
+    val filters = listOf("All", "Memorized", "In Practice").toMutableList()
+    if (selectedFilter != "Favorite") {
+        filters.add("Favorite")
+    }
 
     DropdownMenu(
         expanded = expanded,

@@ -152,8 +152,8 @@ fun AppNavigator(navController: NavHostController) {
                 initialFilter = filterType
             )
         }
-        composable("profile") {
-            PlaceholderScreen(title = "Profile Screen")
+        composable("InfoScreen") {
+            InfoScreen(navController = navController, innerPadding = PaddingValues())
         }
         composable("SettingsScreen") {
             SettingsScreen(navController = navController, innerPadding = PaddingValues())
@@ -484,8 +484,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                     )
                 }
 
-                IconButton(onClick = {
-                    // TODO: Add info screen logic
+                IconButton(onClick = {navController.navigate("InfoScreen")
                 }) {
                     Image(
                         painter = painterResource(id = R.drawable.info_icon),

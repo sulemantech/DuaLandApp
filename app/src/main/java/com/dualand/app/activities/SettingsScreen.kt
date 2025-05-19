@@ -90,7 +90,9 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                 .getBoolean("Word_by_Word_Pause_Enabled", false)
         )
     }
-    var pauseSeconds by rememberSaveable { mutableStateOf(3) }
+    var pauseSeconds by remember {
+        mutableStateOf(sharedPref.getInt("word_by_word_pause_seconds", 2))
+    }
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -271,8 +273,6 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                     Spacer(modifier = Modifier.height(15.dp))
                     Divider(Modifier.padding(vertical = 4.dp))
 
-                    var pauseSeconds by remember { mutableStateOf(2) }
-
                     toggleOptions.forEach { title ->
                         var isSwitchOn by remember { mutableStateOf(false) }
 
@@ -378,12 +378,10 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                                 contentDescription = "Plus"
                                             )
                                         }
-
                                     }
                                 }
                             }
                         }
-
 
                         Divider(Modifier.padding(vertical = 1.dp))
 
@@ -465,7 +463,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 .putBoolean("rewards_enabled", rewardsEnabled)
                                 .putBoolean("auto_next_duas_enabled", autoNextDuasEnabled)
                                 .putBoolean("Word_by_Word_Pause_Enabled", WordbyWordPauseEnabled)
-                              //  .putInt("word_by_word_pause_seconds", pauseSeconds)
+                                .putInt("word_by_word_pause_seconds", pauseSeconds)
                                 .putStringSet("selected_languages", selectedLanguages.toSet())
                                 .putString("selected_voice", selectedVoice.value)
                                 .apply()

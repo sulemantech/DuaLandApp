@@ -325,7 +325,7 @@ object DuaDataProvider {
         ),
         Dua(
             id = 15,
-            arabic = "أَسْتَوْدِعُ اللَّهَ دِينَكَ وَأَمَانَتَكَ، وَخَوَاتِيمَ عَمَلِكَ",
+            arabic = "اَسْتَوْدِعُ اللَّهَ دِينَكَ وَأَمَانَتَكَ، وَخَوَاتِيمَ عَمَلِکَ",
             translation = "(I make) Allah responsible for your deen, your trustsworthiness and for the results of your actions",
             reference = "[Sunan al-Tirmidhi]",
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -338,11 +338,11 @@ object DuaDataProvider {
             duaNumber = "12. ",
             textheading = " Du’a for Traveller",
             wordAudioPairs = listOf(
-                "أَسْتَوْدِعُ اللّٰهَ" to R.raw.dua15_new_part01_audio01,
-                "دِينَكَ" to R.raw.dua15_new_part01_audio02,
-                "وَأَمَانَتَكَ،" to R.raw.dua15_new_part01_audio03,
-                "وَخَوَاتِيمَ" to R.raw.dua15_new_part01_audio04,
-                "عَمَلِكَ" to R.raw.dua15_new_part01_audio05,
+                "اَسْتَوْدِعُ اللّٰهَ" to R.raw.dua15_new_part01_audio01,
+                "دِیْنَکَ" to R.raw.dua15_new_part01_audio02,
+                "وَاَمَانَتَکَ،" to R.raw.dua15_new_part01_audio03,
+                "وَخَوَاتِیْمَ" to R.raw.dua15_new_part01_audio04,
+                "عَمَلِکَ" to R.raw.dua15_new_part01_audio05,
             )
         ),
         Dua(
@@ -867,7 +867,7 @@ object DuaDataProvider {
         ),
         Dua(
             id = 41,
-            arabic = "اللَّهُمَّ إِنِّي أَسْأَلُكَ حُبَّكَ  وَحُبَّ مَنْ يُحِبُّكَ  وَعَمَلٍ يُقَرِّبُنِي إِلَى حُبِّكَ",
+            arabic = "اللَّهُمَّ إِنِّي اَسْئَلُکَ حُبَّكَ  وَحُبَّ مَنْ يُحِبُّكَ  وَعَمَلٍ يُّقَرِّبُنِى إِلَى حُبِّكَ",
             translation = "O Allah! I ask You for Your love and for the love of\n" + "the one who loves You and I ask for the deeds\n" + "which lead me towards Your love.",
             reference = "[Sunan al-Tirmidhi] ",
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -880,11 +880,11 @@ object DuaDataProvider {
             duaNumber = "30. ",
             textheading = " Du’a for Seeking\nAllah’s Love",
             wordAudioPairs = listOf(
-                "اَلّٰھُمَّ اِنِّیْ اَسْاَلُكَ" to R.raw.dua31_part01_audio01,
+                "اَلّٰھُمَّ اِنِّیْ اَسْئَلُکَ" to R.raw.dua31_part01_audio01,
                 "حُبَّكَ" to R.raw.dua31_part01_audio02,
                 "وَحُبَّ" to R.raw.dua31_part01_audio03,
                 "مَنْ يُّحِبُّكَ" to R.raw.dua31_part01_audio04,
-                "وَعَمَلٍ يُّقَرِّبُنِي" to R.raw.dua31_part01_audio05,
+                "وَعَمَلٍ يُّقَرِّبُنِى" to R.raw.dua31_part01_audio05,
                 "اِلَى حُبِّكَ" to R.raw.dua31_part01_audio06,
             )
         ),

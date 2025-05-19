@@ -33,4 +33,6 @@
     <color name="doodlecolor">#A32670</color>
     <color name="dashboard_color">#CDEBF3</color>
     <color name="splash_color">#C0E5E5</color>
+    <color name="badge_color">#064684</color>
+
 </resources>
