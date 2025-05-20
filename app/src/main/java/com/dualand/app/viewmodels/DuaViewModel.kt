@@ -1,6 +1,8 @@
 package com.dualand.app
 
 import android.app.Application
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dualand.app.models.Dua
@@ -14,6 +16,13 @@ import kotlinx.coroutines.launch
 class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dao = AppDatabase.getInstance(application).favoriteDuaDao()
+
+//    private val _selectedTab = mutableStateOf("WORD")
+//    val selectedTab: State<String> = _selectedTab
+//
+//    fun setSelectedTab(tab: String) {
+//        _selectedTab.value = tab
+//    }
 
     // Get all favorites
     val favoriteDuas: StateFlow<List<DuaStatusEntity>> = dao.getAllFavoriteDuas()

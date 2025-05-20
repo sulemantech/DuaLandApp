@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -43,7 +44,7 @@ private fun TabItem(
     ) {
         Text(
             text = text,
-            color = if (isSelected) Color.White else Color.Black,
+            color = if (isSelected) colorResource(R.color.white) else colorResource(R.color.heading_color),
             fontFamily = fontFamily,
             fontSize = 16.sp,
         )
