@@ -7,11 +7,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,7 +84,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.dualand.app.R
+import com.dualand.app.components.AppNavigator
+import com.dualand.app.components.DuaCard
+import com.dualand.app.components.FlipInGridCard
 import com.dualand.app.models.Dua
+import com.dualand.app.models.DuaItem
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -91,72 +98,6 @@ class MainActivity : ComponentActivity() {
         setTheme(R.style.Theme_AnimationDemo)
         setContent {
             AppNavigator(navController = rememberNavController())
-        }
-    }
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun AppNavigator(navController: NavHostController) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_PAUSE) {
-                Log.d("AppNavigator", "App is in background, stopping audio...")
-                MediaPlayerManager.stopAudio()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    AnimatedNavHost(
-        navController = navController,
-        startDestination = "splash",
-        enterTransition = { fadeIn(animationSpec = tween(700)) },
-        exitTransition = { fadeOut(animationSpec = tween(500)) }
-    ) {
-        composable("splash") {
-            SplashScreen(
-                onFinished = {
-                    navController.navigate("learn") {
-                        popUpTo("splash") { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable("learn") {
-            MainScreen(navController)
-        }
-        composable("dua/{index}") { backStackEntry ->
-            val index = backStackEntry.arguments?.getString("index")?.toIntOrNull() ?: 0
-            DuaScreen(
-                index = index,
-                navController = navController,
-                innerPadding = PaddingValues(),
-                stopAudioPlayback = {}
-            )
-        }
-        composable("home") {
-            PlaceholderScreen(title = "Home Screen")
-        }
-        composable("favorites?filterType={filterType}") { backStackEntry ->
-            val filterType = backStackEntry.arguments?.getString("filterType") ?: "All"
-            MyDuaStatusScreen(
-                navController = navController,
-                innerPadding = PaddingValues(),
-                initialFilter = filterType
-            )
-        }
-        composable("InfoScreen") {
-            InfoScreen(navController = navController, innerPadding = PaddingValues())
-        }
-        composable("SettingsScreen") {
-            SettingsScreen(navController = navController, innerPadding = PaddingValues())
         }
     }
 }
@@ -171,48 +112,6 @@ fun PlaceholderScreen(title: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(text = title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-fun SplashScreen(onFinished: () -> Unit) {
-    val systemUiController = rememberSystemUiController()
-
-    val NavigationBarColor = colorResource(id = R.color.splash_color)
-    val statusBarColor = colorResource(id = R.color.splash_color)
-
-    SideEffect {
-        systemUiController.setStatusBarColor(color = statusBarColor)
-        systemUiController.setNavigationBarColor(color = NavigationBarColor)
-    }
-
-    LaunchedEffect(true) {
-        delay(2000)
-        onFinished()
-    }
-
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
-    val screenHeight = configuration.screenHeightDp
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.splash),
-            contentDescription = "Splash Screen",
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.splash_logo),
-            contentDescription = "App Logo",
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(280.dp)
-        )
     }
 }
 
@@ -232,15 +131,6 @@ fun MainScreen(navController: NavController) {
     }
 }
 
-
-data class DuaItem(
-    val imageRes: Int,
-    val title: String,
-    val textheading: String,
-    val onClick: () -> Unit
-) {
-
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -418,7 +308,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 itemsIndexed(filteredDuaList) { index, dua ->
-                    BouncyGridCard(index = index) {
+                    FlipInGridCard(index = index) {
                         DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
                     }
                 }
@@ -484,73 +374,17 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
                     )
                 }
 
-                IconButton(onClick = {navController.navigate("InfoScreen")
-                }) {
+                IconButton(
+                    onClick = { navController.navigate("SettingsScreen") },
+                ) {
                     Image(
-                        painter = painterResource(id = R.drawable.info_icon),
-                        contentDescription = "Info",
+                        painter = painterResource(id = R.drawable.icon_dua_setting),
+                        contentDescription = "Settings",
                         modifier = Modifier.size(33.dp, 40.dp)
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun BouncyGridCard(index: Int, content: @Composable () -> Unit) {
-    var visible by remember { mutableStateOf(false) }
-
-    val scale by animateFloatAsState(
-        targetValue = if (visible) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "gridBounce"
-    )
-
-    LaunchedEffect(Unit) {
-        delay(index * 5L)
-        visible = true
-    }
-
-    Box(
-        modifier = Modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-    ) {
-        content()
-    }
-}
-
-@Composable
-fun DuaCard(
-    imageRes: Int,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                onClick = onClick,
-                indication = rememberRipple(bounded = true),
-                interactionSource = remember { MutableInteractionSource() }
-            ),
-        shape = RoundedCornerShape(6.dp),
-       // elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent // <-- transparent background
-        )
-    ) {
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = "Dua card image",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
-        )
     }
 }
 
@@ -564,8 +398,3 @@ fun LearnWithEaseScreenPreview() {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SplashScreenPreview() {
-    SplashScreen(onFinished = {})
-}

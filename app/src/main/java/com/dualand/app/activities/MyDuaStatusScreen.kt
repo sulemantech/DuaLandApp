@@ -41,7 +41,13 @@ import androidx.navigation.compose.rememberNavController
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.activities.DuaDataProvider.duaList
+import com.dualand.app.components.FilterDropdownMenu
+import com.dualand.app.components.TagButton
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,13 +126,12 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         )
                     }
 
-                    IconButton(
-                        onClick = { navController.navigate("SettingsScreen") },
-                        modifier = Modifier.padding(end = 6.dp, top = 12.dp)
+                    IconButton(onClick = {navController.navigate("InfoScreen")},
+                        modifier = Modifier.padding(start = 6.dp, top = 12.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.icon_dua_setting),
-                            contentDescription = "Settings",
+                            painter = painterResource(id = R.drawable.info_icon),
+                            contentDescription = "Info",
                             modifier = Modifier.size(29.dp, 30.dp)
                         )
                     }
@@ -221,6 +226,30 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                 }
 
                 matchesSearch && matchesFilter
+            }
+            if (selectedFilter == "Favorite" && filteredDuas.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            for (dua in filteredDuas) {
+                                val index = allDuas.indexOf(dua)
+                                navController.navigate("dua/$index")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(R.color.highlited_color),
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(text = "Play All Favorite Duas", fontFamily = text_font)
+                    }
+                }
             }
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 80.dp),
@@ -411,105 +440,16 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                     )
                 }
 
-                IconButton(onClick = {navController.navigate("InfoScreen")
-                }) {
+                IconButton(
+                    onClick = { navController.navigate("SettingsScreen") },
+                ) {
                     Image(
-                        painter = painterResource(id = R.drawable.info_icon),
-                        contentDescription = "Info",
+                        painter = painterResource(id = R.drawable.icon_dua_setting),
+                        contentDescription = "Settings",
                         modifier = Modifier.size(33.dp, 40.dp)
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun FilterDropdownMenu(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    selectedFilter: String,
-    onFilterSelected: (String) -> Unit
-) {
-    val text_font = FontFamily(Font(R.font.montserrat_regular))
-
-    val filters = listOf("All", "Memorized", "In Practice").toMutableList()
-    if (selectedFilter != "Favorite") {
-        filters.add("Favorite")
-    }
-
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest,
-        modifier = Modifier
-            .background(Color.White)
-            .width(170.dp)
-    ) {
-        filters.forEachIndexed { index, filter ->
-            DropdownMenuItem(
-                onClick = {
-                    onFilterSelected(filter)
-                    onDismissRequest()
-                },
-                text = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = filter,
-                            modifier = Modifier.weight(1f),
-                            fontFamily = text_font,
-                            fontSize = 14.sp,
-                            color = colorResource(R.color.heading_color),
-                            fontWeight = W600
-                        )
-                        if (filter == selectedFilter) {
-                            Text(
-                                text = "✓",
-                                color = colorResource(R.color.highlited_color),
-                            )
-                        }
-                    }
-                }
-            )
-            if (index < filters.size - 1) {
-                Divider()
-            }
-        }
-    }
-}
-
-@Composable
-fun TagButton(
-    text: String,
-    bgColor: Color? = null,
-    backgroundDrawable: Int? = null,
-    width: Dp? = null,
-    height: Dp? = null,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .then(
-                if (width != null && height != null) Modifier.size(width, height)
-                else Modifier.wrapContentSize()
-            )
-           // .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
-            .background(
-                color = bgColor ?: Color.Transparent,
-               // shape = RoundedCornerShape(12.dp)
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        if (backgroundDrawable != null) {
-            Image(
-                painter = painterResource(id = backgroundDrawable),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier.matchParentSize()
-            )
         }
     }
 }
