@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dualand.app.models.Dua
 import com.dualand.app.models.DuaStatusEntity
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -23,6 +24,44 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 //    fun setSelectedTab(tab: String) {
 //        _selectedTab.value = tab
 //    }
+
+    private val favoriteIndicesQueue = mutableListOf<Int>()
+    private var isPlayingFavorites = false
+    private val _currentDuaIndex = MutableStateFlow<Int?>(null)
+    val currentDuaIndex: StateFlow<Int?> = _currentDuaIndex
+    private var favoritePlaybackIndex = 0 // Index in favoriteIndicesQueue
+
+    fun startPlayingFavorites(indices: List<Int>) {
+        if (indices.isEmpty()) return
+        favoriteIndicesQueue.clear()
+        favoriteIndicesQueue.addAll(indices)
+        isPlayingFavorites = true
+        favoritePlaybackIndex = 0
+        _currentDuaIndex.value = favoriteIndicesQueue[favoritePlaybackIndex]
+    }
+
+//    fun startPlayingFavorites(indices: List<Int>) {
+//        if (indices.isEmpty()) return
+//        favoriteIndicesQueue.clear()
+//        favoriteIndicesQueue.addAll(indices)
+//        isPlayingFavorites = true
+//        playNextFavorite()
+//    }
+    fun getCurrentDuaIndex(): Int? {
+        return _currentDuaIndex.value
+    }
+
+
+    fun playNextFavorite() {
+        if (favoriteIndicesQueue.isNotEmpty()) {
+            val nextIndex = favoriteIndicesQueue.removeAt(0)
+            _currentDuaIndex.value = nextIndex // trigger navigation
+        } else {
+            isPlayingFavorites = false
+        }
+    }
+
+    fun isPlayingFavoritesFlow(): Boolean = isPlayingFavorites
 
     // Get all favorites
     val favoriteDuas: StateFlow<List<DuaStatusEntity>> = dao.getAllFavoriteDuas()

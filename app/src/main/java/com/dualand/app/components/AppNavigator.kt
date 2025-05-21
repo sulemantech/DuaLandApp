@@ -2,6 +2,8 @@ package com.dualand.app.components
 
 import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,6 +17,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.dualand.app.activities.DuaScreen
 import com.dualand.app.activities.InfoScreen
 import com.dualand.app.activities.MainScreen
@@ -64,8 +67,8 @@ fun AppNavigator(navController: NavHostController) {
 
         composable(
             "learn",
-            enterTransition = { fadeIn(animationSpec = tween(500)) },
-            exitTransition = { fadeOut(animationSpec = tween(300)) }
+            enterTransition = { fadeIn(animationSpec = tween(800)) },
+            exitTransition = { fadeOut(animationSpec = tween(500)) }
         ) {
             MainScreen(navController)
         }
@@ -90,7 +93,38 @@ fun AppNavigator(navController: NavHostController) {
             PlaceholderScreen(title = "Home Screen")
         }
 
-        composable("favorites?filterType={filterType}") { backStackEntry ->
+
+        composable(
+            route = "favorites?filterType={filterType}",
+            arguments = listOf(navArgument("filterType") {
+                defaultValue = "All"
+                nullable = true
+            }),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing)
+                )
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing)
+                )
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing)
+                )
+            }
+        ) { backStackEntry ->
             val filterType = backStackEntry.arguments?.getString("filterType") ?: "All"
             MyDuaStatusScreen(
                 navController = navController,
@@ -99,22 +133,44 @@ fun AppNavigator(navController: NavHostController) {
             )
         }
 
+
         composable("InfoScreen") {
             InfoScreen(navController = navController, innerPadding = PaddingValues())
         }
 
         composable(
             "SettingsScreen",
-            enterTransition = { slideInHorizontally { it } },
-            exitTransition = { slideOutHorizontally { -it } },
-            popEnterTransition = { slideInHorizontally { -it } },
-            popExitTransition = { slideOutHorizontally { it } }
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing)
+                )
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing)
+                )
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing)
+                )
+            }
         ) {
             SettingsScreen(
                 navController = navController,
                 innerPadding = PaddingValues()
             )
         }
+
     }
 }
 

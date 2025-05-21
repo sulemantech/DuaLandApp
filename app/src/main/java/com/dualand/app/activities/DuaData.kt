@@ -39,7 +39,7 @@ object DuaDataProvider {
             // titleAudioResId = R.raw.title_praise_and_glory,
             image = R.drawable.kaaba,
             duaNumber = "1. ",
-           // textheading = "Praise and Glory",
+            textheading = "Praise and Glory",
             wordAudioPairs = listOf(
                 "اَللّٰہُ اَکْبَرُکَبِیْرًا" to R.raw.dua01_part02_audio01,
                 "وَّالْحَمْدُ لِلّٰہِ کَثِیْرًا" to R.raw.dua01_part02_audio02,
@@ -77,7 +77,7 @@ object DuaDataProvider {
             statusBarColorResId = R.color.top_nav_new,
             fullAudioResId = R.raw.dua02_part02_audio01_complete,
             //titleAudioResId = R.raw.title_peace,
-            //textheading = "Peace and Blessing upon\n" + "the Prophet Muhammad ﷺ",
+            textheading = "Peace and Blessing upon\n" + "the Prophet Muhammad ﷺ",
             image = R.drawable.dua_2,
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
             duaNumber = "2. ",
@@ -177,7 +177,7 @@ object DuaDataProvider {
             image = R.drawable.dua_5,
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
             duaNumber = "5. ",
-         //  textheading = "Du’a for Protection",
+           textheading = "Du’a for Protection",
             wordAudioPairs = listOf(
                 "بِسْمِ اللّٰہِ الَّذِیْ" to R.raw.dua05_part02_audio01,
                 "لَايَضُرُّ" to R.raw.dua05_part02_audio02,
@@ -377,7 +377,7 @@ object DuaDataProvider {
             //   titleAudioResId = R.raw.title_entering_home,
             image = R.drawable.dua_13,
             duaNumber = "13. ",
-           // textheading = "Du’a while Entering\n" + "the Home",
+            textheading = "Du’a while Entering\n" + "the Home",
             wordAudioPairs = listOf(
                 "اَلسَّلَامُ عَلَیْکُمْ" to R.raw.dua13_part02_audio01,
             )
@@ -435,7 +435,7 @@ object DuaDataProvider {
             image = R.drawable.dua_16,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             duaNumber = "15. ",
-          //  textheading = "Du’a for Journey",
+            textheading = "Du’a for Journey",
             wordAudioPairs = listOf(
                 "اَلْحَمْدُ لِلّٰہ" to R.raw.dua15_part02_audio01,
             )
@@ -453,7 +453,7 @@ object DuaDataProvider {
             image = R.drawable.dua_16,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             duaNumber = "15. ",
-           // textheading = "Du’a for Journey",
+            textheading = "Du’a for Journey",
             wordAudioPairs = listOf(
                 "سُبْحٰنَ الَّذِیْ" to R.raw.dua15_part03_audio01,
                 "سَخَّرَلَنَا" to R.raw.dua15_part03_audio02,
@@ -499,7 +499,7 @@ object DuaDataProvider {
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             duaNumber = "16. ",
             steps = "Reply to the Greeting:",
-          //  textheading = "Du’a When Meeting\n" + "a Muslim",
+            textheading = "Du’a When Meeting\n" + "a Muslim",
             wordAudioPairs = listOf(
                 "وَعَلَیْکُمُ السَّلَامُ وَرَحْمَةُ اللّٰہِ وَبَرَکَاتُہُ" to R.raw.dua16_part02_audio01
             )
@@ -626,7 +626,7 @@ object DuaDataProvider {
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             duaNumber = "21. ",
             steps = "3. If you forgot to read the Du'a at the beginning\n" + "then upon remembering say:",
-          //  textheading = "Du’a Before Eating\n& Drinking",
+            textheading = "Du’a Before Eating\n& Drinking",
             wordAudioPairs = listOf(
                 "بِسْمِ اللّٰہِ" to R.raw.dua21_part02_audio01,
                 "فِی اَوَّلِہِ" to R.raw.dua21_part02_audio02,
@@ -688,7 +688,7 @@ object DuaDataProvider {
             // titleAudioResId = R.raw.title_sick,
             image = R.drawable.dua_24,
             duaNumber = "23. ",
-           // textheading = "Du’a When Visiting\n" + "the Sick",
+            textheading = "Du’a When Visiting\n" + "the Sick",
             wordAudioPairs = listOf(
                 "اَسْاَلُ اللّٰہَ الْعَظِیْمَ" to R.raw.dua24_part02_audio01,
                 "رَبَّ الْعَرْشِ الْعَظِیْمِ" to R.raw.dua24_part02_audio02,
@@ -798,7 +798,7 @@ object DuaDataProvider {
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             duaNumber = "27. ",
             steps = "Dua by one who hears someone saying اَلْحَمْدُ لِلّٰہِ",
-          //  textheading = "Du‘a when Sneezing",
+            textheading = "Du‘a when Sneezing",
             wordAudioPairs = listOf(
                 "یَرْحَمُکَ اللّٰہُ" to R.raw.dua28_part02_audio01,
             )
@@ -817,7 +817,7 @@ object DuaDataProvider {
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             image = R.drawable.dua_28,
             steps = "Du’a in reply by the person who sneezes:",
-          //  textheading = "Du‘a when Sneezing",
+            textheading = "Du‘a when Sneezing",
             wordAudioPairs = listOf(
                 "یَھْدِیْکُمُ اللّٰہُ" to R.raw.dua28_part03_audio01,
                 "وَیُصْلِحُ بَالَکُمْ" to R.raw.dua28_part03_audio02,

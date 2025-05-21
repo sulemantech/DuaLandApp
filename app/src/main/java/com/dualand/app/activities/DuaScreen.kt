@@ -10,7 +10,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
@@ -42,7 +41,6 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -51,7 +49,6 @@ import androidx.navigation.compose.rememberNavController
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.activities.DuaDataProvider.duaList
-import com.dualand.app.components.AllDuaFunctionality
 import com.dualand.app.components.DuaTabs
 import com.dualand.app.components.FavouriteButton
 import com.dualand.app.components.PlayWordByWordButton
@@ -72,7 +69,6 @@ fun DuaScreen(
     stopAudioPlayback: () -> Unit
 ) {
     val viewModel: DuaViewModel = viewModel()
-
     val systemUiController = rememberSystemUiController()
     val duas = duaList
     val context = LocalContext.current
@@ -100,6 +96,16 @@ fun DuaScreen(
     var currentAudioQueue by remember { mutableStateOf<List<Int>>(emptyList()) }
     var wasPaused by remember { mutableStateOf(false) }
 
+//    val index = navBackStackEntry.arguments?.getString("index")?.toIntOrNull() ?: return
+//
+//    LaunchedEffect(index) {
+//        delay(300)
+//
+//        playFromIndex(index, context) {
+//            navController.popBackStack()
+//            viewModel.finishCurrentDuaAndPlayNext()
+//        }
+//    }
 
     @Composable
     fun isTablet(): Boolean {
@@ -120,6 +126,7 @@ fun DuaScreen(
         }
     }
 
+
     val twoDuaIndices = setOf(0, 1, 2, 3, 6, 7, 15, 16, 21, 22, 27, 28, 30, 31)
     val threeDuaIndices = setOf(18, 19, 20, 35, 36, 37)
 
@@ -134,28 +141,28 @@ fun DuaScreen(
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
     }
 
-//    fun stopAudioPlayback() {
-//        globalMediaPlayer?.let { player ->
-//            try {
-//                if (player.isPlaying) {
-//                    player.stop()
-//                }
-//            } catch (e: IllegalStateException) {
-//                e.printStackTrace()
-//            } finally {
-//                player.release()
-//            }
-//        }
-//
-//        globalMediaPlayer = null
-//        isPlaying = false
-//        showListening = false
-//        globalWordIndex = -1
-//
-//        wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
-//        wordHandler = null
-//        wordRunnable = null
-//    }
+    fun stopAudioPlayback() {
+        globalMediaPlayer?.let { player ->
+            try {
+                if (player.isPlaying) {
+                    player.stop()
+                }
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            } finally {
+                player.release()
+            }
+        }
+
+        globalMediaPlayer = null
+        isPlaying = false
+        showListening = false
+        globalWordIndex = -1
+
+        wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
+        wordHandler = null
+        wordRunnable = null
+    }
 
 
     DisposableEffect(Unit) {
@@ -694,8 +701,8 @@ fun DuaScreen(
                                                         }
 
                                                         if (isPlaying) {
-                                                            // Pause and save state
-                                                            stopAudioPlayback()
+
+                                                           // stopAudioPlayback()
                                                             currentAudioPosition = globalMediaPlayer?.currentPosition ?: 0
                                                             globalMediaPlayer?.pause()
                                                             isPlaying = false
@@ -703,12 +710,12 @@ fun DuaScreen(
                                                             wasPaused = true
                                                         } else {
                                                             if (wasPaused && currentIndex == i) {
-                                                                // Resume same dua
+
                                                                 playFromIndex(currentIndex)
                                                             } else {
-                                                                // New dua or first-time play
+
                                                                 wasPaused = false
-                                                                currentAudioQueue = buildAudioQueue(i)     // REBUILD for new index
+                                                                currentAudioQueue = buildAudioQueue(i)
                                                                 currentAudioQueueIndex = 0
                                                                 currentAudioPosition = 0
                                                                 playFromIndex(i)
