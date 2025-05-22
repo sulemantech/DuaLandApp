@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
@@ -26,9 +27,19 @@ fun SplashScreen(onFinished: () -> Unit) {
     val NavigationBarColor = colorResource(id = R.color.splash_color)
     val statusBarColor = colorResource(id = R.color.splash_color)
 
-    SideEffect {
-        systemUiController.setStatusBarColor(color = statusBarColor)
-        systemUiController.setNavigationBarColor(color = NavigationBarColor)
+//    SideEffect {
+//        systemUiController.setStatusBarColor(color = statusBarColor)
+//        systemUiController.setNavigationBarColor(color = NavigationBarColor)
+//    }
+
+    // Hide system bars when SplashScreen is entered, and restore visibility on exit automatically
+    DisposableEffect(systemUiController) {
+        systemUiController.isSystemBarsVisible = false
+        onDispose {
+            systemUiController.isSystemBarsVisible = true
+            systemUiController.setStatusBarColor(color = statusBarColor)
+            systemUiController.setNavigationBarColor(color = NavigationBarColor)
+        }
     }
 
     LaunchedEffect(true) {
