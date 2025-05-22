@@ -228,14 +228,15 @@ fun DuaScreen(
                         )
                     }
                 }
-                IconButton(onClick = {navController.navigate("InfoScreen")},
+                IconButton(
+                    onClick = { navController.navigate("SettingsScreen") },
                     modifier = Modifier.padding(start = 4.dp, top = 5.dp)
+
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.info_icon),
-                        contentDescription = "Info",
-                        modifier = Modifier.size(29.dp, 30.dp)
-                    )
+                        painter = painterResource(id = R.drawable.icon_dua_setting),
+                        contentDescription = "Settings",
+                        modifier = Modifier.size(29.dp, 30.dp)                    )
                 }
             }
 

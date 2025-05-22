@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.dualand.app.components.InfoDialogContent
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -132,6 +133,21 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                 modifier = Modifier.padding(horizontal = 6.dp)
             )
             Spacer(modifier = Modifier.width(48.dp))
+            var showDialog by remember { mutableStateOf(false) }
+
+            IconButton(
+                onClick = { showDialog = true },
+                modifier = Modifier.padding(start = 4.dp, top = 5.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.info_icon),
+                    contentDescription = "Back",
+                    modifier = Modifier.size(29.dp, 30.dp)
+                )
+            }
+            if (showDialog) {
+                InfoDialogContent(onDismiss = { showDialog = false })
+            }
         }
 
         Spacer(modifier = Modifier.height(17.dp))
