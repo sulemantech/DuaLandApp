@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.dualand.app.activities.DuaNewScreen
 import com.dualand.app.activities.DuaScreen
 import com.dualand.app.activities.InfoScreen
 import com.dualand.app.activities.MainScreen
@@ -55,7 +56,7 @@ fun AppNavigator(navController: NavHostController) {
         ) {
             SplashScreen(
                 onFinished = {
-                    navController.navigate("learn") {
+                    navController.navigate("DuaNewScreen") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
@@ -101,6 +102,9 @@ fun AppNavigator(navController: NavHostController) {
 
         composable("InfoScreen") {
             InfoScreen(navController = navController, innerPadding = PaddingValues())
+        }
+        composable("DuaNewScreen") {
+            DuaNewScreen(navController = navController, innerPadding = PaddingValues())
         }
 
         composable(
