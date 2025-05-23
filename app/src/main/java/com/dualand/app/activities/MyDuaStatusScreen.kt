@@ -82,7 +82,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
 
     val sharedPref = context.getSharedPreferences("your_pref_name", Context.MODE_PRIVATE)
     val rewardsEnabled = sharedPref.getBoolean("rewards_enabled", true)
-
+    var currentIndex by remember { mutableStateOf(0) }
     var showRewardAnimation by remember { mutableStateOf(false) }
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie))
     val progress by animateLottieCompositionAsState(
@@ -274,8 +274,10 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                 }.takeIf { it != -1 }
                             }
                             viewModel.startPlayingFavorites(indices)
-                            viewModel.getCurrentDuaIndex()?.let { index ->
-                                navController.navigate("dua/$index")
+                            val lastFavoriteIndex = indices.lastOrNull()
+                            if (lastFavoriteIndex != null) {
+                                currentIndex = lastFavoriteIndex
+                                navController.navigate("dua/$lastFavoriteIndex")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(colorResource(R.color.highlited_color)),
@@ -291,10 +293,9 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         Text("Play all", color = Color.White)
                     }
                 } else {
-                    Spacer(modifier = Modifier.width(1.dp)) // to align Filter section on right
+                    Spacer(modifier = Modifier.width(1.dp))
                 }
 
-                // Always visible filter section
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {

@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W600
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,11 +28,12 @@ fun FilterDropdownMenu(
     selectedFilter: String,
     onFilterSelected: (String) -> Unit
 ) {
-    val text_font = FontFamily(Font(R.font.montserrat_regular))
-
-    val filters = listOf("All", "Memorized", "In Practice").toMutableList()
-    if (selectedFilter != "Favorite") {
-        filters.add("Favorite")
+    val textFont = FontFamily(Font(R.font.montserrat_regular))
+    val filters = listOf("All", "Favorite", "Memorized", "In Practice")
+    val visibleFilters = if (selectedFilter == "Favorite") {
+        listOf("Favorite")
+    } else {
+        filters.filter { it != "Favorite" }
     }
 
     DropdownMenu(
@@ -41,7 +43,7 @@ fun FilterDropdownMenu(
             .background(Color.White)
             .width(170.dp)
     ) {
-        filters.forEachIndexed { index, filter ->
+        visibleFilters.forEachIndexed { index, filter ->
             DropdownMenuItem(
                 onClick = {
                     onFilterSelected(filter)
@@ -55,10 +57,10 @@ fun FilterDropdownMenu(
                         Text(
                             text = filter,
                             modifier = Modifier.weight(1f),
-                            fontFamily = text_font,
+                            fontFamily = textFont,
                             fontSize = 14.sp,
                             color = colorResource(R.color.heading_color),
-                            fontWeight = W600
+                            fontWeight = FontWeight.W600
                         )
                         if (filter == selectedFilter) {
                             Text(
@@ -69,9 +71,10 @@ fun FilterDropdownMenu(
                     }
                 }
             )
-            if (index < filters.size - 1) {
+            if (index < visibleFilters.size - 1) {
                 Divider()
             }
         }
     }
 }
+
