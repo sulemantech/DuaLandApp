@@ -56,7 +56,7 @@ fun AppNavigator(navController: NavHostController) {
         ) {
             SplashScreen(
                 onFinished = {
-                    navController.navigate("DuaNewScreen") {
+                    navController.navigate("learn") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }

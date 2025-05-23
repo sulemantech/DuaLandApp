@@ -134,28 +134,28 @@ fun DuaScreen(
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
     }
 
-//    fun stopAudioPlayback() {
-//        globalMediaPlayer?.let { player ->
-//            try {
-//                if (player.isPlaying) {
-//                    player.stop()
-//                }
-//            } catch (e: IllegalStateException) {
-//                e.printStackTrace()
-//            } finally {
-//                player.release()
-//            }
-//        }
-//
-//        globalMediaPlayer = null
-//        isPlaying = false
-//        showListening = false
-//        globalWordIndex = -1
-//
-//        wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
-//        wordHandler = null
-//        wordRunnable = null
-//    }
+    fun stopAudioPlayback() {
+        globalMediaPlayer?.let { player ->
+            try {
+                if (player.isPlaying) {
+                    player.stop()
+                }
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            } finally {
+                player.release()
+            }
+        }
+
+        globalMediaPlayer = null
+        isPlaying = false
+        showListening = false
+        globalWordIndex = -1
+
+        wordHandler?.removeCallbacks(wordRunnable ?: Runnable {})
+        wordHandler = null
+        wordRunnable = null
+    }
 
 
     DisposableEffect(Unit) {

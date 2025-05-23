@@ -53,6 +53,7 @@ private fun TabItem(
 
 @Composable
 fun DuaTabs(
+   // dua: List<Dua>,
     dua: Dua,
     selectedTab: String,
     onTabSelected: (String) -> Unit,
@@ -131,6 +132,30 @@ fun DuaTabs(
                     onCompleteDuaClick(dua.fullAudioResId)
                 }
             )
+
+//            TabItem(
+//                text = "WORD BY WORD",
+//                isSelected = currentTab == "WORD",
+//                fontFamily = MyArabicFont,
+//                modifier = Modifier.weight(1f),
+//                onClick = {
+//                    onTabSelected("WORD")         // update tab state
+//                    onStopCompleteDua()           // stop any playing full audio
+//                    onPlayWordByWordButton()     // start word-by-word audio
+//                }
+//            )
+//
+//            TabItem(
+//                text = "COMPLETE DUA",
+//                isSelected = currentTab == "COMPLETE",
+//                fontFamily = MyArabicFont,
+//                modifier = Modifier.weight(1f),
+//                onClick = {
+//                    onTabSelected("COMPLETE")     // update tab state
+//                    onStopCompleteDua()           // stop any word-by-word audio
+//                    onCompleteDuaClick(0)         // play full dua audio (use real ID if needed)
+//                }
+//            )
         }
     }
 }
