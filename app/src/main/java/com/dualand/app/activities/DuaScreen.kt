@@ -974,16 +974,37 @@ fun DuaScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val selectedFilter by viewModel.selectedFilter.collectAsState()
+                            val uniqueFavoriteDuas by viewModel.uniqueFavoriteDuas.collectAsState()
+
                             IconButton(onClick = {
                                 stopAudioPlayback()
                                 wasPaused = false
-//                                selectedTab = ""
-                                val step = when {
-                                    (currentIndex - 1) in threeDuaIndices -> 3
-                                    (currentIndex - 1) in twoDuaIndices -> 2
-                                    else -> 1
+
+                                if (selectedFilter == "Favorite" && uniqueFavoriteDuas.isNotEmpty()) {
+                                    val favoriteIndices = uniqueFavoriteDuas.mapNotNull { dua ->
+                                        duaList.indexOfFirst {
+                                            it.textheading.equals(dua.textheading, ignoreCase = true) &&
+                                                    it.translation.equals(dua.translation, ignoreCase = true)
+                                        }.takeIf { it != -1 }
+                                    }.sorted()
+
+                                    val previousFavIndex = favoriteIndices.lastOrNull { it < currentIndex }
+
+                                    if (previousFavIndex != null) {
+                                        currentIndex = previousFavIndex
+                                        navController.navigate("dua/$previousFavIndex")
+                                    }
+
+                                } else {
+                                    val step = when {
+                                        (currentIndex - 1) in threeDuaIndices -> 3
+                                        (currentIndex - 1) in twoDuaIndices -> 2
+                                        else -> 1
+                                    }
+                                    currentIndex = (currentIndex - step).coerceAtLeast(0)
+                                   // navController.navigate("dua/$currentIndex")
                                 }
-                                currentIndex = (currentIndex - step).coerceAtLeast(0)
                             }) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_backarrow),
@@ -991,6 +1012,8 @@ fun DuaScreen(
                                     modifier = Modifier.size(29.dp, 30.dp)
                                 )
                             }
+
+
                             IconButton(onClick = {
                                 navController.navigate("favorites?filterType=All")
                             }) {

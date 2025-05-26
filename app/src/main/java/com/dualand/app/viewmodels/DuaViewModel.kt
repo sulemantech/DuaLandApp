@@ -24,6 +24,19 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 //    fun setSelectedTab(tab: String) {
 //        _selectedTab.value = tab
 //    }
+private val _selectedFilter = MutableStateFlow("All")
+    val selectedFilter: StateFlow<String> = _selectedFilter
+
+    fun setSelectedFilter(filter: String) {
+        _selectedFilter.value = filter
+    }
+
+    private val _uniqueFavoriteDuas = MutableStateFlow<List<Dua>>(emptyList())
+    val uniqueFavoriteDuas: StateFlow<List<Dua>> = _uniqueFavoriteDuas
+
+    fun setUniqueFavoriteDuas(favs: List<Dua>) {
+        _uniqueFavoriteDuas.value = favs
+    }
 
     private val favoriteIndicesQueue = mutableListOf<Int>()
     private var isPlayingFavorites = false
