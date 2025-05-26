@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.dualand.app.DuaViewModel
 import com.dualand.app.activities.DuaNewScreen
 import com.dualand.app.activities.DuaScreen
 import com.dualand.app.activities.InfoScreen
@@ -28,7 +29,7 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AppNavigator(navController: NavHostController) {
+fun AppNavigator(navController: NavHostController,  duaViewModel: DuaViewModel) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner) {
@@ -56,7 +57,7 @@ fun AppNavigator(navController: NavHostController) {
         ) {
             SplashScreen(
                 onFinished = {
-                    navController.navigate("learn") {
+                    navController.navigate("DuaNewScreen") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
@@ -83,7 +84,8 @@ fun AppNavigator(navController: NavHostController) {
                 index = index,
                 navController = navController,
                 innerPadding = PaddingValues(),
-                stopAudioPlayback = {}
+                stopAudioPlayback = {},
+                duaViewModel = duaViewModel
             )
         }
 
@@ -116,7 +118,7 @@ fun AppNavigator(navController: NavHostController) {
         ) {
             SettingsScreen(
                 navController = navController,
-                innerPadding = PaddingValues()
+                innerPadding = PaddingValues(),duaViewModel
             )
         }
     }

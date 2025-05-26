@@ -31,6 +31,7 @@
     <color name="reference_color">#58595D</color>
     <color name="heading_color">#212222</color>
     <color name="doodlecolor">#A32670</color>
+    <color name="tab_selected">#F3F3F3</color>
     <color name="dashboard_color">#CDEBF3</color>
     <color name="splash_color">#C0E5E5</color>
     <color name="badge_color">#064684</color>

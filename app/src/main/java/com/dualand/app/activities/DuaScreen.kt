@@ -69,10 +69,9 @@ fun DuaScreen(
     innerPadding: PaddingValues,
     index: Int,
     navController: NavController,
-    stopAudioPlayback: () -> Unit
+    stopAudioPlayback: () -> Unit,
+    duaViewModel: DuaViewModel = viewModel()
 ) {
-    val viewModel: DuaViewModel = viewModel()
-
     val systemUiController = rememberSystemUiController()
     val duas = duaList
     val context = LocalContext.current
@@ -246,21 +245,21 @@ fun DuaScreen(
             )
 
             Spacer(modifier = Modifier.height(9.dp))
-            DuaTabs(
-                dua = duas[currentIndex],
-                selectedTab = selectedTab,
-                onTabSelected = { selected ->
-                    selectedTab = selected
-                },
-                onStopCompleteDua = {
-                    stopAudioPlayback()
-                    isPlaying = false
-                    showListening = false
-                },
-                onPlayWordByWordButton = {
-                    //playWord(0)
-                },
-            )
+//            DuaTabs(
+//                dua = duas[currentIndex],
+//                selectedTab = selectedTab,
+//                onTabSelected = { selected ->
+//                    selectedTab = selected
+//                },
+//                onStopCompleteDua = {
+//                    stopAudioPlayback()
+//                    isPlaying = false
+//                    showListening = false
+//                },
+//                onPlayWordByWordButton = {
+//                    //playWord(0)
+//                },
+//            )
 
             Box(modifier = Modifier.fillMaxSize()) {
                 Box(
@@ -352,7 +351,7 @@ fun DuaScreen(
                                                 duaNumber = dua.duaNumber,
                                                 textHeading = dua.textheading,
                                                 imageResId = dua.image,
-                                                viewModel = viewModel
+                                                viewModel = duaViewModel
                                             )
 
                                             fun playWord(

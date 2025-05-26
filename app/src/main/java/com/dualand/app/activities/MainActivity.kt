@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -83,6 +84,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.components.AppNavigator
 import com.dualand.app.components.DuaCard
@@ -93,11 +95,14 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
+
+    private val duaViewModel: DuaViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_AnimationDemo)
         setContent {
-            AppNavigator(navController = rememberNavController())
+            AppNavigator(navController = rememberNavController(), duaViewModel = duaViewModel)
         }
     }
 }

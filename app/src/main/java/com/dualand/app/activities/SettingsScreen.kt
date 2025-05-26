@@ -32,12 +32,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.dualand.app.DuaViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-
+import androidx.compose.runtime.collectAsState
 @Composable
-fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
+fun SettingsScreen(navController: NavController, innerPadding: PaddingValues,duaViewModel: DuaViewModel = viewModel()) {
+
+    val readTitleEnabled by duaViewModel.readTitleEnabled.collectAsState()
+    val rewardsEnabled by duaViewModel.rewardsEnabled.collectAsState()
+    val autoNextDuasEnabled by duaViewModel.autoNextEnabled.collectAsState()
+    val wordByWordPauseEnabled by duaViewModel.wordByWordPauseEnabled.collectAsState()
+    val pauseSeconds by duaViewModel.pauseSeconds.collectAsState()
+    val selectedVoice by duaViewModel.selectedVoice.collectAsState()
+    val fontSize by duaViewModel.fontSize.collectAsState()
+
     val context = LocalContext.current
     val systemUiController = rememberSystemUiController()
     var wordByWordPause by remember { mutableStateOf(2) }
@@ -49,12 +60,14 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
 
     val sharedPref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     val savedVoice = sharedPref.getString("selected_voice", "Female")
-    val selectedVoice = remember { mutableStateOf(savedVoice ?: "Female") }
+    //val selectedVoice = remember { mutableStateOf(savedVoice ?: "Female") }
 
     val NavigationBarColor = colorResource(id = R.color.background_screen)
     val statusBarColor = colorResource(id = R.color.top_nav_new)
 
-    val fontSize = remember { mutableStateOf(sharedPref.getFloat("font_size", 24f)) }
+    val someSetting by duaViewModel.someSettingState
+
+    //val fontSize = remember { mutableStateOf(sharedPref.getFloat("font_size", 24f)) }
 
     val scrollState = rememberScrollState()
     val toggleOptions =
@@ -64,35 +77,35 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
         remember { mutableStateOf(LanguagePreferences.getSelectedLanguages(context)) }
     val selectedLanguages = remember { mutableStateListOf(*savedLanguages.value.toTypedArray()) }
 
-    var readTitleEnabled by remember {
-        mutableStateOf(
-            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                .getBoolean("read_title_enabled", false)
-        )
-    }
+//    var readTitleEnabled by remember {
+//        mutableStateOf(
+//            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+//                .getBoolean("read_title_enabled", false)
+//        )
+//    }
 
-    var rewardsEnabled by remember {
-        mutableStateOf(
-            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                .getBoolean("rewards_enabled", false)
-        )
-    }
+//    var rewardsEnabled by remember {
+//        mutableStateOf(
+//            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+//                .getBoolean("rewards_enabled", false)
+//        )
+//    }
 
-    var autoNextDuasEnabled by remember {
-        mutableStateOf(
-            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                .getBoolean("auto_next_duas_enabled", false)
-        )
-    }
+//    var autoNextDuasEnabled by remember {
+//        mutableStateOf(
+//            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+//                .getBoolean("auto_next_duas_enabled", false)
+//        )
+//    }
     var WordbyWordPauseEnabled by remember {
         mutableStateOf(
             context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                 .getBoolean("Word_by_Word_Pause_Enabled", false)
         )
     }
-    var pauseSeconds by remember {
-        mutableStateOf(sharedPref.getInt("word_by_word_pause_seconds", 2))
-    }
+//    var pauseSeconds by remember {
+//        mutableStateOf(sharedPref.getInt("word_by_word_pause_seconds", 2))
+//    }
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -223,12 +236,12 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = {
-                                if (fontSize.value > 10) {
-                                    fontSize.value -= 2f
+                                if (fontSize > 10) {
+                                    duaViewModel.setFontSize(fontSize - 2f)
 
                                     // Auto-save font size
                                     sharedPref.edit()
-                                        .putFloat("font_size", fontSize.value)
+                                        .putFloat("font_size", fontSize)
                                         .apply()
                                 }
                             }) {
@@ -239,7 +252,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                             }
 
                             Text(
-                                text = "${fontSize.value.toInt()}",
+                                text = "$fontSize",
                                 fontSize = 20.sp,
                                 fontFamily = text_font,
                                 color = colorResource(R.color.heading_color),
@@ -247,11 +260,11 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                             )
 
                             IconButton(onClick = {
-                                fontSize.value += 2f
-
+                                //duaViewModel.fontSize  += 2f
+                                duaViewModel.setFontSize(fontSize + 2f)
                                 // Auto-save font size
                                 sharedPref.edit()
-                                    .putFloat("font_size", fontSize.value)
+                                    .putFloat("font_size", fontSize)
                                     .apply()
                             }) {
                                 Image(
@@ -265,7 +278,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
 
                     Text(
                         text = "سُبْحَانَ اللّٰہِ",
-                        fontSize = fontSize.value.sp,
+                        fontSize = fontSize.sp,
                         fontFamily = MyArabicFont,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -321,19 +334,19 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 onCheckedChange = { isChecked ->
                                     when (title) {
                                         "Reading Out Dua Title" -> {
-                                            readTitleEnabled = isChecked
+                                            duaViewModel.setReadTitleEnabled(isChecked)
                                             sharedPref.edit().putBoolean("read_title_enabled", isChecked).apply()
                                         }
                                         "Rewards" -> {
-                                            rewardsEnabled = isChecked
+                                            duaViewModel.setRewardsEnabled(isChecked)
                                             sharedPref.edit().putBoolean("rewards_enabled", isChecked).apply()
                                         }
                                         "Auto Next Dua's" -> {
-                                            autoNextDuasEnabled = isChecked
+                                            duaViewModel.setAutoNextEnabled(isChecked)
                                             sharedPref.edit().putBoolean("auto_next_duas_enabled", isChecked).apply()
                                         }
                                         "Word-by-Word Pause" -> {
-                                            WordbyWordPauseEnabled = isChecked
+                                            duaViewModel.setWordByWordPauseEnabled(isChecked)
                                             sharedPref.edit().putBoolean("word_by_word_pause_enabled", isChecked).apply()
                                         }
                                     }
@@ -357,7 +370,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 IconButton(
                                     onClick = {
                                         if (pauseSeconds > 1) {
-                                            pauseSeconds--
+                                            duaViewModel.setPauseSeconds(pauseSeconds-1)
                                             sharedPref.edit().putInt("word_by_word_pause_seconds", pauseSeconds).apply()
                                         }
                                     },
@@ -383,7 +396,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
 
                                 IconButton(
                                     onClick = {
-                                        pauseSeconds++
+                                        duaViewModel.setPauseSeconds(pauseSeconds+1)
                                         sharedPref.edit().putInt("word_by_word_pause_seconds", pauseSeconds).apply()
                                     },
                                     modifier = Modifier.size(44.dp)
@@ -418,7 +431,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 modifier = Modifier
                                     .border(
                                         1.dp,
-                                        if (selectedVoice.value == gender) colorResource(R.color.check_box) else Color.Transparent,
+                                        if (selectedVoice == gender) colorResource(R.color.check_box) else Color.Transparent,
                                         shape = RoundedCornerShape(10.dp)
                                     )
                                     .padding(
@@ -427,7 +440,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                         top = 15.dp,
                                         bottom = 10.dp
                                     )
-                                    .clickable { selectedVoice.value = gender }
+                                    .clickable { duaViewModel.setSelectedVoice(gender) }
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Image(
@@ -440,7 +453,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(gender, fontFamily = text_font)
                                 }
-                                if (selectedVoice.value == gender) {
+                                if (selectedVoice == gender) {
                                     Image(
                                         painter = painterResource(id = R.drawable.ic_check_circle),
                                         contentDescription = "Selected",
@@ -478,7 +491,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues) {
                                 .putBoolean("Word_by_Word_Pause_Enabled", WordbyWordPauseEnabled)
                                 .putInt("word_by_word_pause_seconds", pauseSeconds)
                                 .putStringSet("selected_languages", selectedLanguages.toSet())
-                                .putString("selected_voice", selectedVoice.value)
+                                .putString("selected_voice", selectedVoice)
                                 .apply()
 
                             withContext(Dispatchers.Main) {

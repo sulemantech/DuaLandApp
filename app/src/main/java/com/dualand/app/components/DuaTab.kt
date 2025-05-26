@@ -1,29 +1,28 @@
 package com.dualand.app.components
 
-import android.annotation.SuppressLint
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
+import androidx.compose.material.Text as MaterialText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.models.Dua
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 private fun TabItem(
@@ -42,7 +41,7 @@ private fun TabItem(
             ) { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Text(
+        MaterialText(
             text = text,
             color = if (isSelected) colorResource(R.color.white) else colorResource(R.color.heading_color),
             fontFamily = fontFamily,
@@ -53,109 +52,59 @@ private fun TabItem(
 
 @Composable
 fun DuaTabs(
-   // dua: List<Dua>,
-    dua: Dua,
+    dua: List<Dua>,
     selectedTab: String,
-    onTabSelected: (String) -> Unit,
-    onStopCompleteDua: () -> Unit = {},
-    onStartWordByWord: () -> Unit = {},
-    onPlayWordByWordButton: () -> Unit,
-    onCompleteDuaClick: (Int) -> Unit = {}
+    onTabSelected: (String) -> Unit
 ) {
-    val currentTab = if (selectedTab.isEmpty()) "WORD" else selectedTab
-    val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
 
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val horizontalPadding = 20.dp * 2
-    val tabContainerWidth = screenWidth - horizontalPadding
-    val tabWidth = tabContainerWidth / 2
-    val tabOffset = if (currentTab == "WORD") 0.dp else tabWidth
-
-    val animatedOffset by animateDpAsState(targetValue = tabOffset, label = "TabOffset")
-
-    val totalWidth = 158.dp
-    val totalHeight = 50.dp
+    val viewModel: DuaViewModel = viewModel()
+    val selectedTab by viewModel.selectedTab.collectAsState()
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(totalHeight)
-            .padding(horizontal = 20.dp)
-    )
-    {
+            .padding(top = 10.dp)
+    ) {
         Image(
             painter = painterResource(id = R.drawable.tab_bg_pink),
             contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.matchParentSize()
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier.matchParentSize().padding(horizontal = 12.dp).height(50.dp)
         )
 
-        Box(
-            modifier = Modifier
-                .height(55.dp) // match parent height
-                .width(tabWidth)
-                .offset(x = animatedOffset),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.rectangle_tab),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
-            )
-        }
-
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            //  horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            TabItem(
-                text = "WORD BY WORD",
-                isSelected = currentTab == "WORD",
-                fontFamily = MyArabicFont,
-                modifier = Modifier.weight(1f),
-                onClick = {
-                    onStopCompleteDua()
-                    onTabSelected("WORD")
-                    onPlayWordByWordButton()
-                }
-            )
-            TabItem(
-                text = "COMPLETE DUA",
-                isSelected = currentTab == "COMPLETE",
-                fontFamily = MyArabicFont,
-                modifier = Modifier.weight(1f),
-                onClick = {
-                    onTabSelected("COMPLETE")
-                    onStopCompleteDua()
-                    onCompleteDuaClick(dua.fullAudioResId)
-                }
-            )
+            Button(
+                onClick = { viewModel.setSelectedTab("WORD") },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedTab == "WORD") colorResource(R.color.highlited_color)
+                    else colorResource(R.color.tab_selected)
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+            ) {
+                MaterialText("WORD BY WORD")
+            }
 
-//            TabItem(
-//                text = "WORD BY WORD",
-//                isSelected = currentTab == "WORD",
-//                fontFamily = MyArabicFont,
-//                modifier = Modifier.weight(1f),
-//                onClick = {
-//                    onTabSelected("WORD")         // update tab state
-//                    onStopCompleteDua()           // stop any playing full audio
-//                    onPlayWordByWordButton()     // start word-by-word audio
-//                }
-//            )
-//
-//            TabItem(
-//                text = "COMPLETE DUA",
-//                isSelected = currentTab == "COMPLETE",
-//                fontFamily = MyArabicFont,
-//                modifier = Modifier.weight(1f),
-//                onClick = {
-//                    onTabSelected("COMPLETE")     // update tab state
-//                    onStopCompleteDua()           // stop any word-by-word audio
-//                    onCompleteDuaClick(0)         // play full dua audio (use real ID if needed)
-//                }
-//            )
+            Button(
+                onClick = { viewModel.setSelectedTab("COMPLETE") },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedTab == "COMPLETE") colorResource(R.color.highlited_color)
+                    else colorResource(R.color.tab_selected)
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+            ) {
+                MaterialText("COMPLETE DUA")
+            }
         }
+
+
     }
 }
