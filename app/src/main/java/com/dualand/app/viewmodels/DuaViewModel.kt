@@ -24,7 +24,15 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 //    fun setSelectedTab(tab: String) {
 //        _selectedTab.value = tab
 //    }
-private val _selectedFilter = MutableStateFlow("All")
+
+    private val _currentIndex = MutableStateFlow(0)
+    val currentIndex: StateFlow<Int> = _currentIndex
+
+    fun updateCurrentIndex(index: Int) {
+        _currentIndex.value = index
+    }
+
+    private val _selectedFilter = MutableStateFlow("All")
     val selectedFilter: StateFlow<String> = _selectedFilter
 
     fun setSelectedFilter(filter: String) {
