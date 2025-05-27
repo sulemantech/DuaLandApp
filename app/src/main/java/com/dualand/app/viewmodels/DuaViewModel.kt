@@ -9,6 +9,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dualand.app.activities.DuaDataProvider
+import com.dualand.app.activities.DuaDataProvider.duaList
+import com.dualand.app.activities.MediaPlayerManager.playAudio
 import com.dualand.app.models.Dua
 import com.dualand.app.models.DuaStatusEntity
 import kotlinx.coroutines.flow.Flow
@@ -433,6 +435,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             list.any { it.duaNumber == duaNumber }
         }
     }
+
 //    // Check if a dua is marked as favorite
 //    suspend fun isFavorite(duaNumber: String): Boolean {
 //        return dao.isFavorite(duaNumber)

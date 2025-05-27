@@ -313,7 +313,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues,dua
                                             "Reading Out Dua Title" -> "Reads out the dua title automatically"
                                             "Rewards" -> "Gives a reward when a dua is completed"
                                             "Auto Next Dua’s" -> "Automatically move to the next dua"
-                                            else -> ""
+                                            else -> "Automatically move to the next dua"
                                         },
                                         fontSize = 10.sp,
                                         lineHeight = 12.sp,

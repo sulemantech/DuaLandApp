@@ -98,7 +98,8 @@ fun AppNavigator(navController: NavHostController,  duaViewModel: DuaViewModel) 
             MyDuaStatusScreen(
                 navController = navController,
                 innerPadding = PaddingValues(),
-                initialFilter = filterType
+                initialFilter = filterType,
+                duaViewModel = duaViewModel
             )
         }
 

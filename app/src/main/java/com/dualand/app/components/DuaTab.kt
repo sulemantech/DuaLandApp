@@ -54,11 +54,13 @@ private fun TabItem(
 fun DuaTabs(
     dua: List<Dua>,
     selectedTab: String,
-    onTabSelected: (String) -> Unit
+    onTabSelected: (String) -> Unit,
+    duaViewModel: DuaViewModel
+
 ) {
 
-    val viewModel: DuaViewModel = viewModel()
-    val selectedTab by viewModel.selectedTab.collectAsState()
+    //val viewModel: DuaViewModel = viewModel()
+    val selectedTab by duaViewModel.selectedTab.collectAsState()
 
     Box(
         modifier = Modifier
@@ -79,7 +81,7 @@ fun DuaTabs(
             //  horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Button(
-                onClick = { viewModel.setSelectedTab("WORD") },
+                onClick = { duaViewModel.setSelectedTab("WORD") },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (selectedTab == "WORD") colorResource(R.color.highlited_color)
                     else colorResource(R.color.tab_selected)
@@ -92,7 +94,7 @@ fun DuaTabs(
             }
 
             Button(
-                onClick = { viewModel.setSelectedTab("COMPLETE") },
+                onClick = { duaViewModel.setSelectedTab("COMPLETE") },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (selectedTab == "COMPLETE") colorResource(R.color.highlited_color)
                     else colorResource(R.color.tab_selected)

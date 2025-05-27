@@ -1,20 +1,18 @@
 package com.dualand.app.components
 
 import android.annotation.SuppressLint
-import android.media.MediaPlayer
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
@@ -37,11 +35,6 @@ import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.models.Dua
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.SpanStyle
@@ -60,14 +53,14 @@ fun DuaContent(
     innerPadding: PaddingValues,
     modifier: Modifier = Modifier,
     highlightedIndex: Int,
-    viewModel: DuaViewModel
+    duaViewModel: DuaViewModel
 
 ) {
-    var globalWordIndex by viewModel::globalWordIndex
-    val fontSize by viewModel.fontSize.collectAsState()
+    var globalWordIndex by duaViewModel::globalWordIndex
+    val fontSize by duaViewModel.fontSize.collectAsState()
     //val currentPlayingIndex by viewModel::currentPlayingIndex
 
-    val selectedTab by viewModel.selectedTab.collectAsState()
+    val selectedTab by duaViewModel.selectedTab.collectAsState()
     val scrollState = rememberScrollState()
     val MyArabicFont = FontFamily(Font(R.font.vazirmatn_regular))
     Column(modifier = modifier.padding(start = 10.dp, end = 10.dp)) {
@@ -108,47 +101,45 @@ fun DuaContent(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val isFavorite by viewModel.isFavorite(dua.duaNumber).collectAsState(initial = false)
 
+                                val isFavorite by duaViewModel.isFavorite(dua.duaNumber).collectAsState(initial = false)
                                 IconButton(
                                     onClick = {
-                                        viewModel.toggleFavoriteStatus(dua)
+                                        duaViewModel.toggleFavoriteStatus(dua)
                                     }
                                 ) {
                                     val iconRes = if (isFavorite) R.drawable.favourite_active_icon else R.drawable.favourite_icon
-                                    Image(painterResource(iconRes), contentDescription = "Favorite")
+                                    Image(painterResource(iconRes), contentDescription = "Favorite", modifier = Modifier.size(34.dp))
                                 }
-
 
                                 IconButton(
                                     onClick = {
-                                        if (selectedTab == "WORD") {
-                                            if (viewModel.isPlayingWordByWord) {
-                                                viewModel.stopAudio()
+                                        if (duaViewModel.selectedTab.value == "WORD") {
+                                            if (duaViewModel.isPlayingWordByWord) {
+                                                duaViewModel.stopAudio()
                                             } else {
-                                                viewModel.playWordByWord()
+                                                duaViewModel.playWordByWord()
                                             }
-                                        } else if (selectedTab == "COMPLETE") {
-                                            if (viewModel.isPlayingFullAudio) {
-                                                viewModel.stopAudio()
+                                        } else if (duaViewModel.selectedTab.value == "COMPLETE") {
+                                            if (duaViewModel.isPlayingFullAudio) {
+                                                duaViewModel.stopAudio()
                                             } else {
-                                                viewModel.playFullAudio()
+                                                duaViewModel.playFullAudio()
                                             }
                                         }
+
                                     }
                                 ) {
                                     val iconRes = when (selectedTab) {
-                                        "WORD" -> if (viewModel.isPlayingWordByWord) R.drawable.pause_icon else R.drawable.icon_playy
-                                        "COMPLETE" -> if (viewModel.isPlayingFullAudio) R.drawable.pause_icon else R.drawable.icon_playy
+                                        "WORD" -> if (duaViewModel.isPlayingWordByWord) R.drawable.pause_icon else R.drawable.icon_playy
+                                        "COMPLETE" -> if (duaViewModel.isPlayingFullAudio) R.drawable.pause_icon else R.drawable.icon_playy
                                         else -> R.drawable.icon_playy
-                                    }
-                                    Crossfade(targetState = iconRes, label = "") {
-                                        Image(painter = painterResource(it), contentDescription = "Play/Pause")
-                                    }
+                                }
+                                        Image(painter = painterResource(iconRes), contentDescription = "Play/Pause")
                                 }
 
                                 IconButton(onClick = { /* Stop */ }) {
-                                    Image(painterResource(R.drawable.repeat_off_btn), contentDescription = "Stop")
+                                    Image(painterResource(R.drawable.repeat_off_btn), contentDescription = "Stop", modifier = Modifier.size(34.dp))
                                 }
                             }
 
@@ -156,12 +147,12 @@ fun DuaContent(
                                 dua.wordAudioPairs.forEachIndexed { wordIndex, pair ->
                                     withStyle(
                                         style = SpanStyle(
-                                            color = if (viewModel.currentDuaIndex == index &&
-                                                viewModel.currentWordIndexInDua == wordIndex
+                                            color = if (duaViewModel.currentDuaIndex == index &&
+                                                duaViewModel.currentWordIndexInDua == wordIndex
                                             ) colorResource(R.color.highlited_color)
                                             else colorResource(R.color.arabic_color),
-                                            fontWeight = if (viewModel.currentDuaIndex == index &&
-                                                viewModel.currentWordIndexInDua == wordIndex
+                                            fontWeight = if (duaViewModel.currentDuaIndex == index &&
+                                                duaViewModel.currentWordIndexInDua == wordIndex
                                             ) FontWeight.Bold else FontWeight.Normal
                                         )
                                     ) {
@@ -182,7 +173,8 @@ fun DuaContent(
                                         textDirection = TextDirection.Rtl,
                                         textAlign = TextAlign.Center
                                     ),
-                                    onClick = { /* Optional: Add manual word play */ }
+                                    onClick = {
+                                    }
                                 )
                             }
 

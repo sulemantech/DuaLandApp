@@ -31,6 +31,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import android.app.Application
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dualand.app.DuaViewModel
+import com.dualand.app.components.InfoDialogContent
 
 @Composable
 fun DuaNewScreen(
@@ -106,15 +107,20 @@ fun DuaNewScreen(
                         textAlign = TextAlign.Center
                     )
                 }
+                var showDialog by remember { mutableStateOf(false) }
+
                 androidx.compose.material3.IconButton(
-                    onClick = { navController.navigate("InfoScreen") },
-                    modifier = Modifier.padding(start = 4.dp, top = 5.dp)
+                    onClick = { showDialog = true },
+                    modifier = Modifier.padding(start = 6.dp, top = 12.dp)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.info_icon),
                         contentDescription = "Info",
                         modifier = Modifier.size(29.dp, 30.dp)
                     )
+                }
+                if (showDialog) {
+                    InfoDialogContent(onDismiss = { showDialog = false })
                 }
             }
 
@@ -133,7 +139,8 @@ fun DuaNewScreen(
                     onTabSelected = { tab ->
                         duaViewModel.setSelectedTab(tab)
                     },
-                    dua = duaList
+                    dua = duaList,
+                    duaViewModel = duaViewModel
                 )
             }
 
