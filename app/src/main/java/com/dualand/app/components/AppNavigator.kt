@@ -57,7 +57,7 @@ fun AppNavigator(navController: NavHostController,  duaViewModel: DuaViewModel) 
         ) {
             SplashScreen(
                 onFinished = {
-                    navController.navigate("DuaNewScreen") {
+                    navController.navigate("learn") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
@@ -69,7 +69,7 @@ fun AppNavigator(navController: NavHostController,  duaViewModel: DuaViewModel) 
             enterTransition = { fadeIn(animationSpec = tween(500)) },
             exitTransition = { fadeOut(animationSpec = tween(300)) }
         ) {
-            MainScreen(navController)
+            MainScreen(navController, duaViewModel)
         }
 
         composable(
@@ -105,8 +105,13 @@ fun AppNavigator(navController: NavHostController,  duaViewModel: DuaViewModel) 
         composable("InfoScreen") {
             InfoScreen(navController = navController, innerPadding = PaddingValues())
         }
-        composable("DuaNewScreen") {
-            DuaNewScreen(navController = navController, innerPadding = PaddingValues())
+        composable("DuaNewScreen/{index}",
+            enterTransition = { slideInHorizontally { it } },
+            exitTransition = { slideOutHorizontally { -it } },
+            popEnterTransition = { slideInHorizontally { -it } },
+            popExitTransition = { slideOutHorizontally { it } }
+        ) { _ ->
+            DuaNewScreen(navController = navController, innerPadding = PaddingValues(), duaViewModel = duaViewModel)
         }
 
         composable(

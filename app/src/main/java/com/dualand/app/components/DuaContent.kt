@@ -2,6 +2,7 @@ package com.dualand.app.components
 
 import android.annotation.SuppressLint
 import android.media.MediaPlayer
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -92,11 +93,9 @@ fun DuaContent(
                    // .verticalScroll(scrollState)
                     .fillMaxWidth()
             ) {
-                duas.forEach { dua ->
+                duas.forEachIndexed { index, dua ->
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-//                            .padding(vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         elevation = 0.dp
                     ) {
                         Column(
@@ -109,12 +108,17 @@ fun DuaContent(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                IconButton(onClick = { /* Play full */ }) {
-                                    Image(
-                                        painterResource(R.drawable.favourite_icon),
-                                        contentDescription = "Play"
-                                    )
+                                val isFavorite by viewModel.isFavorite(dua.duaNumber).collectAsState(initial = false)
+
+                                IconButton(
+                                    onClick = {
+                                        viewModel.toggleFavoriteStatus(dua)
+                                    }
+                                ) {
+                                    val iconRes = if (isFavorite) R.drawable.favourite_active_icon else R.drawable.favourite_icon
+                                    Image(painterResource(iconRes), contentDescription = "Favorite")
                                 }
+
 
                                 IconButton(
                                     onClick = {
@@ -134,53 +138,35 @@ fun DuaContent(
                                     }
                                 ) {
                                     val iconRes = when (selectedTab) {
-                                        "WORD" -> {
-                                            if (viewModel.isPlayingWordByWord) R.drawable.pause_icon else R.drawable.icon_playy
-                                        }
-                                        "COMPLETE" -> {
-                                            if (viewModel.isPlayingFullAudio) R.drawable.pause_icon else R.drawable.icon_playy
-                                        }
+                                        "WORD" -> if (viewModel.isPlayingWordByWord) R.drawable.pause_icon else R.drawable.icon_playy
+                                        "COMPLETE" -> if (viewModel.isPlayingFullAudio) R.drawable.pause_icon else R.drawable.icon_playy
                                         else -> R.drawable.icon_playy
                                     }
-                                    Image(
-                                        painter = painterResource(iconRes),
-                                        contentDescription = "Play/Pause"
-                                    )
+                                    Crossfade(targetState = iconRes, label = "") {
+                                        Image(painter = painterResource(it), contentDescription = "Play/Pause")
+                                    }
                                 }
+
                                 IconButton(onClick = { /* Stop */ }) {
-                                    Image(
-                                        painterResource(R.drawable.repeat_off_btn),
-                                        contentDescription = "Stop"
-                                    )
+                                    Image(painterResource(R.drawable.repeat_off_btn), contentDescription = "Stop")
                                 }
                             }
 
-//                            Text(
-//                                text = dua.wordAudioPairs.joinToString(" ") { it.first },
-//                                fontSize = 20.sp,
-//                                fontWeight = FontWeight.SemiBold,
-//                                color = Color(0xFF1E88E5),
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(top = 7.dp),
-//                                textAlign = TextAlign.Center
-//                            )
                             val annotatedText = buildAnnotatedString {
-                                dua.wordAudioPairs.forEachIndexed { index, pair ->
-                                    pushStringAnnotation("WORD", index.toString())
+                                dua.wordAudioPairs.forEachIndexed { wordIndex, pair ->
                                     withStyle(
                                         style = SpanStyle(
-                                            color = if (globalWordIndex == index ) // && viewModel.currentIndex == i)
-                                                colorResource(R.color.highlited_color)
+                                            color = if (viewModel.currentDuaIndex == index &&
+                                                viewModel.currentWordIndexInDua == wordIndex
+                                            ) colorResource(R.color.highlited_color)
                                             else colorResource(R.color.arabic_color),
-                                            fontWeight = if (globalWordIndex == index ) //&& viewModel.currentIndex == i)
-                                                FontWeight.Bold
-                                            else FontWeight.Normal
+                                            fontWeight = if (viewModel.currentDuaIndex == index &&
+                                                viewModel.currentWordIndexInDua == wordIndex
+                                            ) FontWeight.Bold else FontWeight.Normal
                                         )
                                     ) {
                                         append(pair.first + " ")
                                     }
-                                    pop()
                                 }
                             }
 
@@ -196,28 +182,9 @@ fun DuaContent(
                                         textDirection = TextDirection.Rtl,
                                         textAlign = TextAlign.Center
                                     ),
-                                    onClick = {
-                            //                                    offset ->
-//
-//                                        annotatedText.getStringAnnotations("WORD", offset, offset)
-//                                            .firstOrNull()?.let { annotation ->
-//                                                val clickedIndex = annotation.item.toInt()
-//                                                globalMediaPlayer?.release()
-//                                                globalMediaPlayer = MediaPlayer.create(
-//                                                    context,
-//                                                    dua.wordAudioPairs[clickedIndex].second
-//                                                )
-//                                                currentPlayingIndex = i
-//                                                globalWordIndex = clickedIndex
-//                                                globalMediaPlayer?.setOnCompletionListener {
-//                                                    globalWordIndex = -1
-//                                                }
-//                                                globalMediaPlayer?.start()
-//                                            }
-                                    }
+                                    onClick = { /* Optional: Add manual word play */ }
                                 )
                             }
-
 
                             Text(
                                 text = dua.translation,
@@ -240,6 +207,7 @@ fun DuaContent(
                         }
                     }
                 }
+
             }
         }
     }

@@ -238,7 +238,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         onClick = {
                             for (dua in filteredDuas) {
                                 val index = allDuas.indexOf(dua)
-                                navController.navigate("dua/$index")
+                                navController.navigate("DuaNewScreen/$index")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -294,10 +294,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                             ) {
                                 val originalIndex = duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
 
-                                val actualStatus = when {
-                                    currentStatus == "Memorized" -> "Memorized"
-                                    else -> "In Practice"
-                                }
+                                val actualStatus = if (currentStatus == "Memorized") "Memorized" else "In Practice"
 
                                 TagButton(
                                     text = actualStatus,
@@ -305,20 +302,21 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                         "Memorized" -> R.drawable.memorized_btn_new
                                         else -> R.drawable.practice_now_btn
                                     },
-                                    width = when (actualStatus) {
-                                        "Memorized" -> 100.dp
-                                        else -> 84.dp
-                                    },
+                                    width = if (actualStatus == "Memorized") 100.dp else 84.dp,
                                     height = 28.dp,
                                     onClick = {
-                                        if (actualStatus == "In Practice" && originalIndex != -1) {
-                                            navController.navigate("dua/$originalIndex")
+                                        if (originalIndex == -1) {
+                                            Toast.makeText(context, "Dua not found", Toast.LENGTH_SHORT).show()
+                                            return@TagButton
+                                        }
+
+                                        if (actualStatus == "In Practice") {
+                                            navController.navigate("DuaNewScreen/$originalIndex")
                                         } else if (actualStatus == "Memorized") {
                                             Toast.makeText(context, "Memorized Dua", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 )
-
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Box(

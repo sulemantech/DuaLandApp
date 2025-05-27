@@ -29,39 +29,31 @@ import com.dualand.app.components.DuaContentFooter
 import com.dualand.app.components.DuaTabs
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import android.app.Application
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dualand.app.DuaViewModel
 
 @Composable
 fun DuaNewScreen(
     navController: NavController,
     duaTitle: String = "",
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    duaViewModel: DuaViewModel = viewModel()
 ) {
     val systemUiController = rememberSystemUiController()
     val navigationBarColor = colorResource(id = R.color.top_nav_new)
     val statusBarColor = colorResource(id = R.color.top_nav_new)
     val context = LocalContext.current
 
-    val viewModel: DuaViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(DuaViewModel::class.java)) {
-                    @Suppress("UNCHECKED_CAST")
-                    return DuaViewModel(context.applicationContext as Application) as T
-                }
-                throw IllegalArgumentException("Unknown ViewModel class")
-            }
-        }
-    )
+    //val allDuas = duaViewModel.duaList
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = navigationBarColor)
     }
 
-    val currentDua = viewModel.currentDua
-    val highlightedIndex = viewModel.highlightedIndex
-    val currentIndex = viewModel.currentIndex
+    val currentDua = duaViewModel.currentDua
+    val highlightedIndex = duaViewModel.highlightedIndex
+    val currentIndex = duaViewModel.currentIndex
 
     Box(
         modifier = Modifier
@@ -70,9 +62,9 @@ fun DuaNewScreen(
             .pointerInput(currentIndex) {
                 detectHorizontalDragGestures { _, dragAmount ->
                     if (dragAmount > 50 && currentIndex > 0) {
-                        viewModel.previousDua()
-                    } else if (dragAmount < -50 && currentIndex < viewModel.duaKeys.lastIndex) {
-                        viewModel.nextDua()
+                        duaViewModel.previousDua()
+                    } else if (dragAmount < -50 && currentIndex < duaViewModel.duaKeys.lastIndex) {
+                        duaViewModel.nextDua()
                     }
                 }
             }
@@ -137,9 +129,9 @@ fun DuaNewScreen(
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 DuaTabs(
-                    selectedTab = viewModel.selectedTab.collectAsState().value,
+                    selectedTab = duaViewModel.selectedTab.collectAsState().value,
                     onTabSelected = { tab ->
-                        viewModel.setSelectedTab(tab)
+                        duaViewModel.setSelectedTab(tab)
                     },
                     dua = duaList
                 )
@@ -154,16 +146,18 @@ fun DuaNewScreen(
                     .weight(1f)
                     .fillMaxWidth(),
                 highlightedIndex = highlightedIndex,
-                viewModel
+                duaViewModel
             )
         }
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             DuaContentFooter(
-                onPreviousClick = { viewModel.previousDua() },
-                onNextClick = { viewModel.nextDua() }
+                navController = navController,
+                onPreviousClick = { duaViewModel.previousDua() },
+                onNextClick = { duaViewModel.nextDua() }
             )
         }
+
     }
 }
 @Preview(showBackground = true)

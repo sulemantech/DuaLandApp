@@ -347,12 +347,12 @@ fun DuaScreen(
                                                 Alignment.CenterHorizontally
                                             )
                                         ) {
-                                            FavouriteButton(
-                                                duaNumber = dua.duaNumber,
-                                                textHeading = dua.textheading,
-                                                imageResId = dua.image,
-                                                viewModel = duaViewModel
-                                            )
+//                                            FavouriteButton(
+//                                                duaNumber = dua.duaNumber,
+//                                                textHeading = dua.textheading,
+//                                                imageResId = dua.image,
+//                                                viewModel = duaViewModel
+//                                            )
 
                                             fun playWord(
                                                 index: Int,

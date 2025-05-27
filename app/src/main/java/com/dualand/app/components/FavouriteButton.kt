@@ -27,9 +27,9 @@ fun FavouriteButton(
     val scope = rememberCoroutineScope()
     var isFav by remember { mutableStateOf(false) }
 
-    LaunchedEffect(duaNumber) {
-        isFav = viewModel.isFavorite(duaNumber)
-    }
+//    LaunchedEffect(duaNumber) {
+//        isFav = viewModel.isFavorite(duaNumber)
+//    }
 
     IconButton(onClick = {
         scope.launch {

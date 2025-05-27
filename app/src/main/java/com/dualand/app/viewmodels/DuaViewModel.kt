@@ -3,7 +3,6 @@ package com.dualand.app
 import android.app.Application
 import android.content.Context
 import android.media.MediaPlayer
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,11 +11,14 @@ import androidx.lifecycle.viewModelScope
 import com.dualand.app.activities.DuaDataProvider
 import com.dualand.app.models.Dua
 import com.dualand.app.models.DuaStatusEntity
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.SortedMap
 
 
 class DuaViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,7 +26,6 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = AppDatabase.getInstance(application).favoriteDuaDao()
 
     var globalWordIndex by mutableStateOf(-1)
-    var currentPlayingIndex by mutableStateOf(-1)
 
 
     private val context = application.applicationContext
@@ -38,6 +39,10 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     var currentIndex by mutableStateOf(0)
         private set
 
+    fun updateCurrentIndex(index: Int) {
+        currentIndex = index
+    }
+
     var highlightedIndex by mutableStateOf(-1)
         private set
 
@@ -50,9 +55,17 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     private var mediaPlayer: MediaPlayer? = null
 
     // Group and sort the dua list
-    private val groupedAndSortedDuas = DuaDataProvider.duaList.groupBy {
+//    private val groupedAndSortedDuas = DuaDataProvider.duaList.groupBy {
+//        it.duaNumber.substringBefore(".").trim().toInt()
+//    }.toSortedMap()
+
+    private val _groupedAndSortedDuas = DuaDataProvider.duaList.groupBy {
         it.duaNumber.substringBefore(".").trim().toInt()
     }.toSortedMap()
+
+    // Expose as public read-only property
+    val groupedAndSortedDuas: SortedMap<Int, List<Dua>>
+        get() = _groupedAndSortedDuas
 
     // Get all favorites
     val favoriteDuas: StateFlow<List<DuaStatusEntity>> = dao.getAllFavoriteDuas()
@@ -160,6 +173,8 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
+        //Filter only the dua that are in favorite, based on the favorite flag value
+        //getTheList of favourite duas from the DB filter based on it
         val duaList = currentDua // depends on currentIndex internally
 
         // If the list is empty or has no valid audio, skip to next group
@@ -228,79 +243,86 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    var currentDuaIndex by mutableStateOf(0)
+    var currentWordIndexInDua by mutableStateOf(-1)
+
     fun playWordByWord() {
         stopAudio()
-        globalWordIndex = 0
-        // If currentIndex is beyond available dua groups, reset and stop
         if (currentIndex >= duaKeys.size) {
             isPlayingWordByWord = false
-            highlightedIndex = -1
-            currentIndex = 0
+            currentDuaIndex = 0
+            currentWordIndexInDua = -1
             return
         }
 
-        val duaList = currentDua // This comes from duaKeys[currentIndex]
-        val allWordAudioPairs = duaList.flatMap { it.wordAudioPairs }
-
-        if (allWordAudioPairs.isEmpty()) {
-            // Skip to next group if autoNextEnabled
-            if (autoNextEnabled.value) {
-                currentIndex++
-                playWordByWord()
-            }
+        val duaList = currentDua // This is the list of Duas at this index
+        if (duaList.isEmpty()) {
+            currentIndex++
+            playWordByWord()
             return
         }
 
         isPlayingWordByWord = true
-        highlightedIndex = -1
-
-        playWordsSequentially(allWordAudioPairs, 0)
+        currentDuaIndex = 0
+        playDuaSequentially(duaList, 0)
     }
 
-    private fun playWordsSequentially(pairs: List<Pair<String, Int>>, index: Int) {
-        if (index >= pairs.size) {
+    private fun playDuaSequentially(duaList: List<Dua>, duaIndex: Int) {
+        if (duaIndex >= duaList.size) {
             isPlayingWordByWord = false
-            highlightedIndex = -1
-
-            // After finishing current group, go to next group if autoNext is on
+            currentWordIndexInDua = -1
+            currentIndex++
             if (autoNextEnabled.value) {
-                currentIndex++
-                globalWordIndex = 0 // ✅ Reset when moving to next dua group
                 playWordByWord()
-            }else{
-                globalWordIndex = -1
             }
-
             return
         }
 
-        highlightedIndex = index
-        globalWordIndex = index
+        currentDuaIndex = duaIndex
+        currentWordIndexInDua = 0
+
+        val currentDua = duaList[duaIndex]
+        val wordAudioPairs = currentDua.wordAudioPairs
+
+        playWordsInDua(wordAudioPairs, 0) {
+            playDuaSequentially(duaList, duaIndex + 1)
+        }
+    }
+
+    private fun playWordsInDua(
+        pairs: List<Pair<String, Int>>,
+        index: Int,
+        onFinished: () -> Unit
+    ) {
+        if (index >= pairs.size) {
+            onFinished()
+            return
+        }
+
+        currentWordIndexInDua = index
 
         val audioResId = pairs[index].second
         if (audioResId == 0) {
-            playWordsSequentially(pairs, index + 1)
+            playWordsInDua(pairs, index + 1, onFinished)
             return
         }
 
         try {
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(context, audioResId)
-
             mediaPlayer?.apply {
                 start()
                 setOnCompletionListener {
                     release()
                     mediaPlayer = null
-                    playWordsSequentially(pairs, index + 1)
+                    playWordsInDua(pairs, index + 1, onFinished)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            playWordsSequentially(pairs, index + 1)
+            playWordsInDua(pairs, index + 1, onFinished)
         }
     }
-
 
 
     fun stopAudio() {
@@ -335,10 +357,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Check if a dua is marked as favorite
-    suspend fun isFavorite(duaNumber: String): Boolean {
-        return dao.isFavorite(duaNumber)
-    }
+
 
     // Update status (e.g., Memorized, In Practice, Not Started)
     fun updateDuaStatus(duaNumber: String, newStatus: String) {
@@ -400,5 +419,23 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 //        }
 //    }
 
+
+    fun toggleFavoriteStatus(dua: Dua) {
+        viewModelScope.launch {
+            val duaNumber = dua.duaNumber
+            val currentStatus = dao.isFavorite(duaNumber)
+            dao.updateFavoriteStatus(duaNumber, !currentStatus)
+        }
+    }
+
+    fun isFavorite(duaNumber: String): Flow<Boolean> {
+        return dao.getAllFavoriteDuas().map { list ->
+            list.any { it.duaNumber == duaNumber }
+        }
+    }
+//    // Check if a dua is marked as favorite
+//    suspend fun isFavorite(duaNumber: String): Boolean {
+//        return dao.isFavorite(duaNumber)
+//    }
 }
 

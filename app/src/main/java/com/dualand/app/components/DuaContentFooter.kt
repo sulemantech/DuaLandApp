@@ -14,18 +14,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.dualand.app.R
-
 
 @Composable
 fun DuaContentFooter(
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
     onFavoriteClick: () -> Unit = {},
-    onShareClick: () -> Unit = {}
+    onShareClick: () -> Unit = {},
+    navController: NavController,
 ) {
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -52,14 +56,28 @@ fun DuaContentFooter(
                     modifier = Modifier.size(29.dp, 30.dp)
                 )
             }
-            IconButton(onClick = onFavoriteClick) {
+            IconButton(onClick = {
+                navController.navigate("favorites?filterType=All")
+            }) {
                 Image(
                     painter = painterResource(id = R.drawable.favourite_icon_dua),
                     contentDescription = "Favorites Dua",
                     modifier = Modifier.size(33.dp, 40.dp)
                 )
             }
-            IconButton(onClick = onShareClick) {
+            IconButton(onClick = {
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        "Check out this amazing app: https://play.google.com/store/apps/details?id=${context.packageName}"
+                    )
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, "Share App")
+                context.startActivity(shareIntent)
+            }) {
                 Image(
                     painter = painterResource(id = R.drawable.share_icon),
                     contentDescription = "Share",

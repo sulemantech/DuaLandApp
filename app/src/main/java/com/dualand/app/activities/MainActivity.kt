@@ -83,6 +83,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
@@ -121,7 +122,7 @@ fun PlaceholderScreen(title: String) {
 }
 
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(navController: NavController, duaViewModel: DuaViewModel = viewModel()) {
     Scaffold(
 //        bottomBar = {
 //            CustomBottomNavigationBar(
@@ -132,14 +133,14 @@ fun MainScreen(navController: NavController) {
 //            )
 //        }
     ) { innerPadding ->
-        LearnWithEaseScreen(navController, innerPadding)
+        LearnWithEaseScreen(navController, innerPadding, duaViewModel)
     }
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValues) {
+fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValues,duaViewModel: DuaViewModel = viewModel()) {
     val systemUiController = rememberSystemUiController()
     val statusBarColor = colorResource(id = R.color.top_nav_new)
     val navBarColor = colorResource(id = R.color.top_nav_new)
@@ -165,10 +166,36 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
 
     val allDuas: List<Dua> = DuaDataProvider.duaList
 
-    val duaList = duaCardMappings.mapIndexed { cardIndex, indexGroup ->
-        val firstIndex = indexGroup.first()
-        val dua = allDuas.getOrNull(firstIndex)
+//    val duaList = duaCardMappings.mapIndexed { cardIndex, indexGroup ->
+//        val firstIndex = indexGroup.first()
+//        val dua = allDuas.getOrNull(firstIndex)
+//
+//        val drawableName = if (cardIndex == 0) "card" else "card${cardIndex + 1}"
+//        val resId = remember(drawableName) {
+//            R.drawable::class.java.getDeclaredField(drawableName).getInt(null)
+//        }
+//
+//        DuaItem(
+//            imageRes = resId,
+//            title = dua?.textheading ?: "Dua ${cardIndex + 1}",
+//            textheading = dua?.textheading ?: "",
+//            onClick = {
+//                //duaViewModel.setCurrentIndex(firstIndex)
+//                //navController.navigate("dua/$firstIndex")
+//                duaViewModel.updateCurrentIndex(firstIndex)
+//                navController.navigate("DuaNewScreen/$firstIndex")
+//
+//            }
+//        )
+//    }
 
+    val groupedDuas = duaViewModel.groupedAndSortedDuas
+
+    val duaList = groupedDuas.entries.mapIndexed { cardIndex, (groupKey, duasInGroup) ->
+        // Pick the first dua of this group to represent the card
+        val firstDua = duasInGroup.firstOrNull()
+        //val firstDuaIndex = DuaDataProvider.duaList.indexOf(firstDua)-1
+        val firstDuaIndex = cardIndex
         val drawableName = if (cardIndex == 0) "card" else "card${cardIndex + 1}"
         val resId = remember(drawableName) {
             R.drawable::class.java.getDeclaredField(drawableName).getInt(null)
@@ -176,26 +203,28 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
 
         DuaItem(
             imageRes = resId,
-            title = dua?.textheading ?: "Dua ${cardIndex + 1}", 
-            textheading = dua?.textheading ?: "",
+            title = firstDua?.textheading ?: "Dua Group $groupKey",
+            textheading = firstDua?.textheading ?: "",
             onClick = {
-                navController.navigate("dua/$firstIndex")
+                if (firstDuaIndex >= 0) {
+                    duaViewModel.updateCurrentIndex(firstDuaIndex)
+                    navController.navigate("DuaNewScreen/$firstDuaIndex")
+                }
             }
         )
     }
-
     val filteredDuaList = remember(searchText) {
         duaList.filter {
             it.textheading.contains(searchText, ignoreCase = true)
         }
     }
 
-    val suggestionList = remember(searchText) {
-        if (searchText.isBlank()) emptyList()
-        else allDuas.filter { dua ->
-            dua.textheading?.contains(searchText, ignoreCase = true) == true
-        }
-    }
+//    val suggestionList = remember(searchText) {
+//        if (searchText.isBlank()) emptyList()
+//        else allDuas.filter { dua ->
+//            dua.textheading?.contains(searchText, ignoreCase = true) == true
+//        }
+//    }
 
     Box(
         modifier = Modifier
