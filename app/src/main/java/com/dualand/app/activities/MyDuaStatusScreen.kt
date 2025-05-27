@@ -1,6 +1,7 @@
 package com.dualand.app.activities
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -34,14 +35,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.activities.DuaDataProvider.duaList
 import com.dualand.app.components.FilterDropdownMenu
+import com.dualand.app.components.InfoDialogContent
 import com.dualand.app.components.TagButton
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.CoroutineScope
@@ -61,16 +68,56 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
     val title = FontFamily(Font(R.font.mochypop_regular))
     val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
     val duaStatuses by viewModel.allDuas.collectAsState()
-    val allDuas = duaList.filter { !it.textheading.isNullOrBlank() }
+//    val allDuas = duaList.filter { !it.textheading.isNullOrBlank() }
+    val allDuas = duaList
+        .filter { !it.textheading.isNullOrBlank() }
+        .distinctBy { it.textheading!!.trim().lowercase() }
     var showDialog by remember { mutableStateOf(false) }
     var selectedFilters by remember { mutableStateOf(listOf<String>()) }
     var expanded by remember { mutableStateOf(false) }
-  //  var selectedFilter by remember { mutableStateOf("All") }
+    //  var selectedFilter by remember { mutableStateOf("All") }
     var index by remember { mutableStateOf(0) }
-
     val text_font = FontFamily(Font(R.font.montserrat_regular))
     var selectedFilter by remember { mutableStateOf(initialFilter) }
 
+    val sharedPref = context.getSharedPreferences("your_pref_name", Context.MODE_PRIVATE)
+    val rewardsEnabled = sharedPref.getBoolean("rewards_enabled", true)
+    var currentIndex by remember { mutableStateOf(0) }
+    var showRewardAnimation by remember { mutableStateOf(false) }
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie))
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = 1,
+        isPlaying = showRewardAnimation
+    )
+
+    LaunchedEffect(progress) {
+        if (progress >= 0.99f) {
+            showRewardAnimation = false
+        }
+    }
+
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Button(onClick = { showRewardAnimation = true }) {
+            Text("Show Animation")
+        }
+        if (showRewardAnimation) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.6f))
+                    .zIndex(2f),
+                contentAlignment = Alignment.Center
+            ) {
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier.size(250.dp)
+                )
+            }
+        }
+    }
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = NavigationBarColor)
@@ -125,8 +172,10 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                             modifier = Modifier.padding(top = 12.dp)
                         )
                     }
+                    var showDialog by remember { mutableStateOf(false) }
 
-                    IconButton(onClick = {navController.navigate("InfoScreen")},
+                    IconButton(
+                        onClick = { showDialog = true },
                         modifier = Modifier.padding(start = 6.dp, top = 12.dp)
                     ) {
                         Image(
@@ -135,78 +184,146 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                             modifier = Modifier.size(29.dp, 30.dp)
                         )
                     }
+
+                    if (showDialog) {
+                        InfoDialogContent(onDismiss = { showDialog = false })
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-
-            OutlinedTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(start = 16.dp, end = 16.dp),
-                trailingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = "Voice Search",
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clickable {
-                            }
-                    )
-                },
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White,
-                    containerColor = colorResource(R.color.top_nav_new),
-                    cursorColor = colorResource(R.color.highlited_color)
-                ),
-                placeholder = {
-                    Text("Search Dua...", fontFamily = text_font)
-
-                },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    capitalization = KeyboardCapitalization.Sentences
-                )
-            )
-
+//
+//            OutlinedTextField(
+//                value = searchText,
+//                onValueChange = { searchText = it },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(50.dp)
+//                    .padding(start = 16.dp, end = 16.dp),
+//                trailingIcon = {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.ic_search),
+//                        contentDescription = "Voice Search",
+//                        modifier = Modifier
+//                            .size(44.dp)
+//                            .clickable {
+//                            }
+//                    )
+//                },
+//                shape = RoundedCornerShape(12.dp),
+//                singleLine = true,
+//                colors = TextFieldDefaults.outlinedTextFieldColors(
+//                    focusedBorderColor = Color.White,
+//                    unfocusedBorderColor = Color.White,
+//                    containerColor = colorResource(R.color.top_nav_new),
+//                    cursorColor = colorResource(R.color.highlited_color)
+//                ),
+//                placeholder = {
+//                    Text("Search Dua...", fontFamily = text_font)
+//
+//                },
+//                keyboardOptions = KeyboardOptions.Default.copy(
+//                    capitalization = KeyboardCapitalization.Sentences
+//                )
+//            )
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp),
+//                horizontalArrangement = Arrangement.End
+//            ) {
+//                Text(
+//                    text = "Total Duas: ${allDuas.size}",
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    fontWeight = FontWeight.SemiBold
+//                )
+//            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 25.dp, start = 20.dp, end = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 20.dp, vertical = 5.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Filter By",
-                    fontWeight = W600,
-                    fontSize = 16.sp,
-                    color = colorResource(R.color.heading_color),
-                    fontFamily = text_font
-                    )
-                Box(
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.TopEnd)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.filter_icon),
-                        contentDescription = "Filter Icon",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { expanded = true }
-                    )
+                val filteredDuas = allDuas.filter { dua ->
+                    val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
 
-                    FilterDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        selectedFilter = selectedFilter,
-                        onFilterSelected = { selectedFilter = it }
+                    val matchesSearch = dua.textheading?.contains(searchText, ignoreCase = true) == true
+
+                    val matchesFilter = when (selectedFilter) {
+                        "All" -> true
+                        "Favorite" -> status?.favorite == true
+                        "Memorized" -> status?.status == "Memorized"
+                        "In Practice" -> status?.status == "In Practice"
+                        else -> false
+                    }
+
+                    matchesSearch && matchesFilter
+                }
+                val uniqueFavoriteDuas = filteredDuas
+                    .filter { !it.textheading.isNullOrBlank() }
+                    .distinctBy { it.textheading!!.trim().lowercase() }
+
+                if (selectedFilter == "Favorite" && uniqueFavoriteDuas.isNotEmpty()) {
+                    Button(
+                        onClick = {
+                            val indices = uniqueFavoriteDuas.mapNotNull { dua ->
+                                duaList.indexOfFirst {
+                                    it.textheading.equals(dua.textheading, ignoreCase = true) &&
+                                            it.translation.equals(dua.translation, ignoreCase = true)
+                                }.takeIf { it != -1 }
+                            }
+                           // viewModel.startPlayingFavorites(indices)
+                            val lastFavoriteIndex = indices.lastOrNull()
+                            if (lastFavoriteIndex != null) {
+                                currentIndex = lastFavoriteIndex
+                                navController.navigate("DuaNewScreen/$lastFavoriteIndex")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(colorResource(R.color.highlited_color)),
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.vector_play),
+                            contentDescription = "Play",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Play all", color = Color.White)
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(1.dp))
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Filter By",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = colorResource(R.color.heading_color),
+                        fontFamily = text_font
                     )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Box {
+                        Image(
+                            painter = painterResource(R.drawable.filter_icon),
+                            contentDescription = "Filter Icon",
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { expanded = true }
+                        )
+
+                        FilterDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            selectedFilter = selectedFilter,
+                            onFilterSelected = { selectedFilter = it }
+                        )
+                    }
                 }
             }
 
@@ -227,30 +344,41 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
 
                 matchesSearch && matchesFilter
             }
-            if (selectedFilter == "Favorite" && filteredDuas.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = {
-                            for (dua in filteredDuas) {
-                                val index = allDuas.indexOf(dua)
-                                navController.navigate("DuaNewScreen/$index")
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(R.color.highlited_color),
-                            contentColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(text = "Play All Favorite Duas", fontFamily = text_font)
-                    }
-                }
-            }
+//            val uniqueFavoriteDuas = filteredDuas
+//                .filter { !it.textheading.isNullOrBlank() }
+//                .distinctBy { it.textheading!!.trim().lowercase() }
+//
+//            if (selectedFilter == "Favorite" && uniqueFavoriteDuas.isNotEmpty()) {
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 20.dp, vertical = 8.dp),
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    Button(
+//                        onClick = {
+//                            val indices = uniqueFavoriteDuas.mapNotNull { dua ->
+//                                duaList.indexOfFirst {
+//                                    it.textheading.equals(dua.textheading, ignoreCase = true) &&
+//                                            it.translation.equals(dua.translation, ignoreCase = true)
+//                                }.takeIf { it != -1 }
+//                            }
+//                            viewModel.startPlayingFavorites(indices)
+//                            viewModel.getCurrentDuaIndex()?.let { index ->
+//                                navController.navigate("dua/$index")
+//                            }
+//                        },
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = colorResource(R.color.highlited_color),
+//                            contentColor = Color.Black
+//                        ),
+//                        shape = RoundedCornerShape(12.dp)
+//                    ) {
+//                        Text(text = "Play All Favorite Duas", fontFamily = text_font)
+//                    }
+//                }
+//            }
+
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 80.dp),
                 modifier = Modifier.fillMaxSize()
@@ -285,7 +413,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                 fontSize = 12.sp,
                                 fontFamily = title,
                                 color = colorResource(R.color.heading_color),
-                                )
+                            )
 
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(
@@ -294,7 +422,10 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                             ) {
                                 val originalIndex = duaList.indexOfFirst { it.duaNumber == dua.duaNumber }
 
-                                val actualStatus = if (currentStatus == "Memorized") "Memorized" else "In Practice"
+                                val actualStatus = when {
+                                    currentStatus == "Memorized" -> "Memorized"
+                                    else -> "In Practice"
+                                }
 
                                 TagButton(
                                     text = actualStatus,
@@ -302,21 +433,20 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                         "Memorized" -> R.drawable.memorized_btn_new
                                         else -> R.drawable.practice_now_btn
                                     },
-                                    width = if (actualStatus == "Memorized") 100.dp else 84.dp,
+                                    width = when (actualStatus) {
+                                        "Memorized" -> 100.dp
+                                        else -> 84.dp
+                                    },
                                     height = 28.dp,
                                     onClick = {
-                                        if (originalIndex == -1) {
-                                            Toast.makeText(context, "Dua not found", Toast.LENGTH_SHORT).show()
-                                            return@TagButton
-                                        }
-
-                                        if (actualStatus == "In Practice") {
+                                        if (actualStatus == "In Practice" && originalIndex != -1) {
                                             navController.navigate("DuaNewScreen/$originalIndex")
                                         } else if (actualStatus == "Memorized") {
                                             Toast.makeText(context, "Memorized Dua", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 )
+
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Box(
@@ -342,6 +472,10 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                 onCheckedChange = { isChecked ->
                                     val newStatus = if (isChecked) "Memorized" else "In Practice"
                                     viewModel.updateDuaStatus(dua.duaNumber, newStatus)
+
+                                    if (isChecked && rewardsEnabled) {
+                                        showRewardAnimation = true
+                                    }
                                 },
                                 modifier = Modifier.scale(1.0f),
                                 colors = SwitchDefaults.colors(
@@ -351,6 +485,22 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                     uncheckedTrackColor = colorResource(R.color.white)
                                 )
                             )
+
+//                            if (showRewardAnimation) {
+//                                Box(
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                      //  .background(Color.Black.copy(alpha = 0.4f))
+//                                        .zIndex(2f),
+//                                    contentAlignment = Alignment.Center
+//                                ) {
+//                                    LottieAnimation(
+//                                        composition = composition,
+//                                        progress = { progress },
+//                                       // modifier = Modifier.size(250.dp)
+//                                    )
+//                                }
+//                            }
                         }
                     }
                     Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
@@ -451,6 +601,8 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
         }
     }
 }
+
+
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
