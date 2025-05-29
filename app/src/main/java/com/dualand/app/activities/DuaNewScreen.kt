@@ -139,7 +139,7 @@ fun DuaNewScreen(
                     .fillMaxWidth()
                     .height(240.dp)
             )
-
+            Spacer(modifier = Modifier.height(10.dp))
             Box(modifier = Modifier.fillMaxWidth().padding()) {
                 DuaTabs(
                     selectedTab = duaViewModel.selectedTab.collectAsState().value,
@@ -163,7 +163,7 @@ fun DuaNewScreen(
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             DuaContentFooter(
-                onStopAudio = { duaViewModel.stopAudio() }, // ✅ pass function as lambda
+                onStopAudio = { duaViewModel.stopAudio() },
                 navController = navController,
                 onPreviousClick = { duaViewModel.previousDua() },
                 onNextClick = { duaViewModel.nextDua() }

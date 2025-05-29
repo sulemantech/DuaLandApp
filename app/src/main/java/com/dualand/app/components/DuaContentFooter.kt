@@ -57,6 +57,7 @@ fun DuaContentFooter(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onPreviousClick) {
+                duaViewModel.stopAudio()
                 Image(
                     painter = painterResource(id = R.drawable.ic_backarrow),
                     contentDescription = "Previous",
@@ -98,6 +99,7 @@ fun DuaContentFooter(
                 )
             }
             IconButton(onClick = onNextClick) {
+                duaViewModel.stopAudio()
                 Image(
                     painter = painterResource(id = R.drawable.ic_nextarrow),
                     contentDescription = "Next",

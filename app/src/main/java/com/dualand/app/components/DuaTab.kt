@@ -1,5 +1,6 @@
 package com.dualand.app.components
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,9 +29,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 @Composable
 private fun TabItem(
@@ -49,7 +52,7 @@ private fun TabItem(
             ) { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        MaterialText(
+        Text(
             text = text,
             color = if (isSelected) colorResource(R.color.white) else colorResource(R.color.heading_color),
             fontFamily = fontFamily,
@@ -63,51 +66,82 @@ fun DuaTabs(
     selectedTab: String,
     onTabSelected: (String) -> Unit
 ) {
+    val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val horizontalPadding = 20.dp * 2
+    val tabContainerWidth = screenWidth - horizontalPadding
+    val tabWidth = tabContainerWidth / 2
+    val tabOffset = if (selectedTab == "WORD") 0.dp else tabWidth
+
+    val animatedOffset by animateDpAsState(targetValue = tabOffset, label = "TabOffset")
+
+    val totalHeight = 50.dp
+
     val activeColor = colorResource(id = R.color.highlited_color)
-    val inactiveColor = Color(0xFFF5F5F5) // or your `tab_selected` color
-    val tabShape = RoundedCornerShape(25.dp)
-    val text_font1 = FontFamily(Font(R.font.doodlestrickers))
+    val inactiveColor = Color.Transparent
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .background(inactiveColor, tabShape)
-            .height(50.dp)
+            .height(totalHeight)
+            .padding(horizontal = 20.dp)
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            // Word by Word Tab
+        // Background container image
+        Image(
+            painter = painterResource(id = R.drawable.tab_bg_pink),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.matchParentSize()
+        )
+
+        // Animated sliding highlight image
+        Box(
+            modifier = Modifier
+                .height(totalHeight + 5.dp) // slightly taller to match design
+                .width(tabWidth)
+                .offset(x = animatedOffset),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.rectangle_tab),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+            )
+        }
+
+        // Tabs row with texts
+        Row(
+            modifier = Modifier.fillMaxSize()
+        ) {
             Box(
                 modifier = Modifier
-                    .size(45.dp)               // width = height = 45.dp for a perfect circle
-                    .clip(CircleShape)
                     .weight(1f)
-                    .background(if (selectedTab == "WORD") activeColor else Color.Transparent)
+                    .fillMaxHeight()
                     .clickable { onTabSelected("WORD") },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "WORD BY WORD",
                     color = if (selectedTab == "WORD") Color.White else colorResource(R.color.heading_color),
-                    fontFamily = text_font1,
+                    fontFamily = MyArabicFont,
                     fontSize = 18.sp
                 )
             }
-
-            // Complete Dua Tab
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(tabShape)
-                    .background(if (selectedTab == "COMPLETE") activeColor else Color.Transparent)
-                    .clickable { onTabSelected("COMPLETE") }
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .clickable { onTabSelected("COMPLETE") },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "COMPLETE DUA",
                     color = if (selectedTab == "COMPLETE") Color.White else colorResource(R.color.heading_color),
-                    fontFamily = text_font1,
+                    fontFamily = MyArabicFont,
                     fontSize = 18.sp
                 )
             }
