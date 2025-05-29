@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
@@ -35,6 +37,8 @@ import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.models.Dua
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.SpanStyle
@@ -63,6 +67,7 @@ fun DuaContent(
     val selectedTab by duaViewModel.selectedTab.collectAsState()
     val scrollState = rememberScrollState()
     val MyArabicFont = FontFamily(Font(R.font.vazirmatn_regular))
+    val translationtext = FontFamily(Font(R.font.poppins_regular))
     Column(modifier = modifier.padding(start = 10.dp, end = 10.dp)) {
         val phrases = duas.firstOrNull()?.wordAudioPairs ?: emptyList()
 //        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -78,17 +83,17 @@ fun DuaContent(
         BoxWithConstraints(
             modifier = modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-                .verticalScroll(scrollState)
         ) {
             Column(
                 modifier = Modifier
-                   // .verticalScroll(scrollState)
-                    .fillMaxWidth()
+                    .verticalScroll(scrollState) // Move scroll here
+                    .fillMaxWidth() // Avoid fillMaxSize()
             ) {
                 duas.forEachIndexed { index, dua ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                         elevation = 0.dp
                     ) {
                         Column(
@@ -102,14 +107,20 @@ fun DuaContent(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
 
-                                val isFavorite by duaViewModel.isFavorite(dua.duaNumber).collectAsState(initial = false)
+                                val isFavorite by duaViewModel.isFavorite(dua.duaNumber)
+                                    .collectAsState(initial = false)
                                 IconButton(
                                     onClick = {
                                         duaViewModel.toggleFavoriteStatus(dua)
                                     }
                                 ) {
-                                    val iconRes = if (isFavorite) R.drawable.favourite_active_icon else R.drawable.favourite_icon
-                                    Image(painterResource(iconRes), contentDescription = "Favorite", modifier = Modifier.size(34.dp))
+                                    val iconRes =
+                                        if (isFavorite) R.drawable.favourite_active_icon else R.drawable.favourite_icon
+                                    Image(
+                                        painterResource(iconRes),
+                                        contentDescription = "Favorite",
+                                        modifier = Modifier.size(34.dp)
+                                    )
                                 }
 
                                 IconButton(
@@ -134,13 +145,15 @@ fun DuaContent(
                                         "WORD" -> if (duaViewModel.isPlayingWordByWord) R.drawable.pause_icon else R.drawable.icon_playy
                                         "COMPLETE" -> if (duaViewModel.isPlayingFullAudio) R.drawable.pause_icon else R.drawable.icon_playy
                                         else -> R.drawable.icon_playy
-                                }
-                                        Image(painter = painterResource(iconRes), contentDescription = "Play/Pause")
+                                    }
+                                    Image(
+                                        painter = painterResource(iconRes),
+                                        contentDescription = "Play/Pause"
+                                    )
                                 }
 
-                                IconButton(onClick = { /* Stop */ }) {
-                                    Image(painterResource(R.drawable.repeat_off_btn), contentDescription = "Stop", modifier = Modifier.size(34.dp))
-                                }
+                              RepeatButton()
+
                             }
 
                             val annotatedText = buildAnnotatedString {
@@ -166,7 +179,7 @@ fun DuaContent(
                                     text = annotatedText,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = 25.dp, end = 25.dp),
+                                        .padding(start = 25.dp, end = 25.dp, top = 10.dp),
                                     style = TextStyle(
                                         fontSize = fontSize.sp,
                                         fontFamily = MyArabicFont,
@@ -180,8 +193,9 @@ fun DuaContent(
 
                             Text(
                                 text = dua.translation,
-                                fontSize = 14.sp,
-                                color = Color.DarkGray,
+                                fontSize = 13.sp,
+                                fontFamily = translationtext,
+                                color = colorResource(R.color.splash_black),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 7.dp),
@@ -190,7 +204,7 @@ fun DuaContent(
                             Text(
                                 text = dua.reference,
                                 fontSize = 10.sp,
-                                color = Color.DarkGray,
+                                color = colorResource(R.color.reference_color),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 5.dp),

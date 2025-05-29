@@ -29,6 +29,8 @@ import com.dualand.app.components.DuaContentFooter
 import com.dualand.app.components.DuaTabs
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import android.app.Application
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dualand.app.DuaViewModel
 import com.dualand.app.components.InfoDialogContent
@@ -44,6 +46,8 @@ fun DuaNewScreen(
     val navigationBarColor = colorResource(id = R.color.top_nav_new)
     val statusBarColor = colorResource(id = R.color.top_nav_new)
     val context = LocalContext.current
+    val title = FontFamily(Font(R.font.mochypop_regular))
+
 
     //val allDuas = duaViewModel.duaList
 
@@ -81,7 +85,8 @@ fun DuaNewScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { navController.navigate("learn") },
+                    onClick = { duaViewModel.stopAudio()
+                        navController.navigate("learn") },
                     modifier = Modifier.padding(start = 4.dp, top = 5.dp)
                 ) {
                     Image(
@@ -94,23 +99,25 @@ fun DuaNewScreen(
                 Row(modifier = Modifier.padding(horizontal = 6.dp)) {
                     Text(
                         text = currentDua.firstOrNull()?.duaNumber ?: duaTitle,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        fontSize = 14.sp,
+                        color = colorResource(R.color.heading_color),
+                        fontFamily = title,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                   // Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = currentDua.firstOrNull()?.textheading ?: duaTitle,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        fontSize = 14.sp,
+                        color = colorResource(R.color.heading_color),
+                        fontFamily = title,
                         textAlign = TextAlign.Center
                     )
                 }
                 var showDialog by remember { mutableStateOf(false) }
 
                 androidx.compose.material3.IconButton(
-                    onClick = { showDialog = true },
+                    onClick = {
+                        duaViewModel.stopAudio()
+                        showDialog = true },
                     modifier = Modifier.padding(start = 6.dp, top = 12.dp)
                 ) {
                     Image(
@@ -133,24 +140,21 @@ fun DuaNewScreen(
                     .height(240.dp)
             )
 
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.fillMaxWidth().padding()) {
                 DuaTabs(
                     selectedTab = duaViewModel.selectedTab.collectAsState().value,
                     onTabSelected = { tab ->
+                        duaViewModel.stopAudio()
                         duaViewModel.setSelectedTab(tab)
-                    },
-                    dua = duaList,
-                    duaViewModel = duaViewModel
+                    }
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
             DuaContent(
                 duas = currentDua,
-                innerPadding = PaddingValues(),
+                innerPadding = PaddingValues(bottom = 50.dp),
                 modifier = Modifier
-                    .weight(1f)
+                    //.weight(1f)
                     .fillMaxWidth(),
                 highlightedIndex = highlightedIndex,
                 duaViewModel
@@ -159,11 +163,13 @@ fun DuaNewScreen(
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             DuaContentFooter(
+                onStopAudio = { duaViewModel.stopAudio() }, // ✅ pass function as lambda
                 navController = navController,
                 onPreviousClick = { duaViewModel.previousDua() },
                 onNextClick = { duaViewModel.nextDua() }
             )
         }
+
 
     }
 }

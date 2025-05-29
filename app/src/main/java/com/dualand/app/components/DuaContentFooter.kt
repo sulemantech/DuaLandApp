@@ -11,22 +11,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.dualand.app.DuaViewModel
 import com.dualand.app.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun DuaContentFooter(
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
+    onStopAudio: () -> Unit,
     onFavoriteClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
     navController: NavController,
+    duaViewModel: DuaViewModel = viewModel()
 ) {
     val context = LocalContext.current
 
@@ -56,8 +63,12 @@ fun DuaContentFooter(
                     modifier = Modifier.size(29.dp, 30.dp)
                 )
             }
+            val coroutineScope = rememberCoroutineScope()
             IconButton(onClick = {
-                navController.navigate("favorites?filterType=All")
+                coroutineScope.launch {
+                    onStopAudio()
+                    navController.navigate("favorites?filterType=All")
+                }
             }) {
                 Image(
                     painter = painterResource(id = R.drawable.favourite_icon_dua),
@@ -65,7 +76,9 @@ fun DuaContentFooter(
                     modifier = Modifier.size(33.dp, 40.dp)
                 )
             }
+
             IconButton(onClick = {
+                onStopAudio()
                 val sendIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(

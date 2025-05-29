@@ -3,7 +3,9 @@ package com.dualand.app
 import android.app.Application
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.annotation.RawRes
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
@@ -111,6 +113,14 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     private val _fontSize = MutableStateFlow(prefs.getFloat("font_size", 24f))
     val fontSize: StateFlow<Float> = _fontSize
 
+    // Track word-by-word play state per dua
+    private val _isPlayingWordByWordMap = mutableStateMapOf<Int, Boolean>()
+    val isPlayingWordByWordMap: Map<Int, Boolean> get() = _isPlayingWordByWordMap
+
+    // Track full audio play state per dua
+    private val _isPlayingFullAudioMap = mutableStateMapOf<Int, Boolean>()
+    val isPlayingFullAudioMap: Map<Int, Boolean> get() = _isPlayingFullAudioMap
+
     fun setReadTitleEnabled(enabled: Boolean) {
         _readTitleEnabled.value = enabled
         prefs.edit().putBoolean("read_title_enabled", enabled).apply()
@@ -175,11 +185,8 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        //Filter only the dua that are in favorite, based on the favorite flag value
-        //getTheList of favourite duas from the DB filter based on it
         val duaList = currentDua // depends on currentIndex internally
 
-        // If the list is empty or has no valid audio, skip to next group
         if (duaList.isEmpty()) {
             if (autoNextEnabled.value) {
                 currentIndex++
@@ -188,19 +195,34 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        // Check first item's audio for validity (assuming all in group have audio)
-        val firstDuaAudio = duaList.firstOrNull()?.fullAudioResId ?: 0
-        if (firstDuaAudio == 0) {
-            // No audio, skip to next group if enabled
-            if (autoNextEnabled.value) {
-                currentIndex++
-                playFullAudio()
-            }
-            return
-        }
+        // Check for title audio
+        val titleAudio = duaList.firstOrNull()?.titleAudioResId ?: 0
+        if (readTitleEnabled.value && titleAudio != 0) {
+            try {
+                mediaPlayer?.release()
+                mediaPlayer = MediaPlayer.create(context, titleAudio)
+                mediaPlayer?.apply {
+                    start()
+                    setOnCompletionListener {
+                        release()
+                        mediaPlayer = null
+                        // After title finishes, play the dua group
+                        playNextAudio(duaList, 0)
+                    }
+                }
 
-        // Play audios in the current group starting from index 0
-        playNextAudio(duaList, 0)
+                isPlayingFullAudio = true
+                highlightedIndex = -1 // No specific highlight for title
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // If title fails, skip and start the dua group directly
+                playNextAudio(duaList, 0)
+            }
+        } else {
+            // No title or readTitle disabled — play directly
+            playNextAudio(duaList, 0)
+        }
     }
 
     private fun playNextAudio(duaList: List<Dua>, index: Int) {
@@ -250,6 +272,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
     fun playWordByWord() {
         stopAudio()
+
         if (currentIndex >= duaKeys.size) {
             isPlayingWordByWord = false
             currentDuaIndex = 0
@@ -257,7 +280,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        val duaList = currentDua // This is the list of Duas at this index
+        val duaList = currentDua
         if (duaList.isEmpty()) {
             currentIndex++
             playWordByWord()
@@ -266,20 +289,42 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
         isPlayingWordByWord = true
         currentDuaIndex = 0
-        playDuaSequentially(duaList, 0)
+
+        val firstDua = duaList.firstOrNull()
+        val titleAudioResId = firstDua?.titleAudioResId
+
+        if (readTitleEnabled.value && titleAudioResId != null) {
+            playAudio(titleAudioResId) {
+                playDuaSequentially(duaList, 0)
+            }
+        } else {
+            playDuaSequentially(duaList, 0)
+        }
+    }
+
+    fun playAudio(@RawRes resId: Int, onComplete: () -> Unit) {
+       // stopAudio()
+        mediaPlayer = MediaPlayer.create(context, resId)
+        mediaPlayer?.apply {
+            setOnCompletionListener {
+                onComplete()
+            }
+            start()
+        }
     }
 
     private fun playDuaSequentially(duaList: List<Dua>, duaIndex: Int) {
         if (duaIndex >= duaList.size) {
             isPlayingWordByWord = false
             currentWordIndexInDua = -1
-            currentIndex++
+
             if (autoNextEnabled.value) {
+                currentIndex++
                 playWordByWord()
             }
+
             return
         }
-
         currentDuaIndex = duaIndex
         currentWordIndexInDua = 0
 
@@ -334,6 +379,8 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         isPlayingFullAudio = false
         isPlayingWordByWord = false
         highlightedIndex = -1
+        currentWordIndexInDua = -1
+        currentDuaIndex = -1
     }
 
 
