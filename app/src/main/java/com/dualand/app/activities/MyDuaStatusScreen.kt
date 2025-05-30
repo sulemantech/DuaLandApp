@@ -28,8 +28,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W400
-import androidx.compose.ui.text.font.FontWeight.Companion.W600
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -51,10 +49,6 @@ import com.dualand.app.components.FilterDropdownMenu
 import com.dualand.app.components.InfoDialogContent
 import com.dualand.app.components.TagButton
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -192,7 +186,6 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -200,56 +193,19 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-//                val filteredDuas = allDuas.filter { dua ->
-//                    val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
-//
-//                    val matchesSearch = dua.textheading?.contains(searchText, ignoreCase = true) == true
-//
-//                    val matchesFilter = when (selectedFilter) {
-//                        "All" -> true
-//                        "Favorite" -> status?.favorite == true
-//                        "Memorized" -> status?.status == "Memorized"
-//                        "In Practice" -> status?.status == "In Practice"
-//                        else -> false
-//                    }
-//
-//                    matchesSearch && matchesFilter
-//                }
-//                val uniqueFavoriteDuas = filteredDuas
-//                    .filter { !it.textheading.isNullOrBlank() }
-//                    .distinctBy { it.textheading!!.trim().lowercase() }
-
-//                if (selectedFilter == "Favorite" && uniqueFavoriteDuas.isNotEmpty()) {
-//                    Button(
-//                        onClick = {
-//                            val indices = uniqueFavoriteDuas.mapNotNull { dua ->
-//                                duaList.indexOfFirst {
-//                                    it.textheading.equals(dua.textheading, ignoreCase = true) &&
-//                                            it.translation.equals(dua.translation, ignoreCase = true)
-//                                }.takeIf { it != -1 }
-//                            }
-//                           // viewModel.startPlayingFavorites(indices)
-//                            val lastFavoriteIndex = indices.lastOrNull()
-//                            if (lastFavoriteIndex != null) {
-//                                currentIndex = lastFavoriteIndex
-//                                navController.navigate("DuaNewScreen/$lastFavoriteIndex")
-//                            }
-//                        },
-//                        colors = ButtonDefaults.buttonColors(colorResource(R.color.highlited_color)),
-//                        shape = RoundedCornerShape(50)
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(id = R.drawable.vector_play),
-//                            contentDescription = "Play",
-//                            tint = Color.White,
-//                            modifier = Modifier.size(16.dp)
-//                        )
-//                        Spacer(modifier = Modifier.width(6.dp))
-//                        Text("Play all", color = Color.White)
-//                    }
-//                } else {
-//                    Spacer(modifier = Modifier.width(1.dp))
-//                }
+                if (selectedFilter == "Favorite") {
+                    Button(
+                        onClick = { selectedFilter = "Favorite" },
+                        shape = RoundedCornerShape(50),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(R.color.highlited_color)
+                        )
+                    ) {
+                        Text(text = "All Duas", color = Color.White)
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(1.dp))
+                }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -281,24 +237,8 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                     }
                 }
             }
-
             Divider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp))
 
-//            val filteredDuas = allDuas.filter { dua ->
-//                val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
-//
-//                val matchesSearch = dua.textheading?.contains(searchText, ignoreCase = true) == true
-//
-//                val matchesFilter = when (selectedFilter) {
-//                    "All" -> true
-//                    "Favorite" -> status?.favorite == true
-//                    "Memorized" -> status?.status == "Memorized"
-//                    "In Practice" -> status?.status == "In Practice"
-//                    else -> false
-//                }
-//
-//                matchesSearch && matchesFilter
-//            }
             val filteredGroupedDuas = duaViewModel.groupedAndSortedDuas.mapValues { entry ->
                 entry.value.filter { dua ->
                     val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
@@ -361,8 +301,13 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
 
-                                val originalIndex = newDuaListFromGroup.indexOfFirst { it.duaNumber == dua.duaNumber }
+                                 val originalIndex = newDuaListFromGroup.indexOfFirst { it.duaNumber == dua.duaNumber }
                                 val actualStatus = if (currentStatus == "Memorized") "Memorized" else "In Practice"
+//                                val originalIndex = newDuaListFromGroup.indexOfFirst {
+//                                    it.duaNumber == dua.duaNumber &&
+//                                            it.textheading == dua.textheading &&
+//                                            it.translation == dua.translation
+//                                }
 
                                 TagButton(
                                     text = actualStatus,
@@ -376,9 +321,9 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                     onClick = {
                                         if (originalIndex >= 0) {
                                             duaViewModel.updateCurrentIndex(originalIndex)
-                                            navController.navigate("DuaNewScreen/${originalIndex}")
+                                            navController.navigate("DuaNewScreen/$originalIndex")
                                         } else {
-                                            Toast.makeText(context, "Invalid Dua", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, "Dua not found", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 )
@@ -443,7 +388,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
             }
         }
         LaunchedEffect(Unit) {
-            viewModel.ensureAllDuasAreTracked(duaList)
+            viewModel.ensureAllDuasAreTracked(allDuas)
         }
         Box(
             modifier = Modifier

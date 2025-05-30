@@ -46,7 +46,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     var currentIndex by mutableStateOf(0)
         private set
 
-    fun updateCurrentIndex(index: Int) {
+    fun updateCurrentIndex(index: Int, fromFiltered: Boolean = true) {
         currentIndex = index
     }
 
@@ -109,64 +109,103 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     val currentFullAudioDuaGroupIndex = mutableStateOf(-1)
+    val currentFullAudioDuaIndexState = mutableStateOf(-1)
+    private var pausedAudioPosition: Int = 0
+    private var pausedDuaIndexInGroup: Int = -1
+    private var pausedGroupIndex: Int = -1
 
-    fun playFullAudio() {
-        stopAudio()
-        Log.d("AudioPlay", "playFullAudio called with currentIndex=$currentIndex")
-
-        if (currentIndex >= duaKeys.size) {
-            Log.d("AudioPlay", "Reached end of duaKeys, resetting states")
-            isPlayingFullAudio = false
-            highlightedIndex = -1
-            currentFullAudioDuaGroupIndex.value = -1
-            currentIndex = 0
-            return
+    fun pauseFullAudio() {
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                pausedAudioPosition = it.currentPosition
+                pausedDuaIndexInGroup = currentFullAudioDuaIndexState.value
+                pausedGroupIndex = currentFullAudioDuaGroupIndex.value
+                it.pause()
+                isPlayingFullAudio = false
+            }
         }
+    }
+
+    fun playFullAudio(startIndexInGroup: Int = 0, resume: Boolean = false) {
+        stopAudio()
 
         val duaList = currentDua
-        Log.d("AudioPlay", "duaList size=${duaList.size}")
 
-        if (duaList.isEmpty()) {
-            if (autoNextEnabled.value) {
-                currentIndex++
-                playFullAudio()
-            }
-            return
+        val indexToStart = if (resume && pausedDuaIndexInGroup >= 0 && pausedGroupIndex == currentIndex) {
+            pausedDuaIndexInGroup
+        } else {
+            startIndexInGroup
         }
 
+        val shouldResume = resume && pausedAudioPosition > 0 &&
+                pausedDuaIndexInGroup >= 0 &&
+                pausedGroupIndex == currentIndex
+
+        if (shouldResume) {
+            val resId = duaList.getOrNull(pausedDuaIndexInGroup)?.fullAudioResId ?: 0
+            if (resId != 0) {
+                try {
+                    mediaPlayer?.release()
+                    mediaPlayer = MediaPlayer.create(context, resId)
+                    mediaPlayer?.apply {
+                        seekTo(pausedAudioPosition)
+                        start()
+
+                        currentFullAudioDuaGroupIndex.value = pausedGroupIndex
+                        currentFullAudioDuaIndexState.value = pausedDuaIndexInGroup
+                        isPlayingFullAudio = true
+                        highlightedIndex = pausedDuaIndexInGroup
+
+                        setOnCompletionListener {
+                            release()
+                            mediaPlayer = null
+                            playNextAudio(duaList, pausedDuaIndexInGroup + 1, pausedGroupIndex)
+                        }
+                    }
+                    return
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        // Reset pause state
+        pausedAudioPosition = 0
+        pausedDuaIndexInGroup = -1
+        pausedGroupIndex = -1
+
+        // Normal flow
         val titleAudio = duaList.firstOrNull()?.titleAudioResId ?: 0
-        if (readTitleEnabled.value && titleAudio != 0) {
+        if (readTitleEnabled.value && titleAudio != 0 && indexToStart == 0) {
             try {
-                mediaPlayer?.release()
                 mediaPlayer = MediaPlayer.create(context, titleAudio)
                 mediaPlayer?.apply {
                     start()
-                    Log.d("AudioPlay", "Playing title audio for group $currentIndex")
                     setOnCompletionListener {
                         release()
                         mediaPlayer = null
-                        playNextAudio(duaList, 0, currentIndex)
+                        playNextAudio(duaList, indexToStart, currentIndex)
                     }
                 }
-
                 isPlayingFullAudio = true
                 highlightedIndex = -1
                 currentFullAudioDuaGroupIndex.value = currentIndex
-
             } catch (e: Exception) {
                 e.printStackTrace()
-                playNextAudio(duaList, 0, currentIndex)
+                playNextAudio(duaList, indexToStart, currentIndex)
             }
         } else {
-            playNextAudio(duaList, 0, currentIndex)
+            playNextAudio(duaList, indexToStart, currentIndex)
         }
     }
+
 
     private fun playNextAudio(duaList: List<Dua>, index: Int, duaGroupIndex: Int) {
         if (index >= duaList.size) {
             // Finished current group
             isPlayingFullAudio = false
             highlightedIndex = -1
+            currentFullAudioDuaIndexState.value = -1
 
             Handler(Looper.getMainLooper()).post {
                 currentFullAudioDuaGroupIndex.value = -1
@@ -192,9 +231,9 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             mediaPlayer?.apply {
                 start()
 
-                // Update state immediately on main thread so UI updates icon properly
                 Handler(Looper.getMainLooper()).post {
                     currentFullAudioDuaGroupIndex.value = duaGroupIndex
+                    currentFullAudioDuaIndexState.value = index
                     isPlayingFullAudio = true
                     highlightedIndex = index
                 }
@@ -213,8 +252,10 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
     var currentDuaIndex by mutableStateOf(0)
     var currentWordIndexInDua by mutableStateOf(-1)
+    val currentDuaIndexState = mutableStateOf(-1)
+    val isListeningPause = mutableStateOf(false)
 
-    fun playWordByWord() {
+    fun playWordByWord(startIndexInGroup: Int = 0) {
         stopAudio()
 
         if (currentIndex >= duaKeys.size) {
@@ -227,25 +268,24 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         val duaList = currentDua
         if (duaList.isEmpty()) {
             currentIndex++
-            playWordByWord()
+            playWordByWord(startIndexInGroup)
             return
         }
 
         isPlayingWordByWord = true
-        currentDuaIndex = 0
+        currentDuaIndex = startIndexInGroup
 
-        val firstDua = duaList.firstOrNull()
+        val firstDua = duaList.getOrNull(startIndexInGroup)
         val titleAudioResId = firstDua?.titleAudioResId
 
-        if (readTitleEnabled.value && titleAudioResId != null) {
+        if (readTitleEnabled.value && titleAudioResId != null && startIndexInGroup == 0) {
             playAudio(titleAudioResId) {
-                playDuaSequentially(duaList, 0)
+                playDuaSequentially(duaList, startIndexInGroup)
             }
         } else {
-            playDuaSequentially(duaList, 0)
+            playDuaSequentially(duaList, startIndexInGroup)
         }
     }
-
     fun playAudio(@RawRes resId: Int, onComplete: () -> Unit) {
        // stopAudio()
         mediaPlayer = MediaPlayer.create(context, resId)
@@ -256,8 +296,6 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             start()
         }
     }
-    val currentDuaIndexState = mutableStateOf(-1) // 👈 Observable
-
     private fun playDuaSequentially(duaList: List<Dua>, duaIndex: Int) {
         if (duaIndex >= duaList.size) {
             isPlayingWordByWord = false
@@ -271,7 +309,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
             return
         }
-        currentDuaIndexState.value = duaIndex // 👈 Set for UI binding
+        currentDuaIndexState.value = duaIndex
         currentDuaIndex = duaIndex
         currentWordIndexInDua = 0
 
@@ -283,14 +321,11 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val isListeningPause = mutableStateOf(false)
-
     private fun playWordsInDua(
         pairs: List<Pair<String, Int>>,
         index: Int,
         onFinished: () -> Unit
     ) {
-        // Stop if index exceeds or user manually stopped
         if (index >= pairs.size || !isPlayingWordByWord) {
             isListeningPause.value = false
             currentWordIndexInDua = -1
@@ -319,8 +354,12 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
                     isListeningPause.value = true
 
+                    val pauseDuration = if (_wordByWordPauseEnabled.value) {
+                        _pauseSeconds.value * 1000L
+                    } else {
+                        0L
+                    }
                     Handler(Looper.getMainLooper()).postDelayed({
-                        // ⛔ Check again before continuing
                         if (!isPlayingWordByWord) {
                             isListeningPause.value = false
                             currentWordIndexInDua = -1
@@ -329,7 +368,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
                         isListeningPause.value = false
                         playWordsInDua(pairs, index + 1, onFinished)
-                    }, duration)
+                    }, pauseDuration)
                 }
             }
         } catch (e: Exception) {
@@ -462,7 +501,6 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _autoNextEnabled = MutableStateFlow(prefs.getBoolean("auto_next_duas_enabled", false))
     val autoNextEnabled: StateFlow<Boolean> = _autoNextEnabled
-
 
     private val _wordByWordPauseEnabled = MutableStateFlow(prefs.getBoolean("word_by_word_pause_enabled", false))
     val wordByWordPauseEnabled: StateFlow<Boolean> = _wordByWordPauseEnabled

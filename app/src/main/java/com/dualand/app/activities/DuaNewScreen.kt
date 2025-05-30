@@ -96,14 +96,14 @@ fun DuaNewScreen(
                     )
                 }
 
-                Row(modifier = Modifier.padding(horizontal = 6.dp)) {
+                Row(modifier = Modifier.padding()) {
                     Text(
                         text = currentDua.firstOrNull()?.duaNumber ?: duaTitle,
                         fontSize = 14.sp,
                         color = colorResource(R.color.heading_color),
                         fontFamily = title,
                     )
-                   // Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
                     Text(
                         text = currentDua.firstOrNull()?.textheading ?: duaTitle,
                         fontSize = 14.sp,

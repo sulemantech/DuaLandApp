@@ -62,6 +62,7 @@ fun DuaContent(
     val selectedTab by duaViewModel.selectedTab.collectAsState()
     val MyArabicFont = FontFamily(Font(R.font.vazirmatn_regular))
     val translationtext = FontFamily(Font(R.font.poppins_regular))
+    val reference = FontFamily(Font(R.font.instrumentsans))
 
     LazyColumn(
         state = listState,
@@ -100,13 +101,36 @@ fun DuaContent(
 
                         val isCurrent = duaViewModel.currentDuaIndexState.value == index
                         val isListening = duaViewModel.isListeningPause.value && isCurrent
-                        val isFullAudioCurrent = duaViewModel.currentFullAudioDuaGroupIndex.value == index
+                        val isFullAudioCurrent = duaViewModel.currentFullAudioDuaIndexState.value == index &&
+                                duaViewModel.currentFullAudioDuaGroupIndex.value == duaViewModel.currentIndex
+
                         IconButton(
                             onClick = {
                                 if (duaViewModel.selectedTab.value == "WORD") {
-                                    if (duaViewModel.isPlayingWordByWord) duaViewModel.stopAudio() else duaViewModel.playWordByWord()
+                                    val isThisPlaying = duaViewModel.isPlayingWordByWord &&
+                                            duaViewModel.currentDuaIndexState.value == index
+
+                                    if (isThisPlaying) {
+                                        duaViewModel.stopAudio()
+                                    } else {
+                                        duaViewModel.stopAudio()
+                                        duaViewModel.playWordByWord(startIndexInGroup = index)
+                                    }
                                 } else if (duaViewModel.selectedTab.value == "COMPLETE") {
-                                    if (duaViewModel.isPlayingFullAudio) duaViewModel.stopAudio() else duaViewModel.playFullAudio()
+                                    val isThisPlaying = duaViewModel.isPlayingFullAudio &&
+                                            duaViewModel.currentFullAudioDuaIndexState.value == index &&
+                                            duaViewModel.currentFullAudioDuaGroupIndex.value == duaViewModel.currentIndex
+
+                                    val isPaused = !duaViewModel.isPlayingFullAudio &&
+                                            duaViewModel.currentFullAudioDuaIndexState.value == index &&
+                                            duaViewModel.currentFullAudioDuaGroupIndex.value == duaViewModel.currentIndex
+
+                                    if (isThisPlaying) {
+                                        duaViewModel.pauseFullAudio() // ✅ Pause instead of stop
+                                    } else {
+                                        duaViewModel.stopAudio()
+                                        duaViewModel.playFullAudio(startIndexInGroup = index, resume = isPaused) // ✅ resume if previously paused
+                                    }
                                 }
                             }
                         ) {
@@ -116,11 +140,13 @@ fun DuaContent(
                                 selectedTab == "COMPLETE" && isFullAudioCurrent && duaViewModel.isPlayingFullAudio -> R.drawable.pause_icon
                                 else -> R.drawable.icon_playy
                             }
+
                             Image(
                                 painter = painterResource(iconRes),
                                 contentDescription = "Play/Pause"
                             )
                         }
+
 
                         RepeatButton()
                     }
@@ -174,6 +200,7 @@ fun DuaContent(
                     Text(
                         text = dua.reference,
                         fontSize = 10.sp,
+                        fontFamily = reference,
                         color = colorResource(R.color.reference_color),
                         modifier = Modifier
                             .fillMaxWidth()

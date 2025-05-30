@@ -44,7 +44,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues,dua
     val readTitleEnabled by duaViewModel.readTitleEnabled.collectAsState()
     val rewardsEnabled by duaViewModel.rewardsEnabled.collectAsState()
     val autoNextDuasEnabled by duaViewModel.autoNextEnabled.collectAsState()
-    val wordByWordPauseEnabled by duaViewModel.wordByWordPauseEnabled.collectAsState()
+    val WordbyWordPauseEnabled by duaViewModel.wordByWordPauseEnabled.collectAsState()
     val pauseSeconds by duaViewModel.pauseSeconds.collectAsState()
     val selectedVoice by duaViewModel.selectedVoice.collectAsState()
     val fontSize by duaViewModel.fontSize.collectAsState()
@@ -97,12 +97,12 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues,dua
 //                .getBoolean("auto_next_duas_enabled", false)
 //        )
 //    }
-    var WordbyWordPauseEnabled by remember {
-        mutableStateOf(
-            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                .getBoolean("Word_by_Word_Pause_Enabled", false)
-        )
-    }
+//    var WordbyWordPauseEnabled by remember {
+//        mutableStateOf(
+//            context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+//                .getBoolean("Word_by_Word_Pause_Enabled", false)
+//        )
+//    }
 //    var pauseSeconds by remember {
 //        mutableStateOf(sharedPref.getInt("word_by_word_pause_seconds", 2))
 //    }
@@ -426,7 +426,7 @@ fun SettingsScreen(navController: NavController, innerPadding: PaddingValues,dua
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        listOf("Male", "Female").forEach { gender ->
+                        listOf( "Female").forEach { gender ->
                             Box(
                                 modifier = Modifier
                                     .border(

@@ -16,7 +16,7 @@ object DuaDataProvider {
             backgroundResId = R.drawable.header_bg,
             statusBarColorResId = R.color.top_nav_new,
             image = R.drawable.kaaba,
-            duaNumber = "1.",
+            duaNumber = "1. ",
             fullAudioResId = R.raw.dua01_part01_audio01_complete,
             titleAudioResId = R.raw.title_praise_and_glory,
             wordAudioPairs = listOf(
@@ -38,7 +38,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua01_part02_audio01_complete,
             // titleAudioResId = R.raw.title_praise_and_glory,
             image = R.drawable.kaaba,
-            duaNumber = "1. ",
+            duaNumber = "1.",
            // textheading = "Praise and Glory",
             wordAudioPairs = listOf(
                 "اَللّٰہُ اَکْبَرُکَبِیْرًا" to R.raw.dua01_part02_audio01,
@@ -57,9 +57,9 @@ object DuaDataProvider {
             statusBarColorResId = R.color.top_nav_new,
             fullAudioResId = R.raw.dua02_part01_audio01_complete,
             titleAudioResId = R.raw.title_peace,
-            duaNumber = "2.",
+            duaNumber ="2.",
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
-            textheading = "Peace and Blessing upon\n" + "the Prophet Muhammad ﷺ",
+            textheading ="Peace and Blessing upon\n"+"the Prophet Muhammad ﷺ",
             image = R.drawable.dua_2,
             wordAudioPairs = listOf(
                 "اَللّٰھُمَّ صَلِّ عَلٰی" to R.raw.dua02_part01_audio01,
@@ -99,7 +99,7 @@ object DuaDataProvider {
             id = 5,
             arabic = "اَللّٰھُمَّ بِکَ اَصْبَحْنَا وَ بِکَ اَمْسَیْنَا وَ بِکَ نَحْیَا وَ بِکَ نَمُوْتُ  وَ اِلَيْكَ الْمَصِیْرُ",
             translation = "O Allah! By Your leave we reach the morning \n" +
-                    "and by Your leave we reach the evening \n" +
+                    "and by Your leave we reach the evening \n"+
                     "and by Your leave we live and by Your leave we die and to You is our return. ",
             reference = " [Sunan al-Tirmidhī]",
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
@@ -108,10 +108,9 @@ object DuaDataProvider {
             statusBarColorResId = R.color.top_nav_new,
             fullAudioResId = R.raw.dua03_part01_audio01_complete,
             titleAudioResId = R.raw.title_morning,
-            textheading = "Du’a of Morning\n" +
-                    "(Before Sunrise)",
+            textheading ="Du’a of Morning\n"+"(Before Sunrise)",
             image = R.drawable.dua_3,
-            duaNumber = "3.",
+            duaNumber ="3.",
             wordAudioPairs = listOf(
                 "اَللّٰھُمَّ بِکَ اَصْبَحْنَا" to R.raw.dua03_part01_audio01,
                 "وَ بِکَ اَمْسَیْنَا" to R.raw.dua03_part01_audio02,
@@ -128,12 +127,11 @@ object DuaDataProvider {
             reference = "[Sunan al-Tirmidhī]",
             urdu = "اے اللہ تیرے حکم سے ہم نے صبح کی اور تیرے حکم سے ہم شام کو پہنچے اور تیرے حکم سے ہم جیتے اور مرتے ہیں اور تیری ہی طرف لوٹ کر جانا ہے۔",
             backgroundResId = R.drawable.header_bg,
-            duaNumber = "4.",
+            duaNumber ="4.",
             statusBarColorResId = R.color.top_nav_new,
             fullAudioResId = R.raw.dua04_part01_audio01_complete,
             titleAudioResId = R.raw.title_evening,
-            textheading = "Du’a of Evening\n" +
-                    "(Before Sunset)",
+            textheading ="Du’a of Evening\n"+"(Before Sunset)",
             image = R.drawable.dua_4,
             wordAudioPairs = listOf(
                 "اَللّٰھُمَّ بِکَ اَمْسَیْنَا" to R.raw.dua04_part01_audio01,
@@ -155,7 +153,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua05_part01_audio01_complete,
             titleAudioResId = R.raw.title_protection,
             textheading = "Du’a for Protection",
-            duaNumber = "5.",
+            duaNumber = "5. ",
             image = R.drawable.dua_5,
             wordAudioPairs = listOf(
                 "اَعُوْذُ" to R.raw.dua05_part01_audio01,
@@ -199,7 +197,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua06_part01_audio01_complete,
             titleAudioResId = R.raw.title_sleeping,
             image = R.drawable.dua_6,
-            duaNumber = "6.",
+            duaNumber = "6. ",
             textheading = "Du’a before Sleeping",
             steps = "1. Dust the bed before sleeping\n" +
                     "2. Sleep on the right side\n" +
@@ -223,7 +221,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua07_part01_audio01_complete,
             titleAudioResId = R.raw.title_waking_up,
             image = R.drawable.dua_7,
-            duaNumber = "7.",
+            duaNumber = "7. ",
             textheading = "Du’a after Waking Up",
             steps = "Rub your face and your eyes with your hands to\n" +
                     "remove any remaining effects of sleep and say:",
@@ -247,7 +245,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_entering_toilet,
             textheading = "Du’a before Entering\nthe Toilet",
             image = R.drawable.dua_8,
-            duaNumber = "8.",
+            duaNumber = "8. ",
             steps = "Enter with your left foot and say:",
             wordAudioPairs = listOf(
                 "اَللّٰھُمَّ اِنِّیْ اَعُوْذُبِکَ" to R.raw.dua08_part01_audio01,
@@ -267,7 +265,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua09_part01_audio01_complete,
             titleAudioResId = R.raw.title_leaving_toilet,
             image = R.drawable.dua_9,
-            duaNumber = "9.",
+            duaNumber = "9. ",
             textheading = "Du’a after Leaving \n" +
                     "the Toilet",
             steps = "Leave with your right foot and say:",
@@ -286,7 +284,7 @@ object DuaDataProvider {
             statusBarColorResId = R.color.top_nav_new,
             fullAudioResId = R.raw.dua10_part01_audio01_complete,
             titleAudioResId = R.raw.title_before_putting_dress,
-            duaNumber = "10.",
+            duaNumber = "10. ",
             textheading = "Du’a before Putting\n" +
                     "on Dress",
             steps = "1. Shake and dust your dress before wearing.\n" +
@@ -315,7 +313,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua11_part01_audio01_complete,
             titleAudioResId = R.raw.title_taking_of_dress,
             image = R.drawable.dua_11,
-            duaNumber = "11.",
+            duaNumber = "11. ",
             steps = "Start to undress from the left side\n(left sleeve, left side of the trouser, left sock etc.",
             textheading = "Du’a before Taking \n" +
                     "off Dress",
@@ -335,7 +333,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_traveler,
             image = R.drawable.dua_15,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "12.",
+            duaNumber = "12. ",
             textheading = "Du’a for Traveller",
             wordAudioPairs = listOf(
                 "اَسْتَوْدِعُ اللّٰهَ" to R.raw.dua15_new_part01_audio01,
@@ -357,7 +355,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua13_part01_audio01_complete,
             titleAudioResId = R.raw.title_entering_home,
             image = R.drawable.dua_13,
-            duaNumber = "13.",
+            duaNumber = "13. ",
             textheading = "Du’a while Entering\n" +
                     "the Home",
             wordAudioPairs = listOf(
@@ -394,7 +392,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua14_part01_audio01_complete,
             titleAudioResId = R.raw.title_bad_ikhlaq,
             image = R.drawable.dua_14,
-            duaNumber = "14.",
+            duaNumber = "14. ",
             textheading = "Du’a for protection\n" +
                     "from Bad Akhlaq",
             wordAudioPairs = listOf(
@@ -416,7 +414,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_journey,
             image = R.drawable.dua_16,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "15 ",
+            duaNumber = "15. ",
             textheading = "Du’a for Journey",
             wordAudioPairs = listOf(
                 "بِسْمِ اللّٰہِ" to R.raw.dua15_part01_audio01,
@@ -452,7 +450,7 @@ object DuaDataProvider {
             // titleAudioResId = R.raw.title_journey,
             image = R.drawable.dua_16,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "15.",
+            duaNumber = "15. ",
            // textheading = "Du’a for Journey",
             wordAudioPairs = listOf(
                 "سُبْحٰنَ الَّذِیْ" to R.raw.dua15_part03_audio01,
@@ -477,7 +475,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_meeting_muslim,
             image = R.drawable.dua_17,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "16.",
+            duaNumber = "16. ",
             textheading = "Du’a When Meeting\n" +
                     "a Muslim",
             wordAudioPairs = listOf(
@@ -497,7 +495,7 @@ object DuaDataProvider {
             // titleAudioResId = R.raw.title_meeting_muslim,
             image = R.drawable.dua_17,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "16.",
+            duaNumber = "16. ",
             steps = "Reply to the Greeting:",
           //  textheading = "Du’a When Meeting\n" + "a Muslim",
             wordAudioPairs = listOf(
@@ -518,7 +516,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua17_part01_audio01_complete,
             titleAudioResId = R.raw.title_gathering,
             image = R.drawable.dua_18,
-            duaNumber = "17.",
+            duaNumber = "17. ",
             textheading = "Du’a at the End of a\n" + "Gathering",
             wordAudioPairs = listOf(
                 "سُبْحَانَكَ اللّٰھُمَّ وَبِحَمْدِکَ،" to R.raw.dua17_part01_audio01,
@@ -538,7 +536,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_market,
             image = R.drawable.dua_19,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "18.",
+            duaNumber = "18. ",
             textheading = "Du’a When Entering the\n" + "Market",
             wordAudioPairs = listOf(
                 "لَا اِلٰہَ اِلَّا اللّٰہُ" to R.raw.dua18_part01_audio01,
@@ -564,7 +562,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua19_part01_audio01_complete,
             titleAudioResId = R.raw.title_entering_masjid,
             image = R.drawable.dua_20,
-            duaNumber = "19.",
+            duaNumber = "19. ",
             steps = "Enter the Masjid with the right foot and say:",
             textheading = "Du’a When Entering\nthe Masjid",
             wordAudioPairs = listOf(
@@ -584,7 +582,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_leaving_masjid,
             image = R.drawable.dua_21,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "20.",
+            duaNumber = "20. ",
             steps = "Leave the masjid with the left foot and say:",
             textheading = "Du’a When Leaving\n" +
                     "the Masjid",
@@ -605,7 +603,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua21_part01_audio01_complete,
             titleAudioResId = R.raw.title_eating_drinking,
             image = R.drawable.dua_22,
-            duaNumber = "21.",
+            duaNumber = "21. ",
             steps = "1. Sit while eating and drinking\n" + "2. Eat with your right hand and eat from\n" + "what is in front of you and say:",
             textheading = "Du’a Before Eating\n& Drinking",
             wordAudioPairs = listOf(
@@ -624,7 +622,7 @@ object DuaDataProvider {
             //  titleAudioResId = R.raw.title_eating_drinking,
             image = R.drawable.dua_22,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "21.",
+            duaNumber = "21. ",
             steps = "3. If you forgot to read the Du'a at the beginning\n" + "then upon remembering say:",
           //  textheading = "Du’a Before Eating\n& Drinking",
             wordAudioPairs = listOf(
@@ -646,7 +644,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_after_eating,
             image = R.drawable.dua_23,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "22.",
+            duaNumber = "22. ",
             textheading = "Du’a after Eating\n& Drinking",
             wordAudioPairs = listOf(
                 "اَلّٰھُمَّ بَارِکْ لَناَ فِیْہِ" to R.raw.dua22_part01_audio01,
@@ -666,7 +664,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_sick,
             image = R.drawable.dua_24,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "23.",
+            duaNumber = "23. ",
             textheading = "Du’a When Visiting\n" +
                     "the Sick",
             wordAudioPairs = listOf(
@@ -707,7 +705,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_calamity,
             image = R.drawable.dua_25,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "24.",
+            duaNumber = "24. ",
             textheading = " Du’a for one Afflicted\nby a Calamity",
             wordAudioPairs = listOf(
                 "اِنَّا لِلّٰہِ" to R.raw.dua25_part01_audio01,
@@ -731,7 +729,7 @@ object DuaDataProvider {
             fullAudioResId = R.raw.dua25_part01_audio01_complete,
             titleAudioResId = R.raw.title_seeing_in_calamity,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "25.",
+            duaNumber = "25. ",
             image = R.drawable.dua_26,
             textheading = "Du’a upon Seeing Someone\nin Calamity ",
             wordAudioPairs = listOf(
@@ -757,7 +755,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_angry,
             image = R.drawable.dua_27,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "26.",
+            duaNumber = "26. ",
             steps = "Seek refuge with Allah from the Satan: ",
             textheading = "Du’a when Angry",
             wordAudioPairs = listOf(
@@ -777,7 +775,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_sneezing,
             image = R.drawable.dua_28,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "27.",
+            duaNumber = "27. ",
             steps = "Say after sneezing: ",
             textheading = "Du’a when Sneezing",
             wordAudioPairs = listOf(
@@ -796,7 +794,7 @@ object DuaDataProvider {
             // titleAudioResId = R.raw.title_sneezing,
             image = R.drawable.dua_28,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "27.",
+            duaNumber = "27. ",
             steps = "Dua by one who hears someone saying اَلْحَمْدُ لِلّٰہِ",
           //  textheading = "Du‘a when Sneezing",
             wordAudioPairs = listOf(
@@ -813,7 +811,7 @@ object DuaDataProvider {
             statusBarColorResId = R.color.top_nav_new,
             fullAudioResId = R.raw.dua27_part03_audio01_complete,
             //  titleAudioResId = R.raw.title_sneezing,
-            duaNumber = "27.",
+            duaNumber = "27. ",
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
             image = R.drawable.dua_28,
             steps = "Du’a in reply by the person who sneezes:",
@@ -835,7 +833,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_rains,
             image = R.drawable.dua_29,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "28.",
+            duaNumber = "28. ",
             textheading = "Du’a when it Rains",
             wordAudioPairs = listOf(
                 "اَلّٰھُمَّ اجْعَلْہُ" to R.raw.dua29_part01_audio01,
@@ -854,7 +852,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_moon,
             image = R.drawable.dua_30,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "29.",
+            duaNumber = "29. ",
             textheading = "Du’a upon Sighting\nthe Crescent Moon",
             wordAudioPairs = listOf(
                 "اَلّٰھُمَّ اَھْلِلْہُ عَلَیْنَا" to R.raw.dua30_part01_audio01,
@@ -877,7 +875,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_seeking_love,
             image = R.drawable.dua_31,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "30.",
+            duaNumber = "30. ",
             textheading = "Du’a for Seeking\nAllah’s Love",
             wordAudioPairs = listOf(
                 "اَلّٰھُمَّ اِنِّیْ اَسْئَلُکَ" to R.raw.dua31_part01_audio01,
@@ -902,7 +900,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_istighfar,
             image = R.drawable.dua_32,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "31.",
+            duaNumber = "31. ",
             textheading = "Du’a:Sayyid-ul-Istighfar ",
             wordAudioPairs = listOf(
                 "اَللّٰھُمَّ اَنْتَ رَبِّى،" to R.raw.dua32_part01_audio01,
@@ -941,7 +939,7 @@ object DuaDataProvider {
             titleAudioResId = R.raw.title_refuse_with_allah,
             image = R.drawable.dua_33,
             hinditranslation = "ऐ अल्लाह, तेरी ही आज्ञा से हम सुबह तक पहुँचे हैं और तेरी ही आज्ञा से हम शाम तक पहुँचे हैं और तेरी ही आज्ञा से हम जीते हैं और मरते हैं, और तेरी ही ओर हमें लौटना है।",
-            duaNumber = "32.",
+            duaNumber = "32. ",
             textheading = "Seeking Refuge\nwith Allah",
             wordAudioPairs = listOf(
                 "اَعُوْذُ" to R.raw.dua33_part01_audio01,
