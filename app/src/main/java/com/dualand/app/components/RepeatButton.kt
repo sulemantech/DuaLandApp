@@ -19,43 +19,41 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 
 @Composable
-fun RepeatButton() {
-    // 0 = repeat off, 1..5 repeat counts, -1 = infinity
-    var repeatCount by remember { mutableStateOf(0) }
+fun RepeatButton(duaViewModel: DuaViewModel) {
+    val repeatCount = duaViewModel.repeatCount
 
-    // Decide icon based on repeatCount
-    val iconRes = if (repeatCount == 0) {
-        R.drawable.repeat_off_btn  // your repeat off icon
-    } else {
-        R.drawable.repeat_1_time_btn   // your repeat on icon
-    }
+    val iconRes = if (repeatCount == 0)
+        R.drawable.repeat_off_btn
+    else
+        R.drawable.repeat_1_time_btn
 
     Box(modifier = Modifier.size(48.dp)) {
         IconButton(
             onClick = {
-                repeatCount = when (repeatCount) {
+                val nextCount = when (repeatCount) {
                     0 -> 1
                     1 -> 2
                     2 -> 3
                     3 -> 4
                     4 -> 5
-                    5 -> -1  // infinity
-                    else -> 0 // back to off
+                    5 -> -1
+                    else -> 0
                 }
+                duaViewModel.updateRepeatCount(nextCount)
             },
             modifier = Modifier.align(Alignment.Center)
         ) {
             Image(
                 painter = painterResource(iconRes),
-                contentDescription = "Repeat Dua",
+                contentDescription = "Repeat",
                 modifier = Modifier.size(34.dp)
             )
         }
 
-        // Badge for repeat count if repeatCount > 0
         if (repeatCount != 0) {
             Box(
                 modifier = Modifier

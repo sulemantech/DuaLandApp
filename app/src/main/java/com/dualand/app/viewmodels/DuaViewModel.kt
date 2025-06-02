@@ -61,6 +61,54 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
     private var mediaPlayer: MediaPlayer? = null
 
+
+    // In DuaViewModel.kt
+
+    fun getFavoritePlayIndex(): Int = favoritePlayIndex
+    fun incrementFavoritePlayIndex() {
+        favoritePlayIndex++
+    }
+    fun getFavoriteDuaCount(): Int = favoriteDuaNumbersToPlay.size
+
+    var autoPlayFavorites by mutableStateOf(false)
+    private var favoritePlayIndex = 0
+    private var favoriteDuaNumbersToPlay: List<String> = emptyList()
+
+    private var favoriteAutoPlayIndex = 0
+    private var favoriteAutoPlayList: List<Int> = emptyList()
+    var isFavoriteAutoPlayActive by mutableStateOf(false)
+        private set
+
+    fun getFavoriteAutoPlayIndex(): Int = favoriteAutoPlayIndex
+    fun getFavoriteAutoPlayListSize(): Int = favoriteAutoPlayList.size
+
+    var isManualStop by mutableStateOf(false)
+        private set
+
+    fun startFavoriteAutoPlay(duaIndexes: List<Int>) {
+        favoriteAutoPlayList = duaIndexes
+        favoriteAutoPlayIndex = 0
+        isFavoriteAutoPlayActive = true
+        setSelectedTab("COMPLETE")
+        stopAudio()
+        updateCurrentIndex(favoriteAutoPlayList[favoriteAutoPlayIndex])
+    }
+
+    fun stopFavoriteAutoPlay() {
+        isFavoriteAutoPlayActive = false
+        favoriteAutoPlayList = emptyList()
+        favoriteAutoPlayIndex = 0
+    }
+
+    fun handleFavoriteAutoPlayDone() {
+        favoriteAutoPlayIndex++
+        if (favoriteAutoPlayIndex < favoriteAutoPlayList.size) {
+            updateCurrentIndex(favoriteAutoPlayList[favoriteAutoPlayIndex])
+        } else {
+            isFavoriteAutoPlayActive = false
+        }
+    }
+
     // Group and sort the dua list
 //    private val groupedAndSortedDuas = DuaDataProvider.duaList.groupBy {
 //        it.duaNumber.substringBefore(".").trim().toInt()
@@ -126,6 +174,16 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    var repeatCount by mutableStateOf(0)
+        private set
+
+    private var repeatPlayCounter = 0
+
+    fun updateRepeatCount(count: Int) {
+        repeatCount = count
+        repeatPlayCounter = 0
+    }
+
     fun playFullAudio(startIndexInGroup: Int = 0, resume: Boolean = false) {
         stopAudio()
 
@@ -159,8 +217,16 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                         setOnCompletionListener {
                             release()
                             mediaPlayer = null
-                            playNextAudio(duaList, pausedDuaIndexInGroup + 1, pausedGroupIndex)
+
+                            if (repeatCount == -1 || repeatPlayCounter < repeatCount - 1) {
+                                repeatPlayCounter++
+                                playFullAudio(startIndexInGroup, resume = false)
+                            } else {
+                                repeatPlayCounter = 0
+                                playNextAudio(duaList, indexToStart + 1, currentIndex)
+                            }
                         }
+
                     }
                     return
                 } catch (e: Exception) {
@@ -181,15 +247,23 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                 mediaPlayer = MediaPlayer.create(context, titleAudio)
                 mediaPlayer?.apply {
                     start()
+                    isPlayingFullAudio = true
+                    highlightedIndex = -1
+                    currentFullAudioDuaGroupIndex.value = currentIndex
+
                     setOnCompletionListener {
                         release()
                         mediaPlayer = null
-                        playNextAudio(duaList, indexToStart, currentIndex)
+
+                        if (repeatCount == -1 || repeatPlayCounter < repeatCount - 1) {
+                            repeatPlayCounter++
+                            playFullAudio(startIndexInGroup, resume = false)
+                        } else {
+                            repeatPlayCounter = 0
+                            playNextAudio(duaList, indexToStart, currentIndex)
+                        }
                     }
                 }
-                isPlayingFullAudio = true
-                highlightedIndex = -1
-                currentFullAudioDuaGroupIndex.value = currentIndex
             } catch (e: Exception) {
                 e.printStackTrace()
                 playNextAudio(duaList, indexToStart, currentIndex)
@@ -198,7 +272,6 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             playNextAudio(duaList, indexToStart, currentIndex)
         }
     }
-
 
     private fun playNextAudio(duaList: List<Dua>, index: Int, duaGroupIndex: Int) {
         if (index >= duaList.size) {
@@ -209,6 +282,10 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
             Handler(Looper.getMainLooper()).post {
                 currentFullAudioDuaGroupIndex.value = -1
+            }
+
+            if (autoPlayFavorites) {
+                favoritePlayIndex++
             }
 
             if (autoNextEnabled.value) {
@@ -376,12 +453,47 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             playWordsInDua(pairs, index + 1, onFinished)
         }
     }
+    fun decrementFavoriteAutoPlayIndex() {
+        if (favoriteAutoPlayIndex > 0) {
+            favoriteAutoPlayIndex--
+        }
+    }
 
-    fun stopAudio() {
+    fun getCurrentFavoriteAutoPlayIndex(): Int {
+        return favoriteAutoPlayList.getOrNull(favoriteAutoPlayIndex) ?: currentIndex
+    }
+
+    fun getCurrentFavoriteDuaIndex(): Int {
+        return favoriteAutoPlayList.getOrNull(favoriteAutoPlayIndex) ?: currentIndex
+    }
+
+    fun goToNextFavoriteDua() {
+        if (favoriteAutoPlayIndex < favoriteAutoPlayList.size - 1) {
+            favoriteAutoPlayIndex++
+            updateCurrentIndex(favoriteAutoPlayList[favoriteAutoPlayIndex])
+        }
+    }
+
+    fun goToPreviousFavoriteDua() {
+        if (favoriteAutoPlayIndex > 0) {
+            favoriteAutoPlayIndex--
+            updateCurrentIndex(favoriteAutoPlayList[favoriteAutoPlayIndex])
+        }
+    }
+
+
+    var isManuallyStopped = false
+        private set
+
+    fun stopAudio(manual: Boolean = false) {
+        if (manual) {
+            stopFavoriteAutoPlay()
+        }
+
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
-
+        repeatPlayCounter = 0
         isPlayingFullAudio = false
         isPlayingWordByWord = false
         highlightedIndex = -1

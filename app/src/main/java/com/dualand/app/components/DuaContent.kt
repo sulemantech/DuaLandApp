@@ -146,9 +146,7 @@ fun DuaContent(
                                 contentDescription = "Play/Pause"
                             )
                         }
-
-
-                        RepeatButton()
+                        RepeatButton(duaViewModel = duaViewModel)
                     }
 
                     val annotatedText = buildAnnotatedString {

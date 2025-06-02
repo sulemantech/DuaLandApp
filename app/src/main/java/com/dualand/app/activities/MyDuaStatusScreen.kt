@@ -52,7 +52,12 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues, initialFilter: String = "All",  duaViewModel: DuaViewModel = viewModel()) {
+fun MyDuaStatusScreen(
+    navController: NavController,
+    innerPadding: PaddingValues,
+    initialFilter: String = "All",
+    duaViewModel: DuaViewModel = viewModel()
+) {
     val viewModel: DuaViewModel = viewModel()
     val systemUiController = rememberSystemUiController()
     val NavigationBarColor = colorResource(id = R.color.top_nav_new)
@@ -91,6 +96,15 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
         }
     }
 
+
+    LaunchedEffect(duaViewModel.isFavoriteAutoPlayActive) {
+        if (duaViewModel.isFavoriteAutoPlayActive) {
+            val nextIndex = duaViewModel.currentIndex
+            // Small delay to allow backstack pop to complete
+            kotlinx.coroutines.delay(300)
+            navController.navigate("DuaNewScreen/$nextIndex")
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Button(onClick = { showRewardAnimation = true }) {
@@ -185,85 +199,157 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                 }
             }
 
+            val autoPlayFavorites = duaViewModel.autoPlayFavorites
+
+//
+
             Spacer(modifier = Modifier.height(30.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 5.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = if (selectedFilter == "Favorite") Arrangement.SpaceBetween else Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (selectedFilter == "Favorite") {
+                    // Build the list of favorite dua numbers based on current filtered UI
+                    val favoriteDuaNumbers = duaList.filter { dua ->
+                        val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
+                        status?.favorite == true
+                    }.map { it.duaNumber }
+
                     Button(
-                        onClick = { selectedFilter = "Favorite" },
+                        onClick = {
+                            if (selectedFilter == "Favorite") {
+                                val favoriteIndexes = duaViewModel.duaKeys.mapIndexedNotNull { index, key ->
+                                    val duaNumber = key.toString()
+                                    val status = duaStatuses.find { it.duaNumber.startsWith(duaNumber) }
+                                    if (status?.favorite == true) index else null
+                                }
+
+                                if (favoriteIndexes.isNotEmpty()) {
+                                    duaViewModel.startFavoriteAutoPlay(favoriteIndexes)
+                                    navController.navigate("DuaNewScreen/${favoriteIndexes.first()}")
+                                }
+                            }
+
+                        },
                         shape = RoundedCornerShape(50),
+                        modifier = Modifier.width(120.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colorResource(R.color.highlited_color)
                         )
                     ) {
-                        Text(text = "All Duas", color = Color.White)
+                        Icon(
+                            painter = painterResource(id = R.drawable.vector_play),
+                            contentDescription = "Play",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Play all",
+                            color = Color.White,
+                            fontFamily = text_font,
+                            fontSize = 12.sp
+                        )
+                    }
+
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Filter By",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp,
+                            color = colorResource(R.color.heading_color),
+                            fontFamily = text_font
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Box {
+                            Image(
+                                painter = painterResource(R.drawable.filter_icon),
+                                contentDescription = "Filter Icon",
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { expanded = true }
+                            )
+
+                            FilterDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                selectedFilter = selectedFilter,
+                                onFilterSelected = { selectedFilter = it }
+                            )
+                        }
                     }
                 } else {
-                    Spacer(modifier = Modifier.width(1.dp))
-                }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Filter By",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp,
+                            color = colorResource(R.color.heading_color),
+                            fontFamily = text_font,
+                            modifier = Modifier.weight(1f)
+                        )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Filter By",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp,
-                        color = colorResource(R.color.heading_color),
-                        fontFamily = text_font
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Box {
-                        Image(
-                            painter = painterResource(R.drawable.filter_icon),
-                            contentDescription = "Filter Icon",
+                        Box(
                             modifier = Modifier
-                                .size(24.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .wrapContentSize()
                                 .clickable { expanded = true }
-                        )
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.filter_icon),
+                                contentDescription = "Filter Icon",
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                            )
 
-                        FilterDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            selectedFilter = selectedFilter,
-                            onFilterSelected = { selectedFilter = it }
-                        )
+                            FilterDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                selectedFilter = selectedFilter,
+                                onFilterSelected = { selectedFilter = it }
+                            )
+                        }
                     }
                 }
             }
             Divider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp))
 
-            val filteredGroupedDuas = duaViewModel.groupedAndSortedDuas.mapValues { entry ->
-                entry.value.filter { dua ->
-                    val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
+            val groupedAndSortedDuas = duaList.filter { dua ->
+                val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
 
-                    val matchesSearch = dua.textheading?.contains(searchText, ignoreCase = true) == true
+                val matchesSearch = dua.textheading?.contains(searchText, ignoreCase = true) == true
 
-                    val matchesFilter = when (selectedFilter) {
-                        "All" -> true
-                        "Favorite" -> status?.favorite == true
-                        "Memorized" -> status?.status == "Memorized"
-                        "In Practice" -> status?.status == "In Practice"
-                        else -> false
-                    }
-
-                    matchesSearch && matchesFilter
+                val matchesFilter = when (selectedFilter) {
+                    "All" -> true
+                    "Favorite" -> status?.favorite == true
+                    "Memorized" -> status?.status == "Memorized"
+                    "In Practice" -> status?.status == "In Practice"
+                    else -> false
                 }
-            }.filter { it.value.isNotEmpty() }
-            val newDuaListFromGroup = filteredGroupedDuas.mapNotNull { (_, duas) ->
-                duas.firstOrNull()
+
+                matchesSearch && matchesFilter
             }
+//            }.filter { it.value.isNotEmpty() }
+//            val newDuaListFromGroup = filteredGroupedDuas.mapNotNull { (_, duas) ->
+//                duas.firstOrNull()
+//            }
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 80.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(newDuaListFromGroup) { dua ->
+                items(groupedAndSortedDuas) { dua ->
                     val currentDuaStatus = duaStatuses.find { it.duaNumber == dua.duaNumber }
                     val isFavorite = currentDuaStatus?.favorite == true
                     val currentStatus = currentDuaStatus?.status ?: "In Practice"
@@ -289,7 +375,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "${dua.duaNumber}${dua.textheading}",
-                                fontWeight =W400,
+                                fontWeight = W400,
                                 fontSize = 12.sp,
                                 fontFamily = title,
                                 color = colorResource(R.color.heading_color),
@@ -301,8 +387,11 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
 
-                                 val originalIndex = newDuaListFromGroup.indexOfFirst { it.duaNumber == dua.duaNumber }
-                                val actualStatus = if (currentStatus == "Memorized") "Memorized" else "In Practice"
+                                val originalIndex = duaViewModel.duaKeys.indexOfFirst {
+                                    it.toString() == dua.duaNumber.substringBefore(".").trim()
+                                }
+                                val actualStatus =
+                                    if (currentStatus == "Memorized") "Memorized" else "In Practice"
 //                                val originalIndex = newDuaListFromGroup.indexOfFirst {
 //                                    it.duaNumber == dua.duaNumber &&
 //                                            it.textheading == dua.textheading &&
@@ -319,6 +408,7 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
                                     width = if (actualStatus == "Memorized") 100.dp else 84.dp,
                                     height = 28.dp,
                                     onClick = {
+                                        duaViewModel.stopFavoriteAutoPlay()
                                         if (originalIndex >= 0) {
                                             duaViewModel.updateCurrentIndex(originalIndex)
                                             navController.navigate("DuaNewScreen/$originalIndex")
@@ -414,7 +504,8 @@ fun MyDuaStatusScreen(navController: NavController, innerPadding: PaddingValues,
 
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
-                val currentFilterType = navBackStackEntry?.arguments?.getString("filterType") ?: "All"
+                val currentFilterType =
+                    navBackStackEntry?.arguments?.getString("filterType") ?: "All"
 
                 IconButton(onClick = {
                     val targetFilter = "Favorite"

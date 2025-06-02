@@ -56,6 +56,13 @@ fun DuaNewScreen(
         systemUiController.setNavigationBarColor(color = navigationBarColor)
     }
 
+    LaunchedEffect(key1 = duaViewModel.currentIndex) {
+        if (duaViewModel.isFavoriteAutoPlayActive) {
+            duaViewModel.playFullAudio()
+        }
+    }
+
+
     val currentDua = duaViewModel.currentDua
     val highlightedIndex = duaViewModel.highlightedIndex
     val currentIndex = duaViewModel.currentIndex
@@ -130,6 +137,33 @@ fun DuaNewScreen(
                     InfoDialogContent(onDismiss = { showDialog = false })
                 }
             }
+            LaunchedEffect(duaViewModel.isPlayingFullAudio, duaViewModel.isFavoriteAutoPlayActive) {
+                if (!duaViewModel.isPlayingFullAudio && duaViewModel.isFavoriteAutoPlayActive && !duaViewModel.isManualStop) {
+                    // Small pause to ensure player state is stable
+                    kotlinx.coroutines.delay(300)
+
+                    val isLast = duaViewModel.getFavoriteAutoPlayIndex() >= duaViewModel.getFavoriteAutoPlayListSize() - 1
+
+                    if (isLast) {
+                        duaViewModel.stopFavoriteAutoPlay()
+                        navController.popBackStack("favorites?filterType=Favorite", inclusive = false)
+                    } else {
+                        // 🔒 Avoid quick flicker by only navigating after back completes
+                        duaViewModel.handleFavoriteAutoPlayDone()
+
+                        // 🔄 Navigate without flicker after a delay
+                        kotlinx.coroutines.delay(200)
+
+                        val nextIndex = duaViewModel.currentIndex
+
+                        // Use launchSingleTop to avoid duplicate destination
+                        navController.navigate("DuaNewScreen/$nextIndex") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
+            }
 
             Image(
                 painter = painterResource(id = currentDua.firstOrNull()?.image ?: R.drawable.kaaba),
@@ -163,7 +197,9 @@ fun DuaNewScreen(
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             DuaContentFooter(
-                onStopAudio = { duaViewModel.stopAudio() },
+                onStopAudio = {
+                    duaViewModel.stopFavoriteAutoPlay()
+                },
                 navController = navController,
                 onPreviousClick = { duaViewModel.previousDua() },
                 onNextClick = { duaViewModel.nextDua() }
