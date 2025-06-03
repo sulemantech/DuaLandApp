@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,12 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import com.dualand.app.activities.DuaDataProvider.duaList
 import com.dualand.app.components.DuaContent
 import com.dualand.app.components.DuaContentFooter
 import com.dualand.app.components.DuaTabs
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import android.app.Application
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,12 +45,51 @@ fun DuaNewScreen(
     val context = LocalContext.current
     val title = FontFamily(Font(R.font.mochypop_regular))
 
-
-    //val allDuas = duaViewModel.duaList
-
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
         systemUiController.setNavigationBarColor(color = navigationBarColor)
+    }
+
+    val currentDua = duaViewModel.currentDua
+    val highlightedIndex = duaViewModel.highlightedIndex
+    val currentIndex = duaViewModel.currentIndex
+    val hasNavigated = remember { mutableStateOf(false) }
+
+    LaunchedEffect(
+        duaViewModel.isPlayingFullAudio,
+        duaViewModel.isFavoriteAutoPlayActive,
+        duaViewModel.getFavoriteAutoPlayIndex()
+    ) {
+        if (duaViewModel.isPlayingFullAudio) {
+            hasNavigated.value = false
+        }
+
+        if (
+            !duaViewModel.isPlayingFullAudio &&
+            duaViewModel.isFavoriteAutoPlayActive &&
+            !duaViewModel.isManualStop &&
+            !hasNavigated.value
+        ) {
+            kotlinx.coroutines.delay(300)
+
+            val isLast = duaViewModel.getFavoriteAutoPlayIndex() >= duaViewModel.getFavoriteAutoPlayListSize() - 1
+
+            if (isLast) {
+                duaViewModel.stopFavoriteAutoPlay()
+                navController.popBackStack("favorites?filterType=Favorite", inclusive = false)
+            } else {
+                duaViewModel.handleFavoriteAutoPlayDone()
+                kotlinx.coroutines.delay(200)
+
+                val nextIndex = duaViewModel.currentIndex
+                hasNavigated.value = true
+
+                navController.navigate("DuaNewScreen/$nextIndex") {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
     }
 
     LaunchedEffect(key1 = duaViewModel.currentIndex) {
@@ -61,11 +97,6 @@ fun DuaNewScreen(
             duaViewModel.playFullAudio()
         }
     }
-
-
-    val currentDua = duaViewModel.currentDua
-    val highlightedIndex = duaViewModel.highlightedIndex
-    val currentIndex = duaViewModel.currentIndex
 
     Box(
         modifier = Modifier
@@ -84,6 +115,7 @@ fun DuaNewScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
+            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,8 +124,10 @@ fun DuaNewScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { duaViewModel.stopAudio()
-                        navController.navigate("learn") },
+                    onClick = {
+                        duaViewModel.stopAudio()
+                        navController.navigate("learn")
+                    },
                     modifier = Modifier.padding(start = 4.dp, top = 5.dp)
                 ) {
                     Image(
@@ -119,12 +153,14 @@ fun DuaNewScreen(
                         textAlign = TextAlign.Center
                     )
                 }
+
                 var showDialog by remember { mutableStateOf(false) }
 
                 androidx.compose.material3.IconButton(
                     onClick = {
                         duaViewModel.stopAudio()
-                        showDialog = true },
+                        showDialog = true
+                    },
                     modifier = Modifier.padding(start = 6.dp, top = 12.dp)
                 ) {
                     Image(
@@ -133,38 +169,13 @@ fun DuaNewScreen(
                         modifier = Modifier.size(29.dp, 30.dp)
                     )
                 }
+
                 if (showDialog) {
                     InfoDialogContent(onDismiss = { showDialog = false })
                 }
             }
-            LaunchedEffect(duaViewModel.isPlayingFullAudio, duaViewModel.isFavoriteAutoPlayActive) {
-                if (!duaViewModel.isPlayingFullAudio && duaViewModel.isFavoriteAutoPlayActive && !duaViewModel.isManualStop) {
-                    // Small pause to ensure player state is stable
-                    kotlinx.coroutines.delay(300)
 
-                    val isLast = duaViewModel.getFavoriteAutoPlayIndex() >= duaViewModel.getFavoriteAutoPlayListSize() - 1
-
-                    if (isLast) {
-                        duaViewModel.stopFavoriteAutoPlay()
-                        navController.popBackStack("favorites?filterType=Favorite", inclusive = false)
-                    } else {
-                        // 🔒 Avoid quick flicker by only navigating after back completes
-                        duaViewModel.handleFavoriteAutoPlayDone()
-
-                        // 🔄 Navigate without flicker after a delay
-                        kotlinx.coroutines.delay(200)
-
-                        val nextIndex = duaViewModel.currentIndex
-
-                        // Use launchSingleTop to avoid duplicate destination
-                        navController.navigate("DuaNewScreen/$nextIndex") {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                }
-            }
-
+            // Image
             Image(
                 painter = painterResource(id = currentDua.firstOrNull()?.image ?: R.drawable.kaaba),
                 contentDescription = null,
@@ -173,7 +184,10 @@ fun DuaNewScreen(
                     .fillMaxWidth()
                     .height(240.dp)
             )
+
             Spacer(modifier = Modifier.height(10.dp))
+
+            // Tabs
             Box(modifier = Modifier.fillMaxWidth().padding()) {
                 DuaTabs(
                     selectedTab = duaViewModel.selectedTab.collectAsState().value,
@@ -184,17 +198,17 @@ fun DuaNewScreen(
                 )
             }
 
+            // Content
             DuaContent(
                 duas = currentDua,
                 innerPadding = PaddingValues(bottom = 50.dp),
-                modifier = Modifier
-                    //.weight(1f)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 highlightedIndex = highlightedIndex,
                 duaViewModel
             )
         }
 
+        // Footer
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             DuaContentFooter(
                 onStopAudio = {
@@ -205,10 +219,10 @@ fun DuaNewScreen(
                 onNextClick = { duaViewModel.nextDua() }
             )
         }
-
-
     }
 }
+
+
 @Preview(showBackground = true)
 @Composable
 fun DuaNewScreenPreview() {

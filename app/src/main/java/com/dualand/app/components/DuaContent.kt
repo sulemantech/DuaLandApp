@@ -126,10 +126,10 @@ fun DuaContent(
                                             duaViewModel.currentFullAudioDuaGroupIndex.value == duaViewModel.currentIndex
 
                                     if (isThisPlaying) {
-                                        duaViewModel.pauseFullAudio() // ✅ Pause instead of stop
+                                        duaViewModel.pauseFullAudio() // Pause only, no double command
                                     } else {
                                         duaViewModel.stopAudio()
-                                        duaViewModel.playFullAudio(startIndexInGroup = index, resume = isPaused) // ✅ resume if previously paused
+                                        duaViewModel.playFullAudio(startIndexInGroup = index, resume = isPaused)
                                     }
                                 }
                             }
@@ -140,13 +140,13 @@ fun DuaContent(
                                 selectedTab == "COMPLETE" && isFullAudioCurrent && duaViewModel.isPlayingFullAudio -> R.drawable.pause_icon
                                 else -> R.drawable.icon_playy
                             }
-
                             Image(
                                 painter = painterResource(iconRes),
                                 contentDescription = "Play/Pause"
                             )
                         }
-                        RepeatButton(duaViewModel = duaViewModel)
+                        RepeatButton(duaViewModel = duaViewModel, index = index)
+
                     }
 
                     val annotatedText = buildAnnotatedString {

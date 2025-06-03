@@ -45,6 +45,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.activities.DuaDataProvider.duaList
+import com.dualand.app.components.DuaTabs
 import com.dualand.app.components.FilterDropdownMenu
 import com.dualand.app.components.InfoDialogContent
 import com.dualand.app.components.TagButton
@@ -101,7 +102,7 @@ fun MyDuaStatusScreen(
         if (duaViewModel.isFavoriteAutoPlayActive) {
             val nextIndex = duaViewModel.currentIndex
             // Small delay to allow backstack pop to complete
-            kotlinx.coroutines.delay(300)
+            kotlinx.coroutines.delay(400)
             navController.navigate("DuaNewScreen/$nextIndex")
         }
     }
@@ -200,8 +201,6 @@ fun MyDuaStatusScreen(
             }
 
             val autoPlayFavorites = duaViewModel.autoPlayFavorites
-
-//
 
             Spacer(modifier = Modifier.height(30.dp))
             Row(
@@ -408,15 +407,18 @@ fun MyDuaStatusScreen(
                                     width = if (actualStatus == "Memorized") 100.dp else 84.dp,
                                     height = 28.dp,
                                     onClick = {
-                                        duaViewModel.stopFavoriteAutoPlay()
-                                        if (originalIndex >= 0) {
-                                            duaViewModel.updateCurrentIndex(originalIndex)
-                                            navController.navigate("DuaNewScreen/$originalIndex")
-                                        } else {
-                                            Toast.makeText(context, "Dua not found", Toast.LENGTH_SHORT).show()
+                                        if (actualStatus != "Memorized") {
+                                            duaViewModel.stopFavoriteAutoPlay()
+                                            if (originalIndex >= 0) {
+                                                duaViewModel.updateCurrentIndex(originalIndex)
+                                                navController.navigate("DuaNewScreen/$originalIndex")
+                                            } else {
+                                                Toast.makeText(context, "Dua not found", Toast.LENGTH_SHORT).show()
+                                            }
                                         }
                                     }
                                 )
+
 
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Box(

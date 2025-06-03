@@ -56,8 +56,11 @@ fun DuaContentFooter(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onPreviousClick) {
+            IconButton(onClick = {
                 duaViewModel.stopAudio()
+                duaViewModel.resetRepeatForCurrentDua()
+                onPreviousClick()
+            }) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_backarrow),
                     contentDescription = "Previous",
@@ -68,6 +71,7 @@ fun DuaContentFooter(
             IconButton(onClick = {
                 coroutineScope.launch {
                     onStopAudio()
+                    duaViewModel.resetRepeatForCurrentDua()
                     navController.navigate("favorites?filterType=All")
                 }
             }) {
@@ -80,6 +84,7 @@ fun DuaContentFooter(
 
             IconButton(onClick = {
                 onStopAudio()
+                duaViewModel.resetRepeatForCurrentDua()
                 val sendIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(
@@ -98,8 +103,11 @@ fun DuaContentFooter(
                     modifier = Modifier.size(33.dp, 40.dp)
                 )
             }
-            IconButton(onClick = onNextClick) {
+            IconButton(onClick = {
+                duaViewModel.resetRepeatForCurrentDua()
                 duaViewModel.stopAudio()
+                onNextClick()
+            }) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_nextarrow),
                     contentDescription = "Next",
@@ -107,5 +115,6 @@ fun DuaContentFooter(
                 )
             }
         }
+
     }
 }
