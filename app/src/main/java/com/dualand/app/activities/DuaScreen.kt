@@ -53,7 +53,6 @@ import com.dualand.app.R
 import com.dualand.app.activities.DuaDataProvider.duaList
 import com.dualand.app.components.AllDuaFunctionality
 import com.dualand.app.components.DuaTabs
-import com.dualand.app.components.FavouriteButton
 import com.dualand.app.components.PlayWordByWordButton
 import com.dualand.app.components.responsiveFontSize
 import com.dualand.app.models.Dua

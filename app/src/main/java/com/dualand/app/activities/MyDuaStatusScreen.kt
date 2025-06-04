@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -30,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W400
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -45,7 +42,6 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dualand.app.DuaViewModel
 import com.dualand.app.R
 import com.dualand.app.activities.DuaDataProvider.duaList
-import com.dualand.app.components.DuaTabs
 import com.dualand.app.components.FilterDropdownMenu
 import com.dualand.app.components.InfoDialogContent
 import com.dualand.app.components.TagButton
@@ -67,7 +63,7 @@ fun MyDuaStatusScreen(
     val context = LocalContext.current
     val title = FontFamily(Font(R.font.mochypop_regular))
     val MyArabicFont = FontFamily(Font(R.font.doodlestrickers))
-    val duaStatuses by viewModel.allDuas.collectAsState()
+    val duaStatuses by viewModel.favouriteDuas.collectAsState()
 //    val allDuas = duaList.filter { !it.textheading.isNullOrBlank() }
     val allDuas = duaList
         .filter { !it.textheading.isNullOrBlank() }
@@ -98,8 +94,8 @@ fun MyDuaStatusScreen(
     }
 
 
-    LaunchedEffect(duaViewModel.isFavoriteAutoPlayActive) {
-        if (duaViewModel.isFavoriteAutoPlayActive) {
+    LaunchedEffect(duaViewModel.autoPlayFavorites) {
+        if (duaViewModel.autoPlayFavorites) {
             val nextIndex = duaViewModel.currentIndex
             // Small delay to allow backstack pop to complete
             kotlinx.coroutines.delay(400)
@@ -212,26 +208,32 @@ fun MyDuaStatusScreen(
             ) {
                 if (selectedFilter == "Favorite") {
                     // Build the list of favorite dua numbers based on current filtered UI
-                    val favoriteDuaNumbers = duaList.filter { dua ->
-                        val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
-                        status?.favorite == true
-                    }.map { it.duaNumber }
+//                    val favoriteDuaNumbers = duaList.filter { dua ->
+//                        val status = duaStatuses.find { it.duaId == dua.id }
+//                        status?.favorite == true
+//                    }.map { it.duaNumber }
 
                     Button(
                         onClick = {
                             if (selectedFilter == "Favorite") {
-                                val favoriteIndexes = duaViewModel.duaKeys.mapIndexedNotNull { index, key ->
-                                    val duaNumber = key.toString()
-                                    val status = duaStatuses.find { it.duaNumber.startsWith(duaNumber) }
-                                    if (status?.favorite == true) index else null
-                                }
+                                val favoriteDuas =
+                                    duaViewModel.groupedAndSortedDuas.values.flatten()
+                                        .filter { dua ->
+                                            duaStatuses.any { it.duaId == dua.id && it.favorite }
+                                        }
+                                if (favoriteDuas.isNotEmpty()) {
+                                    duaViewModel.startFavoriteAutoPlay(favoriteDuas)
+                                    //Enable favourite mode
+                                    duaViewModel.autoPlayFavorites = true
+                                    val firstFavoriteDua = favoriteDuas.first()
+                                    val groupIndex = duaViewModel.groupedAndSortedDuas.entries.indexOfFirst { entry ->
+                                        entry.value.any { it.id == firstFavoriteDua.id }
+                                    }
 
-                                if (favoriteIndexes.isNotEmpty()) {
-                                    duaViewModel.startFavoriteAutoPlay(favoriteIndexes)
-                                    navController.navigate("DuaNewScreen/${favoriteIndexes.first()}")
+                                    navController.navigate("DuaNewScreen/${groupIndex}")
+
                                 }
                             }
-
                         },
                         shape = RoundedCornerShape(50),
                         modifier = Modifier.width(120.dp),
@@ -326,7 +328,7 @@ fun MyDuaStatusScreen(
             Divider(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp))
 
             val groupedAndSortedDuas = duaList.filter { dua ->
-                val status = duaStatuses.find { it.duaNumber == dua.duaNumber }
+                val status = duaStatuses.find { it.duaId == dua.id }
 
                 val matchesSearch = dua.textheading?.contains(searchText, ignoreCase = true) == true
 
@@ -349,7 +351,7 @@ fun MyDuaStatusScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(groupedAndSortedDuas) { dua ->
-                    val currentDuaStatus = duaStatuses.find { it.duaNumber == dua.duaNumber }
+                    val currentDuaStatus = duaStatuses.find { it.duaId == dua.id }
                     val isFavorite = currentDuaStatus?.favorite == true
                     val currentStatus = currentDuaStatus?.status ?: "In Practice"
                     val isMemorized = currentStatus == "Memorized"
@@ -413,7 +415,11 @@ fun MyDuaStatusScreen(
                                                 duaViewModel.updateCurrentIndex(originalIndex)
                                                 navController.navigate("DuaNewScreen/$originalIndex")
                                             } else {
-                                                Toast.makeText(context, "Dua not found", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(
+                                                    context,
+                                                    "Dua not found",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
                                         }
                                     }
@@ -443,7 +449,7 @@ fun MyDuaStatusScreen(
                                 checked = isMemorized,
                                 onCheckedChange = { isChecked ->
                                     val newStatus = if (isChecked) "Memorized" else "In Practice"
-                                    viewModel.updateDuaStatus(dua.duaNumber, newStatus)
+                                    viewModel.updateDuaStatus(dua.id, newStatus)
 
                                     if (isChecked && rewardsEnabled) {
                                         showRewardAnimation = true

@@ -207,6 +207,7 @@ fun LearnWithEaseScreen(navController: NavController, innerPadding: PaddingValue
             textheading = firstDua?.textheading ?: "",
             onClick = {
                 if (firstDuaIndex >= 0) {
+                    //Setting the Dua index to currentIndex for the Dua Item(Card)
                     duaViewModel.updateCurrentIndex(firstDuaIndex)
                     navController.navigate("DuaNewScreen/$firstDuaIndex")
                 }

@@ -55,45 +55,45 @@ fun DuaNewScreen(
     val currentIndex = duaViewModel.currentIndex
     val hasNavigated = remember { mutableStateOf(false) }
 
-    LaunchedEffect(
-        duaViewModel.isPlayingFullAudio,
-        duaViewModel.isFavoriteAutoPlayActive,
-        duaViewModel.getFavoriteAutoPlayIndex()
-    ) {
-        if (duaViewModel.isPlayingFullAudio) {
-            hasNavigated.value = false
-        }
-
-        if (
-            !duaViewModel.isPlayingFullAudio &&
-            duaViewModel.isFavoriteAutoPlayActive &&
-            !duaViewModel.isManualStop &&
-            !hasNavigated.value
-        ) {
-            kotlinx.coroutines.delay(300)
-
-            val isLast = duaViewModel.getFavoriteAutoPlayIndex() >= duaViewModel.getFavoriteAutoPlayListSize() - 1
-
-            if (isLast) {
-                duaViewModel.stopFavoriteAutoPlay()
-                navController.popBackStack("favorites?filterType=Favorite", inclusive = false)
-            } else {
-                duaViewModel.handleFavoriteAutoPlayDone()
-                kotlinx.coroutines.delay(200)
-
-                val nextIndex = duaViewModel.currentIndex
-                hasNavigated.value = true
-
-                navController.navigate("DuaNewScreen/$nextIndex") {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-        }
-    }
+//    LaunchedEffect(
+//        duaViewModel.isPlayingFullAudio,
+//        duaViewModel.isFavoriteAutoPlayActive,
+//        duaViewModel.getFavoriteAutoPlayIndex()
+//    ) {
+//        if (duaViewModel.isPlayingFullAudio) {
+//            hasNavigated.value = false
+//        }
+//
+//        if (
+//            !duaViewModel.isPlayingFullAudio &&
+//            duaViewModel.isFavoriteAutoPlayActive &&
+//            !duaViewModel.isManualStop &&
+//            !hasNavigated.value
+//        ) {
+//            kotlinx.coroutines.delay(300)
+//
+//            val isLast = duaViewModel.getFavoriteAutoPlayIndex() >= duaViewModel.getFavoriteAutoPlayListSize() - 1
+//
+//            if (isLast) {
+//                duaViewModel.stopFavoriteAutoPlay()
+//                navController.popBackStack("favorites?filterType=Favorite", inclusive = false)
+//            } else {
+//                //duaViewModel.handleFavoriteAutoPlayDone()
+//                kotlinx.coroutines.delay(200)
+//
+//                val nextIndex = duaViewModel.currentIndex
+//                hasNavigated.value = true
+//
+//                navController.navigate("DuaNewScreen/$nextIndex") {
+//                    launchSingleTop = true
+//                    restoreState = true
+//                }
+//            }
+//        }
+//    }
 
     LaunchedEffect(key1 = duaViewModel.currentIndex) {
-        if (duaViewModel.isFavoriteAutoPlayActive) {
+        if (duaViewModel.autoPlayFavorites) {
             duaViewModel.playFullAudio()
         }
     }
@@ -106,8 +106,11 @@ fun DuaNewScreen(
                 detectHorizontalDragGestures { _, dragAmount ->
                     if (dragAmount > 50 && currentIndex > 0) {
                         duaViewModel.previousDua()
+                        duaViewModel.autoPlayFavorites = false
                     } else if (dragAmount < -50 && currentIndex < duaViewModel.duaKeys.lastIndex) {
                         duaViewModel.nextDua()
+                        duaViewModel.autoPlayFavorites = false
+
                     }
                 }
             }

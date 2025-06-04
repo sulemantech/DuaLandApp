@@ -39,8 +39,9 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     }.toSortedMap()
     val groupedAndSortedDuas: SortedMap<Int, List<Dua>>
         get() = _groupedAndSortedDuas
-    val allDuas: StateFlow<List<DuaStatusEntity>> = dao.getAllDuaStatuses()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val favouriteDuas: StateFlow<List<DuaStatusEntity>> =
+        dao.getAllDuaStatuses()
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val currentDua: List<Dua>
         get() = groupedAndSortedDuas[duaKeys.getOrNull(currentIndex)] ?: emptyList()
     var highlightedIndex by mutableStateOf(-1)
@@ -83,14 +84,20 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     private val _wordRepeatCountsPerDua = mutableStateMapOf<Int, Int>()
     private val wordRepeatCountersPerDua = mutableMapOf<Int, Int>()
 
+    fun startFavoriteAutoPlay(favoriteDuas: List<Dua>) {
+        favoriteAutoPlayList = favoriteDuas.mapNotNull { dua ->
+            // Find the group index that contains this dua
+            groupedAndSortedDuas.entries.indexOfFirst { it.value.any { it.id == dua.id } }
+        }.distinct()
 
-    fun startFavoriteAutoPlay(duaIndexes: List<Int>) {
-        favoriteAutoPlayList = duaIndexes
         favoriteAutoPlayIndex = 0
         isFavoriteAutoPlayActive = true
         setSelectedTab("COMPLETE")
         stopAudio()
-        updateCurrentIndex(favoriteAutoPlayList[favoriteAutoPlayIndex])
+
+        if (favoriteAutoPlayList.isNotEmpty()) {
+            updateCurrentIndex(favoriteAutoPlayList[0])
+        }
     }
 
     fun stopFavoriteAutoPlay() {
@@ -103,8 +110,12 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         favoriteAutoPlayIndex++
         if (favoriteAutoPlayIndex < favoriteAutoPlayList.size) {
             updateCurrentIndex(favoriteAutoPlayList[favoriteAutoPlayIndex])
+            currentIndex = favoriteAutoPlayList[favoriteAutoPlayIndex]
         } else {
             isFavoriteAutoPlayActive = false
+            //when favourite play completes
+            autoPlayFavorites = false
+            stopAudio()
         }
     }
 
@@ -141,8 +152,19 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
     fun playFullAudio(startIndexInGroup: Int = 0, resume: Boolean = false) {
         stopAudio()
+        val duaList = if (autoPlayFavorites) {
+            currentDua.filter { dua ->
+                favouriteDuas.value.any { it.duaId == dua.id && it.favorite }
+            }
+        } else {
+            currentDua
+        }
 
-        val duaList = currentDua
+        if (duaList.isEmpty()) {
+            //if (autoPlayFavorites) handleFavoriteAutoPlayDone()
+            return
+        }
+
         val indexToStart = if (resume && pausedDuaIndexInGroup >= 0 && pausedGroupIndex == currentIndex) {
             pausedDuaIndexInGroup
         } else {
@@ -173,14 +195,14 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 
                             if (repeatCount == -1 || repeatPlayCounter < repeatCount - 1) {
                                 repeatPlayCounter++
-                                playFullAudio(indexToStart, resume = false) // 🔁 Repeat
+                                playFullAudio(indexToStart, resume = false) // 🔁 Repeat same dua
                             } else {
-                                repeatPlayCounter = 1
+                                repeatPlayCounter = 0
                                 repeatCount = 0
-                                playNextAudio(duaList, indexToStart + 1, currentIndex)
+                                //playNextAudio(duaList, indexToStart + 1, currentIndex)
+                                playNextAudio(duaList, indexToStart + 1)
                             }
                         }
-
                     }
                     return
                 } catch (e: Exception) {
@@ -189,6 +211,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
+        // Reset paused values
         pausedAudioPosition = 0
         pausedDuaIndexInGroup = -1
         pausedGroupIndex = -1
@@ -206,24 +229,16 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                     setOnCompletionListener {
                         release()
                         mediaPlayer = null
-
-                        if (repeatCount == -1 || repeatPlayCounter < repeatCount -1) {
-                            repeatPlayCounter++
-                            playFullAudio(indexToStart, resume = false) // 🔁 Repeat
-                        } else {
-                            repeatPlayCounter = 0
-                            repeatCount = 0
-                            playNextAudio(duaList, indexToStart + 1, currentIndex)
-                        }
+                        // proceed to play actual dua content
+                        playNextAudio(duaList, indexToStart)
                     }
-
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                playNextAudio(duaList, indexToStart, currentIndex)
+                playNextAudio(duaList, indexToStart)
             }
         } else {
-            playNextAudio(duaList, indexToStart, currentIndex)
+            playNextAudio(duaList, indexToStart)
         }
     }
 
@@ -232,7 +247,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         _repeatCountsPerDua[index] = 0
         repeatCountersPerDua[index] = 0
     }
-    private fun playNextAudio(duaList: List<Dua>, index: Int, duaGroupIndex: Int) {
+    private fun playNextAudio(duaList: List<Dua>, index: Int) {
         if (index >= duaList.size) {
             isPlayingFullAudio = false
             highlightedIndex = -1
@@ -242,18 +257,32 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                 currentFullAudioDuaGroupIndex.value = -1
             }
 
-            if (autoPlayFavorites) favoritePlayIndex++
+            if (autoPlayFavorites) {
+                //Get the index of the next favorite dua
 
-            if (autoNextEnabled.value) {
+                handleFavoriteAutoPlayDone()
+            } else if (autoNextEnabled.value) {
                 currentIndex++
                 playFullAudio()
             }
             return
         }
 
+        // ✅ Skip non-favorites in favorite auto play mode
+        if (autoPlayFavorites) {
+            val currentDua = duaList[index]
+            val status = favouriteDuas.value.find { it.duaId == currentDua.id }
+            val isFavorite = status?.favorite == true
+
+            if (!isFavorite) {
+                playNextAudio(duaList, index + 1)
+                return
+            }
+        }
+
         val resId = duaList[index].fullAudioResId
         if (resId == 0) {
-            playNextAudio(duaList, index + 1, duaGroupIndex)
+            playNextAudio(duaList, index + 1)
             return
         }
 
@@ -264,7 +293,8 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                 start()
 
                 Handler(Looper.getMainLooper()).post {
-                    currentFullAudioDuaGroupIndex.value = duaGroupIndex
+                    //currentFullAudioDuaGroupIndex.value = duaGroupIndex
+                    currentFullAudioDuaGroupIndex.value = currentIndex
                     currentFullAudioDuaIndexState.value = index
                     isPlayingFullAudio = true
                     highlightedIndex = index
@@ -278,21 +308,18 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                     val currentRepeat = repeatCountersPerDua[index] ?: 0
 
                     if (repeatCountForCurrent == -1 || currentRepeat < repeatCountForCurrent) {
-
                         repeatCountersPerDua[index] = currentRepeat + 1
-                        playNextAudio(duaList, index, duaGroupIndex)
+                        playNextAudio(duaList, index)
                     } else {
-
                         repeatCountersPerDua[index] = 0
                         _repeatCountsPerDua[index] = 0
-                        playNextAudio(duaList, index + 1, duaGroupIndex)
+                        playNextAudio(duaList, index + 1)
                     }
                 }
-
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            playNextAudio(duaList, index + 1, duaGroupIndex)
+            playNextAudio(duaList, index + 1)
         }
     }
 
@@ -393,12 +420,16 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         try {
+            mediaPlayer?.stop()
             mediaPlayer?.release()
+            mediaPlayer = null
+
             mediaPlayer = MediaPlayer.create(context, audioResId)
             mediaPlayer?.apply {
                 start()
+
                 setOnCompletionListener {
-                    val duration = duration.toLong()
+                    val duration = this.duration.toLong() // actual audio duration
 
                     release()
                     mediaPlayer = null
@@ -406,10 +437,11 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                     isListeningPause.value = true
 
                     val pauseDuration = if (_wordByWordPauseEnabled.value) {
-                        _pauseSeconds.value * 1000L
+                        _pauseSeconds.value * 1000L // from user setting
                     } else {
-                        0L
+                        duration // match audio duration
                     }
+
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (!isPlayingWordByWord) {
                             isListeningPause.value = false
@@ -427,6 +459,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             playWordsInDua(pairs, index + 1, onFinished)
         }
     }
+
 
     fun stopAudio(manual: Boolean = false) {
         if (manual) {
@@ -451,31 +484,27 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         stopAudio()
     }
 
-    // Toggle favorite
-    fun toggleFavorite(duaNumber: String, status: String) {
+//    // Toggle favorite
+//    fun toggleFavorite(duaNumber: String, status: String) {
+//        viewModelScope.launch {
+//            val isFav = dao.isFavorite(duaNumber)
+//            val dua = DuaStatusEntity(duaNumber, !isFav, status)
+//            if (isFav) {
+//                dao.updateFavoriteStatus(duaNumber, false)
+//            } else {
+//                dao.insertFavorite(dua)
+//            }
+//        }
+//    }
+
+    fun updateDuaStatus(duaId: Int, newStatus: String) {
         viewModelScope.launch {
-            val isFav = dao.isFavorite(duaNumber)
-            val dua = DuaStatusEntity(duaNumber, !isFav, status)
-            if (isFav) {
-                dao.updateFavoriteStatus(duaNumber, false)
-            } else {
-                dao.insertFavorite(dua)
-            }
-        }
-    }
-
-
-
-    // Update status (e.g., Memorized, In Practice, Not Started)
-    fun updateDuaStatus(duaNumber: String, newStatus: String) {
-        viewModelScope.launch {
-            val existingDua = dao.getDuaStatusByNumber(duaNumber)
+            val existingDua = dao.getDuaStatusById(duaId)
             if (existingDua != null) {
-                dao.updateDuaStatus(duaNumber, newStatus)
+                dao.updateDuaStatus(duaId, newStatus)
             } else {
-                // Insert with default favorite = false
                 val newDua = DuaStatusEntity(
-                    duaNumber = duaNumber,
+                    duaId = duaId,
                     favorite = false,
                     status = newStatus
                 )
@@ -487,11 +516,11 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     fun ensureAllDuasAreTracked(duaList: List<Dua>) {
         viewModelScope.launch {
             duaList.forEach { dua ->
-                val existing = dao.getDuaStatusByNumber(dua.duaNumber)
+                val existing = dao.getDuaStatusById(dua.id)
                 if (existing == null) {
                     dao.insertFavorite(
                         DuaStatusEntity(
-                            duaNumber = dua.duaNumber,
+                            duaId = dua.id,
                             favorite = false,
                             status = "In Practice"
                         )
@@ -514,19 +543,36 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
 //            }
 //        }
 //    }
+fun toggleFavoriteStatus(dua: Dua) {
+    viewModelScope.launch {
+        val id = dua.id
+        val existing = dao.getDuaStatusById(id)
 
-
-    fun toggleFavoriteStatus(dua: Dua) {
-        viewModelScope.launch {
-            val duaNumber = dua.duaNumber
-            val currentStatus = dao.isFavorite(duaNumber)
-            dao.updateFavoriteStatus(duaNumber, !currentStatus)
+        if (existing != null) {
+            dao.updateFavoriteStatus(id, !existing.favorite)
+        } else {
+            dao.insertFavorite(
+                DuaStatusEntity(
+                    duaId = id,
+                    favorite = true,
+                    status = "In Practice"
+                )
+            )
         }
     }
+}
 
-    fun isFavorite(duaNumber: String): Flow<Boolean> {
+//    fun toggleFavoriteStatus(dua: Dua) {
+//        viewModelScope.launch {
+//            val id = dua.id
+//            val isFav = dao.isFavorite(id)
+//            dao.updateFavoriteStatus(id, !isFav)
+//        }
+//    }
+
+    fun isFavorite(duaId: Int): Flow<Boolean> {
         return dao.getAllFavoriteDuas().map { list ->
-            list.any { it.duaNumber == duaNumber }
+            list.any { it.duaId == duaId && it.favorite }
         }
     }
 

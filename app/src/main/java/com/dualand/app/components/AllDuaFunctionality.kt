@@ -180,12 +180,12 @@ fun AllDuaFunctionality(
                                 Alignment.CenterHorizontally
                             )
                         ) {
-                            FavouriteButton(
-                                duaNumber = dua.duaNumber,
-                                textHeading = dua.textheading,
-                                imageResId = dua.image,
-                                viewModel = viewModel
-                            )
+//                            FavouriteButton(
+//                                duaNumber = dua.duaNumber,
+//                                textHeading = dua.textheading,
+//                                imageResId = dua.image,
+//                                viewModel = viewModel
+//                            )
 
                             fun playWord(
                                 index: Int,

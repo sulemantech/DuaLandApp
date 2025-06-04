@@ -87,20 +87,22 @@ fun DuaContent(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val isFavorite by duaViewModel.isFavorite(dua.duaNumber).collectAsState(initial = false)
-                        IconButton(
-                            onClick = { duaViewModel.toggleFavoriteStatus(dua) }
-                        ) {
+                        val isFavorite by duaViewModel.isFavorite(dua.id).collectAsState(initial = false)
+
+                        IconButton(onClick = { duaViewModel.toggleFavoriteStatus(dua) }) {
                             val iconRes = if (isFavorite) R.drawable.favourite_active_icon else R.drawable.favourite_icon
                             Image(
-                                painterResource(iconRes),
+                                painter = painterResource(iconRes),
                                 contentDescription = "Favorite",
                                 modifier = Modifier.size(34.dp)
                             )
                         }
 
                         val isCurrent = duaViewModel.currentDuaIndexState.value == index
-                        val isListening = duaViewModel.isListeningPause.value && isCurrent
+                        val isListening = selectedTab == "WORD" &&
+                                duaViewModel.isListeningPause.value &&
+                                isCurrent
+
                         val isFullAudioCurrent = duaViewModel.currentFullAudioDuaIndexState.value == index &&
                                 duaViewModel.currentFullAudioDuaGroupIndex.value == duaViewModel.currentIndex
 
