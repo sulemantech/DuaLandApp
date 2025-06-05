@@ -25,7 +25,8 @@ import com.dualand.app.R
 
 @Composable
 fun RepeatButton(duaViewModel: DuaViewModel, index: Int) {
-    val repeatCounts = duaViewModel.repeatCountsPerDua
+    val isWordByWord = duaViewModel.isPlayingWordByWord
+    val repeatCounts = if (isWordByWord) duaViewModel.wordRepeatCountsPerDua else duaViewModel.repeatCountsPerDua
     val currentRepeatCount = repeatCounts[index] ?: 0
 
     val iconRes = if (currentRepeatCount == 0)
@@ -42,10 +43,15 @@ fun RepeatButton(duaViewModel: DuaViewModel, index: Int) {
                     2 -> 3
                     3 -> 4
                     4 -> 5
-                    5 -> -1 // Infinite
+                    5 -> -1
                     else -> 0
                 }
-                duaViewModel.updateRepeatCountForDua(index, nextCount)
+
+                if (isWordByWord) {
+                    duaViewModel.updateWordRepeatCountForDua(index, nextCount)
+                } else {
+                    duaViewModel.updateRepeatCountForDua(index, nextCount)
+                }
             },
             modifier = Modifier.align(Alignment.Center)
         ) {

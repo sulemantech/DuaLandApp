@@ -58,7 +58,6 @@ fun DuaContentFooter(
         ) {
             IconButton(onClick = {
                 duaViewModel.stopAudio()
-                duaViewModel.resetRepeatForCurrentDua()
                 onPreviousClick()
             }) {
                 Image(
@@ -67,14 +66,16 @@ fun DuaContentFooter(
                     modifier = Modifier.size(29.dp, 30.dp)
                 )
             }
+
             val coroutineScope = rememberCoroutineScope()
-            IconButton(onClick = {
-                coroutineScope.launch {
-                    onStopAudio()
-                    duaViewModel.resetRepeatForCurrentDua()
-                    navController.navigate("favorites?filterType=All")
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        duaViewModel.stopAudio()
+                        navController.navigate("favorites?filterType=All")
+                    }
                 }
-            }) {
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.favourite_icon_dua),
                     contentDescription = "Favorites Dua",
@@ -84,7 +85,7 @@ fun DuaContentFooter(
 
             IconButton(onClick = {
                 onStopAudio()
-                duaViewModel.resetRepeatForCurrentDua()
+              //  duaViewModel.resetRepeatForCurrentDua()
                 val sendIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(
@@ -104,7 +105,6 @@ fun DuaContentFooter(
                 )
             }
             IconButton(onClick = {
-                duaViewModel.resetRepeatForCurrentDua()
                 duaViewModel.stopAudio()
                 onNextClick()
             }) {

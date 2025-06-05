@@ -64,8 +64,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     val duaKeys = groupedAndSortedDuas.keys.toList()
     private val _selectedTab = MutableStateFlow("WORD")
     val selectedTab: StateFlow<String> = _selectedTab
-    fun setSelectedTab(tab: String) {
-        _selectedTab.value = tab }
+
     val currentFullAudioDuaGroupIndex = mutableStateOf(-1)
     val currentFullAudioDuaIndexState = mutableStateOf(-1)
     private var pausedAudioPosition: Int = 0
@@ -84,7 +83,31 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     private val _wordRepeatCountsPerDua = mutableStateMapOf<Int, Int>()
     private val wordRepeatCountersPerDua = mutableMapOf<Int, Int>()
 
+    val wordRepeatCountsPerDua: Map<Int, Int>
+        get() = _wordRepeatCountsPerDua
+
+    fun setSelectedTab(tab: String) {
+        _selectedTab.value = tab
+
+        _repeatCountsPerDua.clear()
+        repeatCountersPerDua.clear()
+        repeatPlayCounter = 0
+
+        _wordRepeatCountsPerDua.clear()
+        wordRepeatCountersPerDua.clear()
+    }
+
+    fun resetRepeatStates() {
+        repeatPlayCounter = 0
+        _repeatCountsPerDua.clear()
+        repeatCountersPerDua.clear()
+        _wordRepeatCountsPerDua.clear()
+        wordRepeatCountersPerDua.clear()
+    }
+
+
     fun startFavoriteAutoPlay(favoriteDuas: List<Dua>) {
+        isManualStop = false
         favoriteAutoPlayList = favoriteDuas.mapNotNull { dua ->
             // Find the group index that contains this dua
             groupedAndSortedDuas.entries.indexOfFirst { it.value.any { it.id == dua.id } }
@@ -107,6 +130,11 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun handleFavoriteAutoPlayDone() {
+        if (isManualStop) {
+            stopFavoriteAutoPlay()
+            return
+        }
+
         favoriteAutoPlayIndex++
         if (favoriteAutoPlayIndex < favoriteAutoPlayList.size) {
             updateCurrentIndex(favoriteAutoPlayList[favoriteAutoPlayIndex])
@@ -120,16 +148,22 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun nextDua() {
+        if (autoPlayFavorites) return
+
         if (currentIndex < duaKeys.lastIndex) {
             stopAudio()
             currentIndex++
+            resetRepeatStates()
         }
     }
 
     fun previousDua() {
+        if (autoPlayFavorites) return
+
         if (currentIndex > 0) {
             stopAudio()
             currentIndex--
+            resetRepeatStates()
         }
     }
 
@@ -174,7 +208,7 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                 pausedDuaIndexInGroup >= 0 &&
                 pausedGroupIndex == currentIndex
 
-        if (shouldResume) {
+        if (shouldResume && !isManualStop) {
             val resId = duaList.getOrNull(pausedDuaIndexInGroup)?.fullAudioResId ?: 0
             if (resId != 0) {
                 try {
@@ -222,7 +256,6 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                 mediaPlayer = MediaPlayer.create(context, titleAudio)
                 mediaPlayer?.apply {
                     start()
-                    isPlayingFullAudio = true
                     highlightedIndex = -1
                     currentFullAudioDuaGroupIndex.value = currentIndex
 
@@ -242,14 +275,9 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun resetRepeatForCurrentDua() {
-        val index = currentFullAudioDuaIndexState.value
-        _repeatCountsPerDua[index] = 0
-        repeatCountersPerDua[index] = 0
-    }
     private fun playNextAudio(duaList: List<Dua>, index: Int) {
         if (index >= duaList.size) {
-            isPlayingFullAudio = false
+            if (isManualStop) return
             highlightedIndex = -1
             currentFullAudioDuaIndexState.value = -1
 
@@ -263,12 +291,13 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
                 handleFavoriteAutoPlayDone()
             } else if (autoNextEnabled.value) {
                 currentIndex++
+                resetRepeatStates()
                 playFullAudio()
             }
             return
         }
 
-        // ✅ Skip non-favorites in favorite auto play mode
+        //  Skip non-favorites in favorite auto play mode
         if (autoPlayFavorites) {
             val currentDua = duaList[index]
             val status = favouriteDuas.value.find { it.duaId == currentDua.id }
@@ -340,7 +369,6 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        isPlayingWordByWord = true
         currentDuaIndex = startIndexInGroup
 
         val firstDua = duaList.getOrNull(startIndexInGroup)
@@ -366,12 +394,13 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
     }
     private fun playDuaSequentially(duaList: List<Dua>, duaIndex: Int) {
         if (duaIndex >= duaList.size) {
-            isPlayingWordByWord = false
+            if (isManualStop) return
             currentWordIndexInDua = -1
             currentDuaIndexState.value = -1
 
             if (autoNextEnabled.value) {
                 currentIndex++
+                resetRepeatStates()
                 playWordByWord()
             }
             return
@@ -380,16 +409,17 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         currentDuaIndexState.value = duaIndex
         currentDuaIndex = duaIndex
         currentWordIndexInDua = 0
+        isPlayingWordByWord = true
 
         val currentDua = duaList[duaIndex]
         val wordAudioPairs = currentDua.wordAudioPairs
 
         playWordsInDua(wordAudioPairs, 0) {
-            val repeatCount = _wordRepeatCountsPerDua[duaIndex] ?: 0
-            val counter = wordRepeatCountersPerDua[duaIndex] ?: 0
+            val repeatCountForCurrent = _wordRepeatCountsPerDua[duaIndex] ?: 0
+            val currentRepeat = wordRepeatCountersPerDua[duaIndex] ?: 0
 
-            if (repeatCount == -1 || counter < repeatCount) {
-                wordRepeatCountersPerDua[duaIndex] = counter + 1
+            if (repeatCountForCurrent == -1 || currentRepeat < repeatCountForCurrent) {
+                wordRepeatCountersPerDua[duaIndex] = currentRepeat + 1
                 playDuaSequentially(duaList, duaIndex)
             } else {
                 wordRepeatCountersPerDua[duaIndex] = 0
@@ -398,7 +428,6 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-
     private fun playWordsInDua(
         pairs: List<Pair<String, Int>>,
         index: Int,
@@ -460,15 +489,17 @@ class DuaViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
     fun stopAudio(manual: Boolean = false) {
         if (manual) {
+            isManualStop = true
             stopFavoriteAutoPlay()
         }
 
+        mediaPlayer?.setOnCompletionListener(null)
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
+
         repeatPlayCounter = 0
         isPlayingFullAudio = false
         isPlayingWordByWord = false
@@ -634,6 +665,13 @@ fun toggleFavoriteStatus(dua: Dua) {
         _fontSize.value = size
         prefs.edit().putFloat("font_size", size).apply()
     }
+
+    fun updateWordRepeatCountForDua(index: Int, count: Int) {
+        _wordRepeatCountsPerDua[index] = count
+        wordRepeatCountersPerDua[index] = 0
+    }
+
+
     // Settings Ends
 }
 

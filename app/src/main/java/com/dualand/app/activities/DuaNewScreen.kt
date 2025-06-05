@@ -104,13 +104,12 @@ fun DuaNewScreen(
             .background(Color.White)
             .pointerInput(currentIndex) {
                 detectHorizontalDragGestures { _, dragAmount ->
-                    if (dragAmount > 50 && currentIndex > 0) {
-                        duaViewModel.previousDua()
-                        duaViewModel.autoPlayFavorites = false
-                    } else if (dragAmount < -50 && currentIndex < duaViewModel.duaKeys.lastIndex) {
-                        duaViewModel.nextDua()
-                        duaViewModel.autoPlayFavorites = false
-
+                    if (!duaViewModel.autoPlayFavorites) { // ✅ Disable swipe if autoplay is active
+                        if (dragAmount > 50 && currentIndex > 0) {
+                            duaViewModel.previousDua()
+                        } else if (dragAmount < -50 && currentIndex < duaViewModel.duaKeys.lastIndex) {
+                            duaViewModel.nextDua()
+                        }
                     }
                 }
             }
